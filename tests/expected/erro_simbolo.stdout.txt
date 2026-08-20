@@ -1,0 +1,6 @@
+KW_INT
+<IDENT, x>
+ASSIGN
+<INT, 10>
+<INT, 2>
+SEMICOLON

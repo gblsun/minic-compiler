@@ -1,0 +1,1 @@
+Erro léxico na linha 1, coluna 10: caractere com tamanho inválido.

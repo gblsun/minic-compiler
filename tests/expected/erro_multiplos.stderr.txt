@@ -1,0 +1,3 @@
+Erro léxico na linha 1, coluna 12: símbolo "@" não reconhecido.
+Erro léxico na linha 2, coluna 11: símbolo "#" não reconhecido.
+Erro léxico na linha 3, coluna 7: cadeia não terminada.
