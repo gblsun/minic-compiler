@@ -6,6 +6,15 @@ Python funcional; a versão em C ainda está pendente (ver [sugestao_roteiro.md]
 Especificação léxica em [docs/especificacao.md](docs/especificacao.md) e
 [docs/tokens.md](docs/tokens.md).
 
+## Estrutura do repositório
+
+Cada pasta tem seu próprio README com mais detalhes:
+
+- [src/](src/) — código-fonte ([src/python/](src/python/) implementado; C pendente)
+- [tests/](tests/) — testes de regressão (entradas, saída esperada, runner)
+- [docs/](docs/) — documentação derivada da especificação
+- [ref/](ref/) — PDFs originais da disciplina (fonte normativa)
+
 ## Pré-requisitos
 
 - Python 3.10+ (o projeto foi testado com Python 3.14)
