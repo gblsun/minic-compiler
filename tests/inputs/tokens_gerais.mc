@@ -38,6 +38,7 @@ int main() {
     v[0] = 1;
     v[1] = !ok || nao_ok;
     print(soma(1, 2));
+    print("fim: linha\ttabulada");
     read(v[0]);
     return 0;
 }

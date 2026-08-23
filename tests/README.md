@@ -46,3 +46,20 @@ como um usuário rodaria) com o que está gravado em `expected/`.
    `--update` regrava a saída esperada para **todos** os arquivos em
    `inputs/`, não só o novo — revise o `git diff` de `tests/expected/` antes
    de commitar, para não acabar congelando uma regressão sem querer.
+
+## Os três runners de teste do projeto
+
+Este repositório tem três scripts que rodam contra os mesmos
+`tests/inputs/*.mc` e os mesmos `tests/expected/*.{stdout,stderr,exit}.txt` —
+eles não competem entre si, cada um serve um propósito diferente:
+
+| Script | Linguagem testada | Papel |
+|---|---|---|
+| [run_tests.py](run_tests.py) (aqui) | Python | **Dono** dos arquivos golden em `expected/`: é o único com a flag `--update`, usada para gravar/regravar o esperado depois de conferir a saída à mão. |
+| [`src/python/test_scanner_python.sh`](../src/python/test_scanner_python.sh) | Python | Só lê `expected/`, nunca grava. Existe porque o enunciado da disciplina pede um script de teste ao lado do código-fonte do scanner (formato adaptado do original em [`ref/test_scanner_python.sh`](../ref/test_scanner_python.sh)). |
+| [`src/c/test_scanner_c.sh`](../src/c/test_scanner_c.sh) | C | Compila `lexer.c`/`main.c` e compara com o mesmo `expected/` usado pela versão Python — é a prova em CI/terminal de que as duas implementações produzem os mesmos tokens e os mesmos erros (formato adaptado do original em [`ref/test_scanner_c.sh`](../ref/test_scanner_c.sh)). |
+
+Ou seja: para adicionar ou alterar um caso de teste, sempre passe por
+`tests/run_tests.py --update` (é o único que grava); os outros dois scripts
+servem para *verificar* — em Python e em C — que o golden gravado continua
+batendo com a saída de cada scanner.

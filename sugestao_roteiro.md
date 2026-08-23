@@ -108,38 +108,38 @@ int main() {
 ## 8. Checklist final antes de entregar
 
 **Estrutura da entrega** (o que o enunciado pede explicitamente)
-- [ ] Repositório contém documentação (`docs/`)
-- [ ] Repositório contém código em Python
-- [ ] Repositório contém código em C
-- [ ] Repositório contém testes **com os respectivos resultados** (não só os inputs — as saídas obtidas também precisam estar salvas/documentadas)
+- [x] Repositório contém documentação (`docs/`)
+- [x] Repositório contém código em Python (`src/python/`)
+- [x] Repositório contém código em C (`src/c/`)
+- [x] Repositório contém testes **com os respectivos resultados** (`tests/inputs/` + `tests/expected/*.{stdout,stderr,exit}.txt`, gerados rodando o lexer de verdade — não são só os inputs)
 
 **Cobertura léxica** (spec, seções 3.3–3.5)
-- [ ] Reconhece todos os tokens obrigatórios: identificadores, inteiros, reais, char, string, operadores aritméticos/relacionais/lógicos, atribuição, delimitadores, palavras reservadas
-- [ ] Ignora corretamente espaços/tabs/quebras de linha
-- [ ] Ignora comentários de linha (`//`) e de bloco (`/* */`, sem aninhamento)
-- [ ] Trata sequências de escape em char/string (`\n`, `\t`, `\\`, `\'`, `\"`)
-- [ ] Mantém linha e coluna em todo token gerado
-- [ ] Operadores de dois caracteres têm prioridade sobre os de um caractere (`==` antes de `=`, `<=` antes de `<`)
-- [ ] Palavras reservadas têm prioridade sobre identificadores (ex: `if` não vira `IDENTIFIER`)
-- [ ] Saída dos tokens segue o formato `<TOKEN, lexema>` (ou equivalente documentado)
+- [x] Reconhece todos os tokens obrigatórios: identificadores, inteiros, reais, char, string, operadores aritméticos/relacionais/lógicos, atribuição, delimitadores, palavras reservadas (cobertos em `tests/inputs/tokens_gerais.mc`)
+- [x] Ignora corretamente espaços/tabs/quebras de linha
+- [x] Ignora comentários de linha (`//`) e de bloco (`/* */`, sem aninhamento)
+- [x] Trata sequências de escape em char/string (`\n`, `\t`, `\\`, `\'`, `\"`)
+- [x] Mantém linha e coluna em todo token gerado
+- [x] Operadores de dois caracteres têm prioridade sobre os de um caractere (`==` antes de `=`, `<=` antes de `<`)
+- [x] Palavras reservadas têm prioridade sobre identificadores (ex: `if` não vira `IDENTIFIER`)
+- [x] Saída dos tokens segue o formato `<TOKEN, lexema>` (ou equivalente documentado) — ver `docs/tokens.md`
 
 **Tratamento de erros** (spec, seções 12 e 13.2)
-- [ ] Detecta símbolo não reconhecido
-- [ ] Detecta literal (string ou char) não terminado
-- [ ] Detecta char com tamanho inválido (ex: `'ab'`)
-- [ ] Diagnóstico de erro segue o formato: categoria, linha, coluna, lexema/token relevante
+- [x] Detecta símbolo não reconhecido (`erro_simbolo.mc`, `erro_multiplos.mc`)
+- [x] Detecta literal (string ou char) não terminado (`erro_string_nao_terminada.mc`, `erro_multiplos.mc`)
+- [x] Detecta char com tamanho inválido (ex: `'ab'`) (`erro_char_tamanho_invalido.mc`)
+- [x] Diagnóstico de erro segue o formato: categoria, linha, coluna, lexema/token relevante (`Erro léxico na linha L, coluna C: mensagem.`)
 
 **Equivalência entre implementações**
-- [ ] Python e C produzem os mesmos tokens e os mesmos erros para os mesmos inputs
-- [ ] Formato de saída (tokens e erros) é consistente entre as duas versões
+- [x] Python e C produzem os mesmos tokens e os mesmos erros para os mesmos inputs (verificado rodando `src/python/test_scanner_python.sh` e `src/c/test_scanner_c.sh` contra os mesmos `tests/expected/` — 9/9 em ambos)
+- [x] Formato de saída (tokens e erros) é consistente entre as duas versões
 
 **Testes**
-- [ ] Ao menos um programa `.mc` válido completo testado (ex: fatorial, ou vetor/soma — seção 19)
-- [ ] Todos os casos inválidos da seção 13.2 cobertos
-- [ ] Script/processo que roda os testes automaticamente e compara com o resultado esperado
-- [ ] Resultados reais da execução (não só o esperado) estão salvos ou registrados na documentação
+- [x] Ao menos um programa `.mc` válido completo testado (ex: fatorial, ou vetor/soma — seção 19) (`valido_fatorial.mc`, `valido_soma.mc`, `valido_vetor_leitura.mc`)
+- [x] Todos os casos inválidos da seção 13.2 cobertos
+- [x] Script/processo que roda os testes automaticamente e compara com o resultado esperado (`tests/run_tests.py`, `src/python/test_scanner_python.sh`, `src/c/test_scanner_c.sh`)
+- [x] Resultados reais da execução (não só o esperado) estão salvos ou registrados na documentação (`tests/expected/`)
 
 **Documentação**
-- [ ] README explica como rodar o lexer em Python e em C, e como rodar a suíte de testes
-- [ ] `docs/especificacao.md` resume as regras léxicas seguidas
-- [ ] Tabela de cobertura indicando o que foi implementado
+- [x] README explica como rodar o lexer em Python e em C, e como rodar a suíte de testes
+- [x] `docs/especificacao.md` resume as regras léxicas seguidas
+- [x] Tabela de cobertura indicando o que foi implementado (`docs/tokens.md` — tokens; `docs/especificacao.md` — erros)

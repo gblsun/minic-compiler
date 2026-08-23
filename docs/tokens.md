@@ -1,7 +1,8 @@
 # Tabela de tokens — MINIC
 
-Tabela operacional usada pela implementação do lexer (Python em [`src/python/lexer.py`](../src/python/lexer.py),
-e futuramente C). Baseada na Seção 3 de `ref/especificacao-completa-minic.pdf` — ver
+Tabela operacional usada pelas duas implementações do lexer — Python em
+[`src/python/lexer.py`](../src/python/lexer.py) e C em [`src/c/lexer.c`](../src/c/lexer.c)/[`lexer.h`](../src/c/lexer.h).
+Baseada na Seção 3 de `ref/especificacao-completa-minic.pdf` — ver
 [`docs/especificacao.md`](especificacao.md) para o resumo normativo.
 
 ## Formato de saída
