@@ -3,7 +3,7 @@
 # tests/inputs/*.mc, comparando com o esperado gravado em tests/expected/.
 #
 # Adaptado do script test_scanner_python.sh fornecido pela disciplina
-# (ver ../../ref/test_scanner_python.sh, mantido lá sem edição como
+# (ver ../../ref/scripts/test_scanner_python.sh, mantido lá sem edição como
 # material de referência) para o formato de saída e a estrutura de pastas
 # realmente usados neste repositório:
 #   - a saída do lexer é texto simples (um token por linha em stdout, um

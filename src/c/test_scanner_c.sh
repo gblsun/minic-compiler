@@ -3,7 +3,7 @@
 # tests/inputs/*.mc, comparando com o esperado gravado em tests/expected/.
 #
 # Adaptado do script test_scanner_c.sh fornecido pela disciplina (ver
-# ../../ref/test_scanner_c.sh, mantido lá sem edição como material de
+# ../../ref/scripts/test_scanner_c.sh, mantido lá sem edição como material de
 # referência) para o formato de saída e a estrutura de pastas realmente
 # usados neste repositório:
 #   - a saída do lexer é texto simples (um token por linha em stdout, um
@@ -21,7 +21,7 @@
 # código de saída da Seção 11.1 (0 sem erro léxico, 2 com erro léxico).
 #
 # NOTA: este script pressupõe a implementação em C descrita em
-# ../../sugestao_roteiro.md (lexer.c/lexer.h/main.c) — ela ainda não existe
+# ../../docs/roteiro-etapa1-lexer.md (lexer.c/lexer.h/main.c) — ela ainda não existe
 # neste repositório. Rode este script só depois que src/c/ tiver os fontes.
 
 set -uo pipefail

@@ -9,7 +9,7 @@ para produzir exatamente os mesmos tokens e as mesmas mensagens de erro.
 | [lexer.h](lexer.h) | Interface pública: `TokenType` (prefixo `TOK_`, para não colidir com macros do C como `EOF` de `<stdio.h>`), `Token`, `LexError`, `Lexer`, e as assinaturas de `lexer_init`/`lexer_tokenize`/`lexer_free`/`token_to_string`/`lexerror_to_string`. |
 | [lexer.c](lexer.c) | Implementação: as mesmas tabelas do `lexer.py` (`KEYWORDS`, `TWO_CHAR_SYMBOLS`, `ONE_CHAR_SYMBOLS`, escapes) e a mesma máquina de reconhecimento caractere a caractere (cursor com linha/coluna, maximal munch, modo pânico). |
 | [main.c](main.c) | CLI mínima: `./scanner <arquivo.mc>`. Lê o arquivo, roda o `Lexer` e imprime tokens em stdout / erros em stderr, com o mesmo contrato de exit code de `main.py` (0 = ok, 2 = erro léxico, 1 = erro de uso). |
-| [test_scanner_c.sh](test_scanner_c.sh) | Script de teste (formato pedido pela disciplina — ver o original em [`../../ref/test_scanner_c.sh`](../../ref/test_scanner_c.sh), adaptado aqui para compilar este scanner e comparar com `tests/expected/`; ver [`tests/README.md`](../../tests/README.md) para como os três runners de teste do projeto se encaixam). |
+| [test_scanner_c.sh](test_scanner_c.sh) | Script de teste (formato pedido pela disciplina — ver o original em [`../../ref/scripts/test_scanner_c.sh`](../../ref/scripts/test_scanner_c.sh), adaptado aqui para compilar este scanner e comparar com `tests/expected/`; ver [`tests/README.md`](../../tests/README.md) para como os três runners de teste do projeto se encaixam). |
 
 ## Compilando e rodando
 

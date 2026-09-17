@@ -1,6 +1,12 @@
 # Roteiro — Entrega do Analisador Léxico (Etapa 1) do MINIC
 
 > Sugestão de roteiro — ajuste a ordem, a estrutura ou as etapas conforme fizer mais sentido para o seu fluxo de trabalho.
+>
+> **Etapa concluída.** Este arquivo é mantido como registro do que foi planejado
+> e entregue na etapa 1 (o checklist no fim está todo marcado). Ele morava na
+> raiz do repositório como `sugestao_roteiro.md`. O roteiro da etapa em aberto é
+> o [roteiro-etapa2-parser.md](roteiro-etapa2-parser.md); a visão geral das
+> quatro etapas está em [etapas.md](etapas.md).
 
 Baseado na **ESPECIFICAÇÃO COMPLETA DA LINGUAGEM MINIC** (v1.0).
 

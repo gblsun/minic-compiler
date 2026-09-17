@@ -56,10 +56,37 @@ eles não competem entre si, cada um serve um propósito diferente:
 | Script | Linguagem testada | Papel |
 |---|---|---|
 | [run_tests.py](run_tests.py) (aqui) | Python | **Dono** dos arquivos golden em `expected/`: é o único com a flag `--update`, usada para gravar/regravar o esperado depois de conferir a saída à mão. |
-| [`src/python/test_scanner_python.sh`](../src/python/test_scanner_python.sh) | Python | Só lê `expected/`, nunca grava. Existe porque o enunciado da disciplina pede um script de teste ao lado do código-fonte do scanner (formato adaptado do original em [`ref/test_scanner_python.sh`](../ref/test_scanner_python.sh)). |
-| [`src/c/test_scanner_c.sh`](../src/c/test_scanner_c.sh) | C | Compila `lexer.c`/`main.c` e compara com o mesmo `expected/` usado pela versão Python — é a prova em CI/terminal de que as duas implementações produzem os mesmos tokens e os mesmos erros (formato adaptado do original em [`ref/test_scanner_c.sh`](../ref/test_scanner_c.sh)). |
+| [`src/python/test_scanner_python.sh`](../src/python/test_scanner_python.sh) | Python | Só lê `expected/`, nunca grava. Existe porque o enunciado da disciplina pede um script de teste ao lado do código-fonte do scanner (formato adaptado do original em [`ref/scripts/test_scanner_python.sh`](../ref/scripts/test_scanner_python.sh)). |
+| [`src/c/test_scanner_c.sh`](../src/c/test_scanner_c.sh) | C | Compila `lexer.c`/`main.c` e compara com o mesmo `expected/` usado pela versão Python — é a prova em CI/terminal de que as duas implementações produzem os mesmos tokens e os mesmos erros (formato adaptado do original em [`ref/scripts/test_scanner_c.sh`](../ref/scripts/test_scanner_c.sh)). |
 
 Ou seja: para adicionar ou alterar um caso de teste, sempre passe por
 `tests/run_tests.py --update` (é o único que grava); os outros dois scripts
 servem para *verificar* — em Python e em C — que o golden gravado continua
 batendo com a saída de cada scanner.
+
+## Esta suíte e os testes oficiais da disciplina
+
+O que está aqui é a suíte **do projeto**: casos que nós escolhemos, no formato
+que o nosso scanner produz, usada no dia a dia. Ela não substitui os pacotes
+de teste **oficiais** do professor, que ficam em
+[`ref/testes-oficiais/`](../ref/testes-oficiais/) e são o critério de avaliação
+externo:
+
+| | `tests/` (aqui) | `ref/testes-oficiais/` |
+|---|---|---|
+| Origem | escrita pelo grupo | fornecida pelo professor |
+| Formato | `.mc` + stdout/stderr/exit gravados | JSONL (scanner) e AST em S-expression (parser) |
+| Papel | regressão rápida durante o desenvolvimento | conformidade com a entrega |
+| Editável | sim | **não** (material normativo) |
+
+As divergências entre os dois formatos e as armadilhas dos scripts oficiais
+estão documentadas em
+[`ref/testes-oficiais/README.md`](../ref/testes-oficiais/README.md).
+
+## Etapa 2 (parser): o que ainda não existe aqui
+
+Nada de teste sintático está implementado. O plano — runner próprio para os 50
+casos oficiais (`tests/run_parser_tests.py`), comparação de AST com
+normalização de espaços e casos próprios para as construções que os oficiais
+não cobrem — está em
+[`docs/roteiro-etapa2-parser.md`](../docs/roteiro-etapa2-parser.md#6-testes).

@@ -7,7 +7,7 @@ Implementação em Python do analisador léxico do MINIC.
 | [lexer.py](lexer.py) | O analisador léxico em si: classe `Lexer`, `Token`, `LexError` e as tabelas de palavras-chave/símbolos/escapes. Não depende de nada fora da biblioteca padrão — pode ser importado por qualquer interface (CLI, testes, Streamlit) sem carregar nada de terminal ou de UI junto. |
 | [main.py](main.py) | CLI mínima: `python main.py <arquivo.mc>`. Lê o arquivo, chama `Lexer`, imprime tokens em stdout e erros em stderr, e devolve o exit code definido na especificação (0 = ok, 2 = erro léxico). |
 | [app_streamlit.py](app_streamlit.py) | Interface web opcional (não faz parte da entrega obrigatória) para testar o lexer interativamente. Reaproveita o mesmo `Lexer` de `lexer.py` — nenhuma regra léxica é duplicada aqui. |
-| [test_scanner_python.sh](test_scanner_python.sh) | Script de teste (formato pedido pela disciplina — ver o original em [`../../ref/test_scanner_python.sh`](../../ref/test_scanner_python.sh), adaptado aqui para rodar `main.py` e comparar com `tests/expected/`; ver [`tests/README.md`](../../tests/README.md) para como os três runners de teste do projeto se encaixam). |
+| [test_scanner_python.sh](test_scanner_python.sh) | Script de teste (formato pedido pela disciplina — ver o original em [`../../ref/scripts/test_scanner_python.sh`](../../ref/scripts/test_scanner_python.sh), adaptado aqui para rodar `main.py` e comparar com `tests/expected/`; ver [`tests/README.md`](../../tests/README.md) para como os três runners de teste do projeto se encaixam). |
 
 ## Rodando
 
