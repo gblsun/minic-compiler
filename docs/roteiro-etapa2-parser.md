@@ -1,9 +1,11 @@
 # Roteiro — Etapa 2: analisador sintático e AST
 
-> Plano de trabalho para a atividade "AP 1 - analisador sintático" (etapa 2 do
-> projeto). Mesmo espírito do [roteiro da etapa 1](roteiro-etapa1-lexer.md):
+> Plano de trabalho da atividade "AP 1 - analisador sintático" (etapa 2 do
+> projeto), **já executado** — o checklist do fim está marcado e cada decisão
+> registrada. Mesmo espírito do [roteiro da etapa 1](roteiro-etapa1-lexer.md):
 > sugestão de ordem e checklist, não exigência do enunciado. Prazo e comandos
-> obrigatórios em [`etapas.md`](etapas.md).
+> obrigatórios em [`etapas.md`](etapas.md); resultados das suítes em
+> [`resultados-etapa2.md`](resultados-etapa2.md).
 
 Pré-requisitos de leitura, nesta ordem: [`gramatica.md`](gramatica.md) (o que
 reconhecer), [`ast.md`](ast.md) (o que produzir),
@@ -12,12 +14,12 @@ entrega) e
 [`ref/testes-oficiais/README.md`](../ref/testes-oficiais/README.md) (como a
 entrega vai ser medida).
 
-## 0. Decisões a tomar antes de escrever código
+## 0. Decisões tomadas antes de escrever código
 
-Quatro escolhas travam o resto do trabalho. As recomendações abaixo valem para
-o prazo curto desta etapa:
+Quatro escolhas travavam o resto do trabalho. Todas foram decididas conforme a
+recomendação abaixo, e é o que está implementado:
 
-| Decisão | Opções | Recomendação |
+| Decisão | Opções | Decisão adotada |
 |---|---|---|
 | Técnica de parsing | descida recursiva (LL, aula 7) vs. tabela LL(1) (aula 10) vs. LR (aulas 8/11) | **descida recursiva**: a gramática do MINIC é quase toda LL(1) com os ajustes de [`gramatica.md`](gramatica.md#notas-de-implementação), o código fica legível, o port para C é direto e o tutorial da disciplina usa exatamente essa técnica |
 | Onde mora o parser | dentro de `src/` vs. na raiz | `src/python/parser.py` + `src/c/parser.c`, com **atalhos** `parser.py`/`parser` na raiz (ver seção 5) — mantém a organização e atende ao comando exigido |
@@ -141,59 +143,80 @@ construção.
 O enunciado da etapa 1 pediu "documentação, os códigos C, Python e os testes
 com os respectivos resultados"; nada indica que mudou. Então, antes de entregar:
 
-- [ ] `README.md` da raiz mostra como rodar o parser nas duas linguagens, com
+- [x] `README.md` da raiz mostra como rodar o parser nas duas linguagens, com
       os comandos exatos do enunciado
-- [ ] [`gramatica.md`](gramatica.md) reflete a gramática efetivamente
+- [x] [`gramatica.md`](gramatica.md) reflete a gramática efetivamente
       implementada (inclusive as decisões de desambiguação)
-- [ ] [`ast.md`](ast.md) reflete os nós e o formato de impressão implementados
-- [ ] resultado da execução dos 50 casos registrado (não só o esperado)
-- [ ] `src/python/README.md` e `src/c/README.md` descrevem os arquivos novos
-- [ ] `tests/README.md` explica o runner novo e o que ele cobre
+- [x] [`ast.md`](ast.md) reflete os nós e o formato de impressão implementados
+- [x] resultado da execução dos 50 casos registrado (não só o esperado)
+- [x] `src/python/README.md` e `src/c/README.md` descrevem os arquivos novos
+- [x] `tests/README.md` explica o runner novo e o que ele cobre
 
 ## Checklist de conformidade
 
 **Gramática** (Seção 4 da especificação)
 
-- [ ] declarações globais, locais e vetores (`tipo id [tamanho]`)
-- [ ] funções com/sem parâmetros, `void`, parâmetro vetor (`tipo id[]`)
-- [ ] blocos aninhados
-- [ ] `if`, `if`-`else` com `else` ligado ao `if` mais próximo
-- [ ] `while`
-- [ ] `for` (não coberto pelos 50 casos, mas obrigatório)
-- [ ] `return` com e sem expressão
-- [ ] `break`, `continue`
-- [ ] `print`, `read`
-- [ ] atribuição associativa à direita, inclusive em cadeia
-- [ ] todos os níveis de precedência da Seção 4.3, com associatividade correta
-- [ ] unários `-` e `!`
-- [ ] chamada e indexação encadeáveis (`f(x)[0]`, `v[i][j]` é erro semântico, não sintático)
-- [ ] literais: inteiro, real, booleano, caractere
+- [x] declarações globais, locais e vetores (`tipo id [tamanho]`)
+- [x] funções com/sem parâmetros, `void`, parâmetro vetor (`tipo id[]`)
+- [x] blocos aninhados
+- [x] `if`, `if`-`else` com `else` ligado ao `if` mais próximo
+- [x] `while`
+- [x] `for` (não coberto pelos 50 casos, mas obrigatório) — testado em `tests/parser_inputs/valido_for_completo.c` e `valido_for_partes_vazias.c`
+- [x] `return` com e sem expressão
+- [x] `break`, `continue` — `valido_for_completo.c`
+- [x] `print`, `read` — `valido_print_read.c` (e `read` só aceita variável ou elemento de vetor: `erro_read_alvo_invalido.c`)
+- [x] atribuição associativa à direita, inclusive em cadeia
+- [x] todos os níveis de precedência da Seção 4.3, com associatividade correta
+- [x] unários `-` e `!`
+- [x] chamada e indexação encadeáveis — `f(2)[0] + g()(1)` é aceito pelas duas implementações com a mesma AST (`v[i][j]` é erro semântico, não sintático)
+- [x] literais: inteiro, real, booleano, caractere e cadeia — `valido_literais.c`, com escapes preservados na impressão
 
 **AST**
 
-- [ ] um nó por construção, com `line`/`column`
-- [ ] parênteses não geram nó
-- [ ] `NULL` explícito em ramo ausente (`If` sem `else`, `return` vazio)
-- [ ] impressão canônica compacta estável entre execuções
-- [ ] impressão indentada para depuração
+- [x] um nó por construção, com `line`/`column`
+- [x] parênteses não geram nó
+- [x] `NULL` explícito em ramo ausente (`If` sem `else`, `return` vazio)
+- [x] impressão canônica compacta estável entre execuções
+- [x] impressão indentada para depuração
 
 **Erros**
 
-- [ ] `Erro sintático na linha L, coluna C: …` com token/lexema encontrado
-- [ ] exit code 3
-- [ ] mais de um erro por execução (modo pânico com sincronização)
-- [ ] nenhuma AST impressa quando a entrada é rejeitada
+- [x] `Erro sintático na linha L, coluna C: …` com token/lexema encontrado
+- [x] exit code 3
+- [x] mais de um erro por execução (modo pânico com sincronização)
+- [x] nenhuma AST impressa quando a entrada é rejeitada
 
 **Equivalência Python/C**
 
-- [ ] mesma AST e mesmos diagnósticos para as mesmas entradas
-- [ ] verificado por script, contra os mesmos arquivos esperados
+- [x] mesma AST e mesmos diagnósticos para as mesmas entradas — 65/65 entradas com saída byte a byte idêntica
+- [x] verificado por script (`tests/run_parser_tests.py`, suíte de equivalência), contra os mesmos arquivos esperados
 
 **Testes**
 
-- [ ] 25 casos válidos oficiais produzindo a AST esperada (com a exceção
-      documentada do caso 24)
-- [ ] 25 casos inválidos oficiais rejeitados com diagnóstico e exit code ≠ 0
-- [ ] casos próprios cobrindo `for`, `print`, `read`, `break`, `continue` e
-      literais de caractere/cadeia, que os oficiais não exercitam
-- [ ] resultados gravados em `tests/expected/`
+- [x] 25 casos válidos oficiais produzindo a AST esperada (com a exceção
+      documentada do caso 24) — 25/25 em Python e em C
+- [x] 25 casos inválidos oficiais rejeitados com diagnóstico e exit code 3 — 25/25 em Python e em C; tabela dos diagnósticos em [`resultados-etapa2.md`](resultados-etapa2.md#cobertura-dos-diagnósticos-dos-25-casos-inválidos)
+- [x] casos próprios cobrindo `for`, `print`, `read`, `break`, `continue` e
+      literais de caractere/cadeia, que os oficiais não exercitam — 15 casos
+      em `tests/parser_inputs/`
+- [x] resultados gravados em `tests/parser_expected/` (golden de stdout, stderr e exit code de cada caso próprio)
+
+## O que foi construído (mapa final)
+
+| Arquivo | Papel |
+|---|---|
+| [`../parser.py`](../parser.py) | ponto de entrada `python parser.py codigo.c` (atalho para `src/python/parser.py`), com bit de execução para o script oficial |
+| [`../parser.c`](../parser.c) | ponto de entrada `./parser codigo.c`; inclui os fontes de `src/c/` para compilar como unidade única, que é como o script oficial compila |
+| [`../src/python/minic_ast.py`](../src/python/minic_ast.py) | nós da AST + impressão compacta e indentada |
+| [`../src/python/parser.py`](../src/python/parser.py) | parser por descida recursiva + CLI |
+| [`../src/c/ast.h`](../src/c/ast.h) / [`ast.c`](../src/c/ast.c) | a mesma AST em C (struct única + enum de tipo de nó) |
+| [`../src/c/parser.h`](../src/c/parser.h) / [`parser.c`](../src/c/parser.c) | o mesmo parser em C (setjmp/longjmp no lugar das exceções) |
+| [`../src/c/parser_main.c`](../src/c/parser_main.c) | CLI em C |
+| [`../tests/run_parser_tests.py`](../tests/run_parser_tests.py) | as três suítes: oficiais, próprias e equivalência |
+| [`../src/python/test_parser_python.sh`](../src/python/test_parser_python.sh) / [`../src/c/test_parser_c.sh`](../src/c/test_parser_c.sh) | wrappers que rodam os scripts oficiais do professor com os caminhos deste repositório |
+
+Duas divergências entre a gramática da especificação e os casos oficiais foram
+encontradas durante a implementação e estão registradas em
+[`gramatica.md`](gramatica.md#divergências-entre-a-especificação-e-os-casos-oficiais):
+comandos soltos no nível do programa e declaração global com lista de
+declaradores/vetor.

@@ -133,8 +133,10 @@ início de uma expressão. Duas saídas usuais:
    (`Id` ou `Index`); se não for, é erro sintático. É a abordagem mais simples e
    produz um diagnóstico direto no caso oficial 38 (`atribuição sem destino`).
 
-A recomendação do roteiro da etapa 2 é a opção 2 — ver
-[`roteiro-etapa2-parser.md`](roteiro-etapa2-parser.md).
+**Implementado com a opção 2** (`_atribuicao`/`parse_atribuicao`): se o nó à
+esquerda do `=` não é `Id` nem `Index`, o erro sai na posição do próprio `=`
+(`lado esquerdo da atribuição não é atribuível`). Mesma verificação vale para o
+alvo de `read`, que a especificação também exige `localizavel`.
 
 ### `else` pendente (*dangling else*)
 
@@ -166,6 +168,23 @@ assim marcados como `ACEITO`).
 > têm `main` (01–04, 06, 12, 13, 16, 18–22). Isso é regra **semântica** (etapa
 > 3), não sintática: o parser da etapa 2 não deve rejeitar um programa por falta
 > de `main`.
+
+## Divergências entre a especificação e os casos oficiais
+
+Três pontos em que a gramática do PDF e o pacote de 50 casos não concordam.
+Nos três, a implementação segue os **casos oficiais** (é por eles que a entrega
+é avaliada), e a decisão está registrada aqui e em comentário no código:
+
+| # | A gramática diz | Os casos oficiais exigem | Implementado |
+|---|---|---|---|
+| 1 | `programa ::= declaracao_global* declaracao_funcao* funcao_main` — só declarações no topo | o caso 22 (`int a; int b; a = b = 3;`) é **ACEITO**, com `ExprStmt` no nível do programa | topo aceita declaração **ou** comando, em qualquer ordem |
+| 2 | `declaracao_global ::= tipo identificador inicializacao? ";"` — uma variável por vez, sem vetor | o caso 16 (`int dados[10];`) é **ACEITO** como global | global usa a mesma regra da local (`declarador ("," declarador)*`), o que também aceita `int a, b = 2, v[3];` |
+| 3 | "todo programa deve conter exatamente uma função `main`" (Seção 2) | 13 dos 25 casos aceitos não têm `main` | o parser não exige `main`; isso passa a ser verificação semântica da etapa 3 |
+
+O que **não** foi relaxado: função sem corpo (`int f();`, caso 48) continua
+sendo erro, porque a MINIC não tem protótipo; e declaração dentro de um comando
+sem bloco (`if (x) int y;`) também, porque `comando` não deriva
+`declaracao_local`.
 
 ### Tokens do scanner usados pelo parser
 
@@ -208,8 +227,15 @@ Levantado a partir de
 Ou seja: os 50 casos exercitam pouco mais da metade da gramática. Implementar
 só o que eles cobrem passaria nos testes oficiais, mas deixaria de fora
 construções que a especificação lista como obrigatórias (Seção 18) e que voltam
-a aparecer nas etapas 3 e 4. O roteiro da etapa 2 trata isso como duas ondas:
-primeiro o que os testes cobrem, depois o resto da gramática.
+a aparecer nas etapas 3 e 4.
+
+**O parser implementa a gramática inteira**, incluindo as quatro linhas
+marcadas como "não" acima. Como os casos oficiais não as exercitam, elas são
+cobertas pelos casos próprios em
+[`tests/parser_inputs/`](../tests/parser_inputs/): `for` completo e com as três
+partes vazias, `break`/`continue`, `print`/`read`, literais de caractere e de
+cadeia (com escapes), declaração múltipla, parâmetro vetor, `else` pendente e
+comando vazio.
 
 Os 25 casos de rejeição (26–50) mapeiam quais diagnósticos precisam existir:
 ponto e vírgula ausente (26, 27, 45), parêntese/chave ausente (28–31, 39, 41,

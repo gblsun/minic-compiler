@@ -130,16 +130,45 @@ da aula 12 pede ("ordem fixa de campos, nada dependente de execução"). Logo:
 ## Forma canônica adotada pelo projeto
 
 Duas saídas, ambas determinísticas (a apostila da aula 12 sugere exatamente
-isso: uma para teste, outra para leitura humana):
+isso: uma para teste, outra para leitura humana). Implementadas em
+[`src/python/minic_ast.py`](../src/python/minic_ast.py) e
+[`src/c/ast.c`](../src/c/ast.c), com o mesmo resultado byte a byte.
 
-1. **Compacta** (padrão, usada nos testes): S-expression de uma linha, na
-   notação da tabela acima, com `, ` (vírgula + espaço) separando irmãos e sem
-   espaço em volta de `=` dentro de `VarDecl`/`size=`. É a forma comparada
-   com os `ast.esperada.txt`, após normalização de espaços.
-2. **Indentada** (`--ast-tree` ou equivalente, para depuração): um nó por
-   linha, dois espaços por nível, atributos em ordem fixa, lexemas entre
-   aspas quando ambíguos. Nunca imprimir endereço de ponteiro, ordem de
-   dicionário ou qualquer coisa que mude entre execuções.
+1. **Compacta** (padrão, usada nos testes): S-expression de uma linha. A regra
+   de espaçamento é uma só — **itens de uma lista (`Program` e `Block`) são
+   separados por `", "`; todo o resto é compacto** (`","` entre filhos, `=` sem
+   espaços em `VarDecl` e em `size=`). Foi a combinação que casa exatamente com
+   o maior número de arquivos oficiais (16 dos 25); os outros 9 diferem apenas
+   em espaço em branco, que é o que a comparação da suíte normaliza.
+2. **Indentada** (`--tree`, para depuração): um nó por linha, dois espaços por
+   nível, atributos escalares em ordem fixa (`type=`, `name=`, `op=`,
+   `value=`). Nada dependente da execução (endereço de ponteiro, ordem de
+   dicionário) aparece na saída.
+
+```bash
+python parser.py --tree codigo.c   # ou ./parser --tree codigo.c
+```
+
+## Nós que os testes oficiais não exercitam
+
+A gramática tem construções que nenhum dos 50 casos usa, e para elas a notação
+é convenção nossa (registrada aqui para ficar estável nas etapas seguintes):
+
+| Nó | Forma | Exemplo |
+|---|---|---|
+| `for` | `For(init, cond, passo, corpo)`, com `NULL` nas partes ausentes | `For(NULL,NULL,NULL,Block(Break()))` |
+| `break` / `continue` | `Break()` / `Continue()` | `Block(Break())` |
+| `print` | `Print(expr)` | `Print(Binary(+,Id(x),Lit(int,1)))` |
+| `read` | `Read(alvo)` — só `Id` ou `Index` | `Read(Index(Id(v),Id(i)))` |
+| literal de caractere | `Lit(char,'a')`, com escapes reescritos | `Lit(char,'\n')` |
+| literal de cadeia | `Lit(string,"…")`, com escapes reescritos | `Lit(string,"a\tb")` |
+| parâmetro vetor | `tipo nome[]` na assinatura | `Function(float media(float valores[],int n) …)` |
+| comando vazio | `ExprStmt(NULL)` | `Block(ExprStmt(NULL))` |
+
+Os literais de caractere e de cadeia são impressos **como estavam no código**:
+o lexer entrega o valor já decodificado (o `\n` virou uma quebra de linha de
+verdade), e a impressão reescreve os escapes, de modo que
+`char quebra = '\n';` volta a sair como `Lit(char,'\n')`.
 
 ```text
 Program

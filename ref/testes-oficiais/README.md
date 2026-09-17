@@ -70,8 +70,14 @@ Encontrados ao conferir o material; não são erros de digitação deste README:
 
 Consequência prática: **comparar a AST byte a byte contra `ast.esperada.txt`
 não é um critério viável.** A comparação precisa normalizar espaços em branco
-fora de lexemas, e o caso 24 precisa de exceção explícita e documentada. Ver
-[`docs/roteiro-etapa2-parser.md`](../../docs/roteiro-etapa2-parser.md).
+fora de lexemas, e o caso 24 precisa de exceção explícita e documentada.
+
+É o que [`tests/run_parser_tests.py`](../../tests/run_parser_tests.py) faz: os
+50 casos passam nas duas implementações (50/50 cada), com o caso 24 comparado
+contra a AST corrigida e isso dito no relatório. Já os scripts oficiais do
+professor, que comparam byte a byte, param em 16 aprovados — o teto do pacote.
+Os dois resultados, e como lê-los, estão em
+[`docs/resultados-etapa2.md`](../../docs/resultados-etapa2.md).
 
 ---
 

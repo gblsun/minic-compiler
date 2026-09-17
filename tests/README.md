@@ -1,14 +1,21 @@
 # tests/
 
-Testes de regressão do analisador léxico, no formato "golden file" (a saída
-esperada fica gravada em disco e é comparada byte a byte com a saída atual).
+Testes de regressão do projeto, no formato "golden file" (a saída esperada fica
+gravada em disco e é comparada byte a byte com a saída atual). Duas suítes, uma
+por etapa:
 
-```
+```text
 tests/
-├── inputs/     arquivos .mc de entrada
-├── expected/   saída esperada para cada entrada (stdout, stderr, exit code)
-└── run_tests.py
+├── inputs/            .mc de entrada do SCANNER (etapa 1)
+├── expected/          saída esperada de cada .mc (stdout, stderr, exit code)
+├── run_tests.py       runner do scanner
+├── parser_inputs/     .c de entrada do PARSER (etapa 2)
+├── parser_expected/   saída esperada de cada .c (stdout, stderr, exit code)
+└── run_parser_tests.py  runner do parser (+ casos oficiais e equivalência)
 ```
+
+O restante deste arquivo detalha a suíte do scanner; a do parser está na seção
+[Suíte do parser](#suíte-do-parser-etapa-2).
 
 ## Estrutura
 
@@ -47,9 +54,9 @@ como um usuário rodaria) com o que está gravado em `expected/`.
    `inputs/`, não só o novo — revise o `git diff` de `tests/expected/` antes
    de commitar, para não acabar congelando uma regressão sem querer.
 
-## Os três runners de teste do projeto
+## Os três runners do scanner (etapa 1)
 
-Este repositório tem três scripts que rodam contra os mesmos
+Três scripts rodam contra os mesmos
 `tests/inputs/*.mc` e os mesmos `tests/expected/*.{stdout,stderr,exit}.txt` —
 eles não competem entre si, cada um serve um propósito diferente:
 
@@ -83,10 +90,60 @@ As divergências entre os dois formatos e as armadilhas dos scripts oficiais
 estão documentadas em
 [`ref/testes-oficiais/README.md`](../ref/testes-oficiais/README.md).
 
-## Etapa 2 (parser): o que ainda não existe aqui
+## Suíte do parser (etapa 2)
 
-Nada de teste sintático está implementado. O plano — runner próprio para os 50
-casos oficiais (`tests/run_parser_tests.py`), comparação de AST com
-normalização de espaços e casos próprios para as construções que os oficiais
-não cobrem — está em
-[`docs/roteiro-etapa2-parser.md`](../docs/roteiro-etapa2-parser.md#6-testes).
+```bash
+python tests/run_parser_tests.py            # tudo
+python tests/run_parser_tests.py --python   # só a versão Python
+python tests/run_parser_tests.py --c        # só a versão C
+python tests/run_parser_tests.py --update   # regrava os golden dos casos próprios
+python tests/run_parser_tests.py -v         # detalha caso a caso
+```
+
+[`run_parser_tests.py`](run_parser_tests.py) roda **três** suítes:
+
+| Suíte | Fonte dos casos | Critério |
+|---|---|---|
+| 50 casos oficiais | [`ref/testes-oficiais/testes-parser-50/`](../ref/testes-oficiais/testes-parser-50/) (material do professor) | 01–25: exit 0, stderr vazio e AST igual à esperada (espaços normalizados); 26–50: exit 3, nenhuma AST e diagnóstico "Erro sintático" |
+| 15 casos próprios | [`parser_inputs/`](parser_inputs/) | stdout, stderr e exit code idênticos aos golden de [`parser_expected/`](parser_expected/) |
+| Equivalência | as 65 entradas das duas suítes acima | a versão Python e a versão C devem devolver **exatamente** o mesmo stdout, stderr e exit code |
+
+Resultado atual: 195/195 — registro em
+[`docs/resultados-etapa2.md`](../docs/resultados-etapa2.md).
+
+### Por que os casos próprios existem
+
+Os 50 oficiais não exercitam `for`, `print`, `read`, `break`, `continue` nem
+literais de caractere/cadeia, que a especificação lista como obrigatórios. Os
+casos em `parser_inputs/` cobrem essas construções, mais declaração múltipla,
+parâmetro vetor, `else` pendente, comando vazio, recuperação com vários erros
+numa mesma entrada e a interação com erro léxico (exit code 2). A convenção de
+nomes é a mesma da etapa 1: `valido_*.c` para entradas aceitas e `erro_*.c`
+para as rejeitadas.
+
+### Adicionando um caso próprio
+
+1. Crie `tests/parser_inputs/<nome>.c`.
+2. Rode `python parser.py tests/parser_inputs/<nome>.c` e confira **à mão** que
+   a AST (ou o diagnóstico) está correta.
+3. Grave o golden: `python tests/run_parser_tests.py --update` — como na etapa
+   1, quem grava é sempre a versão **Python**, e o `--update` regrava todos os
+   casos, então revise o `git diff` de `parser_expected/` antes de commitar.
+4. Rode a suíte completa (`python tests/run_parser_tests.py`) para conferir que
+   a versão C concorda byte a byte.
+
+### Os scripts oficiais do professor
+
+```bash
+bash src/python/test_parser_python.sh
+bash src/c/test_parser_c.sh
+```
+
+São wrappers que chamam os scripts de [`ref/scripts/`](../ref/scripts/) sem
+alterá-los, apontando para os caminhos deste repositório. Eles marcam 16
+aprovados e 25 erros sintáticos detectados — o teto do pacote de testes, por
+defeitos conhecidos dele (a AST esperada dos 25 casos inválidos é a frase "NÃO
+HÁ AST", e o espaçamento dos válidos é inconsistente). O porquê está em
+[`docs/resultados-etapa2.md`](../docs/resultados-etapa2.md#scripts-oficiais-da-disciplina)
+e em
+[`ref/testes-oficiais/README.md`](../ref/testes-oficiais/README.md#armadilhas-dos-scripts-oficiais).
