@@ -1,0 +1,1001 @@
+ROTEIRO DE AULA — AULA 6: GRAMÁTICAS LIVRES DE CONTEXTO
+
+SLIDE 1 — COMPILADORES: AULA 6 — GRAMÁTICAS LIVRES DE CONTEXTO
+
+Bom dia, pessoal.
+
+Na aula de hoje, vamos estudar as Gramáticas Livres de Contexto, conhecidas pela sigla GLC.
+
+As gramáticas livres de contexto são utilizadas para descrever a estrutura sintática das linguagens de programação. Em outras palavras, elas definem como os tokens produzidos pelo analisador léxico podem ser organizados para formar expressões, comandos, declarações, funções e programas completos.
+
+Nas aulas anteriores, vimos que o compilador recebe um programa como uma sequência de caracteres. O scanner, ou analisador léxico, transforma essa sequência de caracteres em uma sequência de tokens.
+
+Por exemplo, ao receber uma instrução como:
+
+if (x + 1) y = 2;
+
+o scanner identifica elementos como a palavra reservada if, os parênteses, os identificadores x e y, o operador de adição, o operador de atribuição, os números inteiros e o ponto e vírgula.
+
+A partir desse momento, o parser, ou analisador sintático, precisa verificar se essa sequência de tokens obedece às regras da linguagem.
+
+O parser não deve apenas verificar se os tokens aparecem isoladamente. Ele precisa reconhecer as relações entre eles.
+
+Ele precisa perceber, por exemplo, que if inicia um comando condicional, que x + 1 é uma expressão, que y = 2 é uma atribuição e que a atribuição está associada ao comando condicional.
+
+É justamente nesse ponto que entram as gramáticas livres de contexto.
+
+Durante esta aula, vamos estudar os elementos que formam uma GLC, as árvores de derivação, as derivações mais à esquerda e mais à direita, a relação entre árvores de derivação e ASTs e a aplicação desses conceitos à linguagem MINIC.
+
+Ao final, vamos construir e analisar ASTs para expressões aritméticas.
+
+A ideia central da aula é compreender como uma sequência linear de tokens pode ser transformada em uma estrutura hierárquica que represente o programa.
+
+SLIDE 2 — AGENDA
+
+Esta é a agenda da nossa aula.
+
+Primeiro, vamos estudar os elementos das Gramáticas Livres de Contexto.
+
+Vamos identificar o papel dos não terminais, dos terminais, das produções e do símbolo inicial.
+
+Depois, vamos discutir as árvores de derivação.
+
+Uma árvore de derivação mostra como uma sentença é construída a partir do símbolo inicial da gramática, por meio da aplicação sucessiva das produções.
+
+Também vamos estudar a notação BNF e a notação EBNF, que são formas de escrever produções gramaticais.
+
+Em seguida, veremos como uma gramática pode representar precedência e associatividade de operadores.
+
+Esse assunto é essencial para expressões aritméticas. Precisamos garantir, por exemplo, que a multiplicação seja interpretada antes da adição e que expressões como a menos b menos c sejam agrupadas corretamente.
+
+Vamos estudar ainda o conceito de derivação, distinguindo forma sentencial e sentença.
+
+Também veremos a diferença entre derivação mais à esquerda e derivação mais à direita.
+
+Por fim, vamos relacionar as árvores de derivação com as ASTs e resolver exercícios relacionados à linguagem MINIC.
+
+Ao longo de toda a aula, vamos fazer a ligação entre a teoria das gramáticas e a implementação de compiladores.
+
+SLIDE 3 — ELEMENTOS DAS GRAMÁTICAS LIVRES DE CONTEXTO
+
+Uma Gramática Livre de Contexto é definida formalmente como uma quádrupla:
+
+G = (N, T, P, S)
+
+Cada componente dessa quádrupla possui uma função específica.
+
+O primeiro componente é N, que representa o conjunto dos não terminais.
+
+Os não terminais são símbolos que representam categorias sintáticas. Eles funcionam como nomes para estruturas da linguagem.
+
+Alguns exemplos são:
+
+expr, para representar uma expressão;
+
+stmt, para representar um comando;
+
+decl, para representar uma declaração;
+
+program, para representar um programa completo.
+
+Os não terminais não aparecem diretamente na entrada final do programa. Eles são símbolos intermediários utilizados para explicar como as construções da linguagem podem ser formadas.
+
+O segundo componente é T, que representa o conjunto dos terminais.
+
+Os terminais são os símbolos que podem aparecer na entrada do parser. Em um compilador, normalmente correspondem aos tokens produzidos pelo scanner.
+
+Alguns exemplos de terminais são:
+
+IF, para representar a palavra reservada if;
+
+ID, para representar um identificador;
+
+INT, para representar um número inteiro;
+
+o ponto e vírgula, para representar o encerramento de uma instrução;
+
+os operadores, como mais, menos, multiplicação, divisão e atribuição.
+
+É importante compreender que, em uma gramática de compiladores, o terminal geralmente não representa apenas um caractere individual. Ele pode representar uma categoria de token.
+
+Por exemplo, o terminal ID pode representar qualquer identificador válido, como x, contador ou resultado.
+
+O terminal INT pode representar qualquer literal inteiro válido, como 0, 1, 25 ou 1000.
+
+O terceiro componente é P, o conjunto de produções.
+
+As produções são regras de reescrita. Elas indicam como um não terminal pode ser substituído por uma sequência de terminais e não terminais.
+
+Por exemplo:
+
+stmt → if ( expr ) stmt
+
+Essa produção afirma que um comando pode ser formado pela palavra reservada if, seguida de um parêntese esquerdo, uma expressão, um parêntese direito e outro comando.
+
+Observe que a produção apresenta um não terminal do lado esquerdo e uma sequência de símbolos do lado direito.
+
+Finalmente, temos S, o símbolo inicial.
+
+O símbolo inicial é o não terminal a partir do qual começamos a construir ou reconhecer uma sentença.
+
+Em uma gramática de linguagem de programação, é comum utilizar program como símbolo inicial.
+
+Portanto, podemos resumir:
+
+N representa os não terminais;
+
+T representa os terminais;
+
+P representa as produções;
+
+S representa o símbolo inicial.
+
+A gramática completa será responsável por descrever quais programas pertencem à linguagem e como esses programas estão estruturados.
+
+SLIDE 4 — O QUE SIGNIFICA “LIVRE DE CONTEXTO”?
+
+Agora vamos entender o significado da expressão “livre de contexto”.
+
+Uma gramática é livre de contexto quando a substituição de um não terminal não depende dos símbolos que aparecem ao redor dele.
+
+Considere, por exemplo, uma produção como:
+
+expr → expr + term
+
+Essa produção pode ser aplicada sempre que estivermos expandindo um símbolo expr, independentemente dos símbolos que estejam antes ou depois dele na forma sentencial.
+
+Se tivermos uma sequência como:
+
+stmt expr ;
+
+podemos substituir expr conforme as regras da gramática.
+
+Se tivermos:
+
+( expr )
+
+também podemos substituir expr conforme as mesmas regras.
+
+A possibilidade de substituição depende apenas do próprio não terminal e da produção disponível. Ela não depende do contexto em que o não terminal aparece.
+
+De maneira geral, uma produção de uma gramática livre de contexto possui a forma:
+
+A → α
+
+Nesse caso, A é um único não terminal e α é uma sequência de terminais e não terminais.
+
+A produção afirma que A pode ser substituído por α em qualquer posição em que A apareça.
+
+Isso diferencia uma GLC de uma Gramática Sensível ao Contexto, ou GSC.
+
+Em uma gramática sensível ao contexto, a substituição poderia depender dos símbolos vizinhos.
+
+Podemos representar essa situação, de maneira simplificada, assim:
+
+α A β → α γ β
+
+Nesse caso, A somente poderia ser substituído por γ quando estivesse entre o contexto α e o contexto β.
+
+Para a maioria das estruturas sintáticas de uma linguagem de programação, as Gramáticas Livres de Contexto são suficientemente expressivas.
+
+Elas conseguem representar expressões, comandos, declarações, blocos, chamadas de função e muitas outras construções.
+
+Entretanto, nem todas as regras de uma linguagem são puramente sintáticas.
+
+Por exemplo, a regra que determina que uma variável deve ser declarada antes de ser utilizada não é, normalmente, resolvida apenas pela gramática.
+
+A gramática pode reconhecer que uma instrução possui um identificador. Porém, verificar se esse identificador foi declarado, qual é o seu tipo e se pode ser utilizado naquela posição são tarefas da análise semântica.
+
+Assim, a gramática descreve principalmente a forma estrutural dos programas.
+
+SLIDE 5 — O PAPEL DAS GRAMÁTICAS NA RELAÇÃO ENTRE SCANNER, PARSER E AST
+
+Agora, vamos relacionar três componentes fundamentais do compilador: o scanner, o parser e a AST.
+
+O programa começa como uma sequência de caracteres.
+
+Considere novamente a instrução:
+
+if (x + 1) y = 2;
+
+Neste primeiro momento, temos apenas texto.
+
+O scanner percorre essa sequência e identifica os tokens.
+
+Uma possível sequência de tokens seria:
+
+IF, parêntese esquerdo, ID, operador de adição, INT, parêntese direito, ID, operador de atribuição, INT e ponto e vírgula.
+
+O scanner identifica unidades léxicas, mas não constrói toda a estrutura sintática.
+
+Ele reconhece que if é uma palavra reservada, que x e y são identificadores e que 1 e 2 são inteiros.
+
+Depois que os tokens são produzidos, o parser verifica como eles estão relacionados.
+
+O parser precisa identificar que if inicia uma construção condicional.
+
+Ele precisa reconhecer que a expressão entre parênteses é a condição do comando.
+
+Também precisa reconhecer que y recebe o valor 2 e que essa atribuição forma o comando associado ao if.
+
+O resultado da análise sintática pode ser representado por uma árvore.
+
+Uma representação simplificada seria:
+
+stmt expr assign
+
+Essa representação ainda pode ser detalhada.
+
+A estrutura poderia indicar que temos um comando condicional, cuja condição é uma expressão de adição entre x e 1 e cujo comando associado é uma atribuição de 2 à variável y.
+
+A AST, ou Árvore Sintática Abstrata, preserva justamente essas relações importantes.
+
+Podemos resumir o papel de cada etapa da seguinte forma:
+
+O scanner transforma caracteres em tokens.
+
+O parser transforma tokens em uma estrutura sintática.
+
+A AST representa a estrutura essencial do programa para as fases seguintes do compilador.
+
+A análise semântica, a otimização e a geração de código podem trabalhar sobre essa estrutura.
+
+SLIDE 6 — EXEMPLO DE TRANSFORMAÇÃO DA ENTRADA EM ESTRUTURA
+
+Vamos acompanhar o exemplo apresentado neste slide.
+
+Na entrada textual, temos:
+
+if (x + 1) y = 2;
+
+Essa é uma sequência linear de caracteres.
+
+Para o compilador, ainda é necessário identificar quais partes possuem função sintática.
+
+O scanner transforma a entrada em tokens.
+
+A sequência pode ser representada assim:
+
+IF, parêntese esquerdo, ID, mais, INT, parêntese direito, ID, atribuição, INT e ponto e vírgula.
+
+O primeiro ID representa o identificador x.
+
+O segundo ID representa o identificador y.
+
+O primeiro INT representa o valor 1.
+
+O segundo INT representa o valor 2.
+
+Nesse estágio, o scanner já reconheceu as unidades, mas ainda não identificou completamente a estrutura da instrução.
+
+O parser recebe esses tokens e utiliza as produções da gramática para verificar se eles podem formar um comando válido.
+
+O parser pode reconhecer uma estrutura semelhante a:
+
+stmt expr assign
+
+Essa representação é simplificada, mas mostra a mudança fundamental que ocorre.
+
+A entrada começa como uma sequência linear.
+
+Depois do scanner, torna-se uma sequência de categorias léxicas.
+
+Depois do parser, torna-se uma estrutura hierárquica.
+
+Podemos detalhar essa árvore da seguinte maneira:
+
+if-statement condição soma x 1 comando atribuição y 2
+
+A raiz representa o comando condicional.
+
+Abaixo da raiz, temos duas partes principais: a condição e o comando que será executado.
+
+A condição é uma expressão de adição entre x e 1.
+
+O comando associado é uma atribuição em que y recebe o valor 2.
+
+Essa estrutura é mais útil do que a sequência original de tokens porque representa as relações do programa.
+
+Por exemplo, a geração de código poderá utilizar essa árvore para produzir uma instrução de desvio condicional.
+
+O compilador poderá calcular x + 1 e, dependendo do resultado, executar ou não a atribuição y = 2.
+
+Portanto, a gramática não é apenas uma lista de regras abstratas.
+
+Ela fornece a base para que o parser reconheça a estrutura do programa e construa uma representação hierárquica.
+
+SLIDE 7 — ESPECIFICAR, DERIVAR E ESTRUTURAR
+
+Ao final do processo, a gramática deixa de ser apenas uma lista de regras e passa a orientar concretamente a implementação do parser.
+
+Podemos organizar esse trabalho em três atividades principais: especificar, derivar e estruturar.
+
+A primeira atividade é especificar.
+
+Especificar significa definir os componentes da gramática.
+
+Precisamos declarar os terminais, os não terminais, as produções e o símbolo inicial.
+
+Também precisamos estabelecer convenções.
+
+Por exemplo, devemos decidir se os terminais serão escritos em letras maiúsculas e se os não terminais serão escritos em letras minúsculas.
+
+Devemos indicar como os tokens do scanner correspondem aos terminais da gramática.
+
+Também devemos definir como representaremos a palavra vazia, normalmente indicada pelo símbolo epsilon.
+
+Uma especificação precisa evitar ambiguidades de notação.
+
+A segunda atividade é derivar.
+
+Derivar significa aplicar produções sucessivamente a partir do símbolo inicial.
+
+Começamos com o símbolo inicial e substituímos os não terminais até obter uma sequência formada somente por terminais.
+
+Por exemplo, partindo de E, podemos obter:
+
+E ⇒ E + T ⇒ T + T ⇒ id + T ⇒ id + id
+
+Cada seta representa a aplicação de uma produção.
+
+Durante a derivação, podemos escolher expandir primeiro o não terminal mais à esquerda ou o não terminal mais à direita.
+
+A terceira atividade é estruturar.
+
+Uma derivação pode ser representada por uma árvore de derivação.
+
+Essa árvore mostra quais produções foram aplicadas e como os elementos da sentença estão relacionados.
+
+Depois, essa estrutura pode ser transformada em uma AST.
+
+A AST normalmente elimina detalhes que são importantes para explicar a gramática, mas que não são necessários para as fases seguintes.
+
+Podemos resumir as três atividades por meio de três perguntas:
+
+Quais são as regras da linguagem?
+
+Essa é a especificação.
+
+Como uma sentença válida é gerada?
+
+Essa é a derivação.
+
+Como a sentença pode ser representada de modo útil para o compilador?
+
+Essa é a estrutura sintática ou AST.
+
+SLIDE 8 — ÁRVORES DE DERIVAÇÃO, BNF E EBNF
+
+Agora vamos iniciar o estudo das árvores de derivação.
+
+As produções de uma gramática podem ser escritas utilizando diferentes notações.
+
+Uma das notações mais conhecidas é a BNF, ou Forma de Backus-Naur.
+
+Na BNF, as produções são escritas explicitamente.
+
+Por exemplo:
+
+expr → expr + term
+
+Essa produção indica que uma expressão pode ser formada por outra expressão, seguida do operador de adição e de um termo.
+
+Outra notação bastante utilizada é a EBNF, ou Forma Estendida de Backus-Naur.
+
+A EBNF acrescenta recursos de abreviação para representar repetição, opcionalidade e agrupamento.
+
+Por exemplo, uma construção repetitiva pode ser indicada com chaves, dependendo da convenção adotada.
+
+Uma construção opcional pode ser indicada entre colchetes.
+
+Essas abreviações tornam a gramática mais compacta, mas também exigem que a equipe conheça e documente a convenção utilizada.
+
+Uma gramática pode ser formalmente correta e ainda assim ser difícil de compreender se sua notação não estiver bem definida.
+
+No projeto MINIC, é importante declarar explicitamente que program é o símbolo inicial.
+
+Isso significa que a análise de um programa completo deve começar pelo não terminal program.
+
+Também precisamos registrar as convenções adotadas pela equipe.
+
+Devemos decidir, por exemplo:
+
+como os terminais serão nomeados;
+
+como os não terminais serão nomeados;
+
+como os identificadores serão representados;
+
+como os números inteiros serão representados;
+
+como a palavra vazia será indicada;
+
+como listas de declarações e listas de comandos serão descritas.
+
+Essa documentação é importante porque a gramática será utilizada como referência para a implementação do parser, para a construção da AST e para a criação dos testes.
+
+Uma árvore de derivação construída a partir dessa gramática deverá permitir acompanhar exatamente como um programa válido é formado.
+
+SLIDE 9 — PRECEDÊNCIA E ASSOCIATIVIDADE
+
+Este slide mostra como a separação da gramática em níveis pode representar precedência e associatividade.
+
+Considere as produções:
+
+E → E + T | E - T | T
+
+T → T multiplicado por F | T dividido por F | F
+
+F → ( E ) | id
+
+Aqui temos três níveis principais.
+
+E representa uma expressão.
+
+T representa um termo.
+
+F representa um fator.
+
+O fator é a unidade mais básica.
+
+Ele pode ser um identificador ou uma expressão entre parênteses.
+
+O termo é formado por fatores combinados com multiplicação ou divisão.
+
+A expressão é formada por termos combinados com adição ou subtração.
+
+A posição desses operadores na gramática estabelece níveis de precedência.
+
+A soma e a subtração aparecem no nível de E.
+
+A multiplicação e a divisão aparecem no nível de T.
+
+Os fatores aparecem no nível mais baixo da árvore, representando as unidades fundamentais.
+
+Quanto mais abaixo está um nível na estrutura da gramática, maior é a precedência dos operadores associados a ele.
+
+Assim, temos:
+
+expressão: soma e subtração;
+
+termo: multiplicação e divisão;
+
+fator: identificador ou expressão entre parênteses.
+
+Considere a expressão:
+
+a + b multiplicado por c.
+
+A multiplicação entre b e c deve ser agrupada primeiro.
+
+A interpretação correta é:
+
+a + (b multiplicado por c)
+
+e não:
+
+(a + b) multiplicado por c.
+
+A gramática força essa interpretação porque b multiplicado por c forma um termo, enquanto a soma combina termos no nível de expressão.
+
+Os parênteses são tratados como fatores.
+
+Isso permite alterar a ordem natural de avaliação.
+
+Na expressão:
+
+(a + b) multiplicado por c
+
+a soma dentro dos parênteses é reconhecida como uma expressão completa e, depois, essa expressão é utilizada como um fator da multiplicação.
+
+As produções recursivas à esquerda também ajudam a representar associatividade.
+
+Por exemplo:
+
+E → E + T
+
+permite interpretar uma sequência como:
+
+a - b - c
+
+da seguinte forma:
+
+(a - b) - c
+
+Ou seja, as operações são associadas da esquerda para a direita.
+
+A gramática, portanto, pode controlar não apenas quais sentenças são válidas, mas também como os operadores são agrupados.
+
+SLIDE 10 — DERIVAÇÃO E FORMA SENTENCIAL
+
+Uma derivação é uma sequência de aplicações de produções a partir do símbolo inicial.
+
+Vamos acompanhar o exemplo:
+
+E ⇒ E + T ⇒ T + T ⇒ id + T ⇒ id + id
+
+Começamos com o símbolo inicial E.
+
+Na primeira etapa, aplicamos a produção:
+
+E → E + T
+
+Obtemos:
+
+E + T
+
+Na segunda etapa, expandimos o E que aparece à esquerda utilizando a produção:
+
+E → T
+
+Obtemos:
+
+T + T
+
+Depois, expandimos o primeiro T utilizando uma produção que gera um identificador:
+
+T → id
+
+Obtemos:
+
+id + T
+
+Por fim, expandimos o segundo T:
+
+T → id
+
+Chegamos a:
+
+id + id
+
+Nesse momento, não há mais não terminais.
+
+A sequência contém apenas terminais e, por isso, é uma sentença da gramática.
+
+Durante o processo, algumas formas ainda contêm não terminais.
+
+Por exemplo:
+
+E + T
+
+T + T
+
+id + T
+
+Essas sequências são chamadas de formas sentenciais.
+
+Uma forma sentencial pode conter terminais e não terminais.
+
+Ela representa uma etapa intermediária da derivação.
+
+Uma sentença, por outro lado, contém apenas terminais.
+
+Essa distinção é importante para compreender o funcionamento do parser.
+
+Enquanto realiza a análise, o parser trabalha com estruturas intermediárias que ainda possuem categorias sintáticas não resolvidas.
+
+Quando a análise é concluída com sucesso, todos os não terminais foram reconhecidos ou reduzidos e a entrada foi identificada como uma sentença válida.
+
+SLIDE 11 — DERIVAÇÃO MAIS À ESQUERDA E MAIS À DIREITA
+
+Quando uma forma sentencial possui mais de um não terminal, precisamos escolher qual não terminal será expandido primeiro.
+
+Na derivação mais à esquerda, sempre expandimos o não terminal mais à esquerda.
+
+Observe o exemplo:
+
+E ⇒ E + T
+
+Agora existem dois não terminais: E e T.
+
+O não terminal mais à esquerda é o primeiro E.
+
+Então aplicamos a produção correspondente:
+
+E + T ⇒ T + T
+
+Agora existem dois símbolos T.
+
+Expandimos o T mais à esquerda:
+
+T + T ⇒ id + T
+
+Por fim, expandimos o T restante:
+
+id + T ⇒ id + id
+
+Essa é uma derivação mais à esquerda porque, em cada etapa, escolhemos o não terminal mais à esquerda.
+
+Na derivação mais à direita, sempre expandimos o não terminal mais à direita.
+
+Partimos novamente de:
+
+E ⇒ E + T
+
+Agora escolhemos expandir o T, que está mais à direita:
+
+E + T ⇒ E + id
+
+Depois, expandimos o E:
+
+E + id ⇒ T + id
+
+Em seguida, expandimos o T:
+
+T + id ⇒ id + id
+
+A sentença final é a mesma:
+
+id + id
+
+O que muda é a ordem de aplicação das produções.
+
+Essa diferença é importante porque está relacionada às estratégias de análise sintática.
+
+Os analisadores top-down, ou descendentes, começam pelo símbolo inicial e tentam gerar a entrada.
+
+Eles normalmente estão associados à construção de derivações mais à esquerda.
+
+Os analisadores bottom-up, ou ascendentes, começam pelos tokens da entrada e tentam reconstruir a derivação até chegar ao símbolo inicial.
+
+Em termos formais, a análise bottom-up recupera uma derivação mais à direita em ordem reversa.
+
+Isso significa que o parser ascendente começa pela sentença e vai desfazendo as aplicações de produção até alcançar o símbolo inicial.
+
+SLIDE 12 — DA ÁRVORE DE DERIVAÇÃO À AST
+
+Agora vamos diferenciar a árvore de derivação da AST.
+
+A árvore de derivação registra detalhadamente a forma como a sentença foi construída pela gramática.
+
+Nela aparecem os não terminais, os terminais e todas as produções utilizadas.
+
+Para a expressão:
+
+id + id
+
+a árvore de derivação pode conter os nós E, T e F, além do operador de adição e dos identificadores.
+
+Essa árvore é útil para explicar a gramática e verificar se as produções foram aplicadas corretamente.
+
+Entretanto, ela pode conter muitos detalhes que não são necessários para as próximas fases do compilador.
+
+A AST, ou Árvore Sintática Abstrata, é uma representação mais compacta.
+
+Na AST, o operador de adição pode ser colocado como o nó principal:
+
+mais id id
+
+O operador é a raiz porque representa a operação realizada.
+
+Os dois identificadores são seus filhos porque representam os operandos da operação.
+
+Na árvore de derivação, os não terminais E, T e F aparecem porque explicam a organização gramatical.
+
+Na AST, esses símbolos normalmente são eliminados, pois não representam operações ou valores diretamente relevantes.
+
+A AST preserva a estrutura essencial do programa.
+
+Ela deve manter informações como:
+
+operadores;
+
+operandos;
+
+atribuições;
+
+condições;
+
+comandos;
+
+chamadas de função;
+
+blocos;
+
+relações entre expressões.
+
+Por outro lado, pode omitir detalhes como parênteses que foram utilizados apenas para orientar a análise, desde que sua função estrutural já esteja representada pela árvore.
+
+A AST será utilizada pelas fases seguintes do compilador.
+
+A análise semântica poderá percorrê-la para verificar tipos e declarações.
+
+O otimizador poderá identificar expressões constantes ou operações redundantes.
+
+O gerador de código poderá percorrê-la para produzir instruções da máquina-alvo.
+
+Portanto, a árvore de derivação explica como a gramática reconheceu a entrada.
+
+A AST representa a estrutura essencial que o compilador precisa manipular.
+
+SLIDE 13 — GRAMÁTICA INICIAL DO MINIC
+
+Agora vamos observar algumas produções iniciais para a linguagem MINIC.
+
+A primeira produção é:
+
+program → declaration-list
+
+Isso significa que um programa é formado por uma lista de declarações.
+
+A lista de declarações é definida por:
+
+declaration-list → declaration declaration-list | epsilon
+
+Essa produção possui duas alternativas.
+
+A primeira alternativa diz que a lista contém uma declaração seguida por outra lista de declarações.
+
+A segunda alternativa utiliza epsilon para indicar que a lista pode ser vazia.
+
+Isso permite representar um programa sem declarações ou indicar o ponto final de uma sequência de declarações.
+
+Em seguida, temos:
+
+declaration → var-declaration | fun-declaration
+
+Essa produção afirma que uma declaração pode ser uma declaração de variável ou uma declaração de função.
+
+Uma declaração de variável pode ser definida por:
+
+var-declaration → type ID ponto e vírgula
+
+Essa regra representa declarações como:
+
+int x;
+
+Nesse caso, type representa o tipo, ID representa o nome da variável e o ponto e vírgula marca o final da declaração.
+
+Também temos a categoria stmt, que representa um comando:
+
+stmt → expr-stmt | compound-stmt | if-stmt
+
+Um comando pode ser um comando de expressão, um comando composto ou um comando condicional.
+
+Um comando composto normalmente representa um bloco delimitado por chaves.
+
+Um comando condicional representa construções como if.
+
+O comando de expressão é definido por:
+
+expr-stmt → expr ponto e vírgula | ponto e vírgula
+
+A primeira alternativa representa uma expressão seguida por ponto e vírgula.
+
+Por exemplo:
+
+x + 1;
+
+A segunda alternativa representa um comando vazio:
+
+;
+
+Esse comando não executa nenhuma operação, mas ainda pode ser uma construção válida da linguagem.
+
+Essas produções são apenas uma parte inicial da gramática do MINIC.
+
+Em uma gramática mais completa, ainda precisaríamos definir:
+
+os tipos;
+
+as funções;
+
+os parâmetros;
+
+os blocos;
+
+os comandos condicionais completos;
+
+os comandos de repetição;
+
+as atribuições;
+
+as chamadas de função;
+
+as expressões aritméticas;
+
+as expressões relacionais;
+
+as expressões booleanas.
+
+O objetivo dessas primeiras produções é mostrar como a linguagem pode ser organizada hierarquicamente.
+
+O não terminal program representa o programa inteiro.
+
+A partir dele, chegamos às declarações.
+
+A partir das declarações, chegamos às variáveis e funções.
+
+A partir dos comandos, chegamos às expressões e aos blocos.
+
+SLIDE 14 — EXERCÍCIOS: CONSTRUÇÃO DAS ASTS
+
+Agora vamos resolver os exercícios propostos.
+
+A primeira expressão é:
+
+x = 2 + 5 multiplicado por 2;
+
+Precisamos respeitar a precedência dos operadores.
+
+A multiplicação possui precedência maior do que a adição.
+
+Portanto, primeiro agrupamos:
+
+5 multiplicado por 2
+
+Depois, somamos o resultado a 2.
+
+A expressão deve ser interpretada como:
+
+x recebe 2 mais o resultado de 5 multiplicado por 2.
+
+A AST possui a atribuição como raiz.
+
+O lado esquerdo da atribuição é x.
+
+O lado direito é uma adição.
+
+O primeiro filho da adição é o valor 2.
+
+O segundo filho é uma multiplicação entre 5 e 2.
+
+A estrutura textual da árvore é:
+
+atribuição x adição 2 multiplicação 5 2
+
+A segunda expressão é:
+
+x = 2 multiplicado por 5 menos 2;
+
+A multiplicação deve ser realizada antes da subtração.
+
+Portanto, a interpretação é:
+
+x recebe o resultado de 2 multiplicado por 5, menos 2.
+
+A estrutura é:
+
+atribuição x subtração multiplicação 2 5 2
+
+A raiz da expressão do lado direito é a subtração.
+
+O operando esquerdo da subtração é a multiplicação entre 2 e 5.
+
+O operando direito é o valor 2.
+
+A terceira expressão é:
+
+x = 2 multiplicado por 7 menos 5 multiplicado por 2;
+
+Nesse caso, temos duas multiplicações.
+
+As duas devem ser resolvidas antes da subtração.
+
+A interpretação é:
+
+x recebe o resultado de 2 multiplicado por 7, menos o resultado de 5 multiplicado por 2.
+
+A AST é:
+
+atribuição x subtração multiplicação 2 7 multiplicação 5 2
+
+A subtração é o nó principal da expressão do lado direito.
+
+Seu primeiro filho representa 2 multiplicado por 7.
+
+Seu segundo filho representa 5 multiplicado por 2.
+
+A quarta expressão é:
+
+x = 2 menos 5 multiplicado por 2 mais 3;
+
+Primeiro devemos realizar a multiplicação:
+
+5 multiplicado por 2.
+
+Depois, temos uma subtração e uma adição.
+
+Como subtração e adição possuem a mesma precedência, aplicamos a associatividade da esquerda para a direita.
+
+A expressão é interpretada como:
+
+x recebe o resultado de 2 menos o resultado de 5 multiplicado por 2, e depois esse resultado é somado a 3.
+
+De forma agrupada:
+
+x recebe ((2 menos (5 multiplicado por 2)) mais 3).
+
+A AST é:
+
+atribuição x adição subtração 2 multiplicação 5 2 3
+
+Observe que a raiz da expressão é a adição.
+
+O operando esquerdo da adição é uma subtração.
+
+O lado esquerdo da subtração é 2.
+
+O lado direito da subtração é a multiplicação entre 5 e 2.
+
+O operando direito da adição é 3.
+
+Esses exercícios mostram por que a gramática precisa representar corretamente a precedência e a associatividade.
+
+Se a gramática não separar expressões, termos e fatores, o parser poderia interpretar:
+
+2 + 5 multiplicado por 2
+
+como:
+
+(2 + 5) multiplicado por 2
+
+Essa interpretação produziria uma AST diferente e, consequentemente, um resultado diferente.
+
+A estrutura da gramática influencia diretamente a estrutura da AST.
+
+A estrutura da AST influencia a interpretação do programa e as instruções geradas pelo compilador.
+
+ENCERRAMENTO DA AULA
+
+Para encerrar, vamos retomar os principais conceitos estudados.
+
+Uma Gramática Livre de Contexto é definida como uma quádrupla:
+
+G = (N, T, P, S)
+
+N é o conjunto dos não terminais.
+
+T é o conjunto dos terminais.
+
+P é o conjunto das produções.
+
+S é o símbolo inicial.
+
+Os não terminais representam categorias sintáticas, como expressão, comando, declaração e programa.
+
+Os terminais representam os tokens que aparecem na entrada do parser.
+
+As produções indicam como os não terminais podem ser substituídos por sequências de terminais e não terminais.
+
+O símbolo inicial representa a estrutura completa que desejamos reconhecer.
+
+Também vimos que uma gramática é livre de contexto quando a substituição de um não terminal não depende dos símbolos que aparecem ao redor dele.
+
+O scanner transforma caracteres em tokens.
+
+O parser utiliza a gramática para reconhecer relações e hierarquias entre esses tokens.
+
+A árvore de derivação mostra detalhadamente como uma sentença é construída a partir do símbolo inicial.
+
+Uma forma sentencial pode conter terminais e não terminais.
+
+Uma sentença contém apenas terminais.
+
+Na derivação mais à esquerda, expandimos sempre o não terminal mais à esquerda.
+
+Na derivação mais à direita, expandimos sempre o não terminal mais à direita.
+
+As estratégias top-down estão relacionadas à construção de derivações mais à esquerda.
+
+As estratégias bottom-up recuperam uma derivação mais à direita em ordem reversa.
+
+Também diferenciamos a árvore de derivação da AST.
+
+A árvore de derivação explica o funcionamento da gramática.
+
+A AST preserva a estrutura essencial do programa.
+
+A AST pode representar operadores, operandos, atribuições, comandos e relações entre expressões sem manter todos os detalhes utilizados apenas para o reconhecimento sintático.
+
+Por fim, vimos como a gramática pode representar precedência e associatividade.
+
+A separação entre expressão, termo e fator faz com que a multiplicação tenha precedência maior do que a adição.
+
+As produções recursivas à esquerda ajudam a representar operações associativas da esquerda para a direita.
+
+Na próxima etapa, vamos utilizar esses conceitos para estudar técnicas de análise sintática.
+
+Vamos analisar como um parser pode percorrer a gramática, escolher produções e identificar erros sintáticos.
+
+O objetivo será transformar a especificação gramatical em um analisador sintático capaz de reconhecer programas da linguagem MINIC e construir suas respectivas ASTs.

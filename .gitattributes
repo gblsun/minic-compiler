@@ -1,2 +1,21 @@
-# Auto detect text files and perform LF normalization
+# Detecção automática de arquivos de texto, normalizando para LF no repositório.
 * text=auto
+
+# Scripts e fixtures precisam de LF também na cópia de trabalho: bash em
+# Windows (Git Bash/WSL) falha com CRLF, e os .jsonl/.minic oficiais são
+# comparados byte a byte pelos scripts de teste.
+*.sh   text eol=lf
+*.jsonl text eol=lf
+*.minic text eol=lf
+*.mc   text eol=lf
+
+# Material da disciplina: binário, nunca normalizar.
+*.pdf  binary
+*.docx binary
+*.gz   binary
+
+# Pacotes de teste oficiais e roteiro da aula: material normativo, preservado
+# byte a byte como veio do Classroom (sem conversão de fim de linha nenhuma).
+ref/testes-oficiais/testes-parser-50/** -text
+ref/testes-oficiais/testes-scanner-minic/** -text
+ref/slides/aula-06-roteiro.txt -text

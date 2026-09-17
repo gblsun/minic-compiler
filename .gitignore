@@ -1,4 +1,14 @@
+# Python
 __pycache__/
 *.pyc
+.venv/
+venv/
+
+# Objetos e executáveis compilados
 *.o
 *.exe
+src/c/scanner
+src/c/parser
+
+# Saídas geradas pelos scripts de teste da disciplina
+output.jsonl
