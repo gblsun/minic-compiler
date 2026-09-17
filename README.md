@@ -183,9 +183,14 @@ Os dois últimos são atalhos para os scripts do professor, que também podem se
 chamados direto — o pacote de 50 casos está versionado no repositório:
 
 ```bash
-bash ref/scripts/testar_parser_python.sh ref/testes-oficiais/testes-parser-50 ./parser.py
-bash ref/scripts/testar_parser_c.sh      ref/testes-oficiais/testes-parser-50 ./parser.c
+LC_ALL=C.UTF-8 bash ref/scripts/testar_parser_python.sh ref/testes-oficiais/testes-parser-50 ./parser.py
+LC_ALL=C.UTF-8 bash ref/scripts/testar_parser_c.sh      ref/testes-oficiais/testes-parser-50 ./parser.c
 ```
+
+> O `LC_ALL=C.UTF-8` não é frescura: o script oficial conta os erros com um
+> `grep` que procura por "sintático", e em locale `C` o "á" não casa — o
+> contador "Erros sintáticos" apareceria como 0 mesmo com o parser detectando
+> todos os 25. Os wrappers em `src/` já exportam isso.
 
 Resultado atual: **195/195 verificações** — 50/50 casos oficiais e 15/15 casos
 próprios em cada implementação, mais 65/65 entradas com saída byte a byte
