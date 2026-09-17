@@ -179,6 +179,14 @@ bash src/python/test_parser_python.sh     # script oficial da disciplina (Python
 bash src/c/test_parser_c.sh               # script oficial da disciplina (C)
 ```
 
+Os dois últimos são atalhos para os scripts do professor, que também podem ser
+chamados direto — o pacote de 50 casos está versionado no repositório:
+
+```bash
+bash ref/scripts/testar_parser_python.sh ref/testes-oficiais/testes-parser-50 ./parser.py
+bash ref/scripts/testar_parser_c.sh      ref/testes-oficiais/testes-parser-50 ./parser.c
+```
+
 Resultado atual: **195/195 verificações** — 50/50 casos oficiais e 15/15 casos
 próprios em cada implementação, mais 65/65 entradas com saída byte a byte
 idêntica entre Python e C. Os scripts oficiais do professor marcam
