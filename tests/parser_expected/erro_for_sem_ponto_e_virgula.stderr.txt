@@ -1,0 +1,2 @@
+Erro sintático na linha 2, coluna 16: esperado PONTO_E_VIRGULA; encontrado IDENT.
+Erro sintático na linha 2, coluna 32: esperado PONTO_E_VIRGULA; encontrado FECHA_PAREN.

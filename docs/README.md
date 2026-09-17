@@ -10,7 +10,8 @@ existem para não precisar reabrir os PDFs toda hora.
 - Quer entender **onde o projeto está**? → [etapas.md](etapas.md)
 - Quer entender **como as partes se encaixam**? → [arquitetura.md](arquitetura.md)
 - Vai mexer no **scanner**? → [especificacao.md](especificacao.md) e [tokens.md](tokens.md)
-- Vai escrever o **parser**? → [gramatica.md](gramatica.md), [ast.md](ast.md) e [roteiro-etapa2-parser.md](roteiro-etapa2-parser.md)
+- Vai mexer no **parser**? → [gramatica.md](gramatica.md), [ast.md](ast.md) e [roteiro-etapa2-parser.md](roteiro-etapa2-parser.md)
+- Quer os **resultados dos testes**? → [resultados-etapa2.md](resultados-etapa2.md)
 
 ## Visão geral e planejamento
 
@@ -33,7 +34,8 @@ existem para não precisar reabrir os PDFs toda hora.
 | Arquivo | O que é |
 |---|---|
 | [roteiro-etapa1-lexer.md](roteiro-etapa1-lexer.md) | Roteiro e checklist usados na **etapa 1** (analisador léxico), já concluída — mantido como registro do que foi entregue. |
-| [roteiro-etapa2-parser.md](roteiro-etapa2-parser.md) | Plano de execução da **etapa 2** (parser e AST): decisões a tomar, ordem de implementação, tratamento de erros, pontos de entrada exigidos, testes e checklist de conformidade. |
+| [roteiro-etapa2-parser.md](roteiro-etapa2-parser.md) | Plano de execução da **etapa 2** (parser e AST), já executado: decisões tomadas, ordem de implementação, tratamento de erros, pontos de entrada exigidos, testes e checklist de conformidade marcado. |
+| [resultados-etapa2.md](resultados-etapa2.md) | Registro da execução das suítes da etapa 2 (195/195), como ler o resumo dos scripts oficiais do professor e a tabela dos diagnósticos emitidos nos 25 casos de rejeição. |
 | [possiveis_features.md](possiveis_features.md) | Backlog de ideias/diferenciais observados em outros projetos da mesma disciplina. Nada ali é exigência do enunciado — é uma lista para avaliar o que vale incorporar. |
 
 A especificação completa (fonte normativa), os slides, as apostilas, os

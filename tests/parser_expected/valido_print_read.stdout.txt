@@ -1,0 +1,1 @@
+Program(Function(int main() Block(VarDecl(int valores size=Lit(int,5)), VarDecl(int i=Lit(int,0)), Read(Index(Id(valores),Id(i))), Read(Id(i)), Print(Binary(+,Index(Id(valores),Id(i)),Lit(int,1))), Return(Lit(int,0)))))

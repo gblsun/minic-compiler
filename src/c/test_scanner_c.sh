@@ -20,9 +20,8 @@
 # stdout, os erros léxicos no formato da Seção 12 em stderr, e retorne o
 # código de saída da Seção 11.1 (0 sem erro léxico, 2 com erro léxico).
 #
-# NOTA: este script pressupõe a implementação em C descrita em
-# ../../docs/roteiro-etapa1-lexer.md (lexer.c/lexer.h/main.c) — ela ainda não existe
-# neste repositório. Rode este script só depois que src/c/ tiver os fontes.
+# Compila apenas lexer.c + main.c (os fontes do scanner). Os fontes do parser
+# da etapa 2 moram na mesma pasta e têm o seu próprio script, test_parser_c.sh.
 
 set -uo pipefail
 
@@ -37,10 +36,14 @@ TOTAL=0
 PASS=0
 FAIL=0
 
-shopt -s nullglob
-sources=("$SRC_DIR"/*.c)
-shopt -u nullglob
-(( ${#sources[@]} > 0 )) || { echo "ERRO: nenhum arquivo .c encontrado em '$SRC_DIR'." >&2; exit 2; }
+# Só os fontes do SCANNER: a pasta também tem os fontes do parser (ast.c,
+# parser.c, parser_main.c), e compilar tudo junto daria dois `main` no mesmo
+# executável. Quem testa o parser é ../../tests/run_parser_tests.py e
+# test_parser_c.sh.
+sources=("$SRC_DIR/lexer.c" "$SRC_DIR/main.c")
+for src in "${sources[@]}"; do
+    [[ -f "$src" ]] || { echo "ERRO: fonte do scanner não encontrado: $src" >&2; exit 2; }
+done
 
 echo '== Compilando o analisador léxico =='
 gcc -Wall -Wextra -std=c11 "${sources[@]}" -o "$BINARY" || { echo 'ERRO: a compilação falhou.' >&2; exit 2; }

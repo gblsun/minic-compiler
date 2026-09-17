@@ -95,8 +95,8 @@ como os runners se encaixam.
 |---|---|---|
 | [test_scanner_python.sh](scripts/test_scanner_python.sh) | Roda `scanner.py` sobre cada caso e compara a saída **JSONL** com `<entrada>.expected.jsonl`. | [`src/python/test_scanner_python.sh`](../src/python/test_scanner_python.sh) |
 | [test_scanner_c.sh](scripts/test_scanner_c.sh) | Compila `scanner.c` com `gcc -Wall -Wextra -std=c11` e faz a mesma comparação JSONL. | [`src/c/test_scanner_c.sh`](../src/c/test_scanner_c.sh) |
-| [testar_parser_python.sh](scripts/testar_parser_python.sh) | `bash testar_parser_python.sh ./testes-parser-50 ./parser.py` — roda o parser em cada `codigo.c` e compara stdout+stderr com o esperado. | ainda não existe (etapa 2) |
-| [testar_parser_c.sh](scripts/testar_parser_c.sh) | `bash testar_parser_c.sh ./testes-parser-50 ./parser.c` — compila o parser como **unidade única** (`gcc … $PARSER -o parser`) e faz a mesma comparação. | ainda não existe (etapa 2) |
+| [testar_parser_python.sh](scripts/testar_parser_python.sh) | `bash testar_parser_python.sh ./testes-parser-50 ./parser.py` — roda o parser em cada `codigo.c` e compara stdout+stderr com o esperado. | [`src/python/test_parser_python.sh`](../src/python/test_parser_python.sh) (wrapper: chama este script sem alterá-lo, com os caminhos do repo) |
+| [testar_parser_c.sh](scripts/testar_parser_c.sh) | `bash testar_parser_c.sh ./testes-parser-50 ./parser.c` — compila o parser como **unidade única** (`gcc … $PARSER -o parser`) e faz a mesma comparação. | [`src/c/test_parser_c.sh`](../src/c/test_parser_c.sh) (wrapper, idem) |
 
 As armadilhas conhecidas desses quatro scripts (comparação byte a byte,
 exigência de bit de execução, compilação em arquivo único) estão detalhadas em

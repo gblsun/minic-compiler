@@ -1,0 +1,1 @@
+Program(Function(float media(float valores[],int n) Block(VarDecl(float total=Lit(real,0.0)), VarDecl(int i), For(Assign(Id(i),Lit(int,0)),Binary(<,Id(i),Id(n)),Assign(Id(i),Binary(+,Id(i),Lit(int,1))),Block(ExprStmt(Assign(Id(total),Binary(+,Id(total),Index(Id(valores),Id(i))))))), Return(Binary(/,Id(total),Id(n))))))

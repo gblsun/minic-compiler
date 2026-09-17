@@ -15,7 +15,7 @@ disciplina abre uma atividade no Classroom para cada uma.
 | Etapa | Componente | Entregáveis (Seção 15) | Status |
 |---|---|---|---|
 | 1 | Analisador léxico | tokens, expressões regulares, scanner, erros e testes | ✅ entregue |
-| 2 | Parser e AST | gramática, parser, AST, recuperação e testes sintáticos | ⏳ **em aberto** |
+| 2 | Parser e AST | gramática, parser, AST, recuperação e testes sintáticos | ✅ concluída |
 | 3 | Semântica e IR | tabela de símbolos, escopos, tipos, 3AC e testes | não iniciada |
 | 4 | Código e otimização | backend, duas otimizações, benchmarks, manual e apresentação | não iniciada |
 
@@ -37,7 +37,7 @@ disciplina abre uma atividade no Classroom para cada uma.
   JSONL — ver
   [`ref/testes-oficiais/README.md`](../ref/testes-oficiais/README.md#divergências-entre-estas-fixtures-e-o-nosso-scanner).
 
-## Etapa 2 — analisador sintático e AST ⏳
+## Etapa 2 — analisador sintático e AST ✅
 
 - **Atividade no Classroom**: "AP 1 - analisador sintático", 10 pontos,
   publicada em 9 de setembro de 2026. O nome diz "AP 1", mas é a **etapa 2** do
@@ -67,13 +67,23 @@ disciplina abre uma atividade no Classroom para cada uma.
   (comparação byte a byte, bit de execução, compilação em arquivo único) estão
   em
   [`ref/testes-oficiais/README.md`](../ref/testes-oficiais/README.md#armadilhas-dos-scripts-oficiais).
-- **O que já está documentado e pronto para implementar**:
-  [`gramatica.md`](gramatica.md) (EBNF + decisões de LL(1), `else` pendente,
-  alvo de atribuição), [`ast.md`](ast.md) (nós e notação exata dos testes) e
-  [`roteiro-etapa2-parser.md`](roteiro-etapa2-parser.md) (plano de execução e
-  checklist).
-- **Estado do código**: nada implementado ainda. Não existe `parser.py`,
-  `parser.c`, `ast.py` nem runner de testes de parser.
+- **O que foi entregue**: parser por descida recursiva em Python
+  ([`src/python/parser.py`](../src/python/parser.py) +
+  [`minic_ast.py`](../src/python/minic_ast.py)) e em C
+  ([`src/c/parser.c`](../src/c/parser.c), [`ast.c`](../src/c/ast.c),
+  [`parser_main.c`](../src/c/parser_main.c)), com os pontos de entrada
+  [`parser.py`](../parser.py) e [`parser.c`](../parser.c) na raiz, nos comandos
+  exatos que o enunciado pede; AST com impressão compacta e indentada;
+  diagnósticos com linha/coluna e recuperação em modo pânico; três suítes de
+  teste em [`tests/run_parser_tests.py`](../tests/run_parser_tests.py).
+- **Resultado**: 195/195 verificações — 50/50 casos oficiais e 15/15 casos
+  próprios em cada implementação, e 65/65 entradas com saída idêntica entre
+  Python e C. Registro completo em
+  [`resultados-etapa2.md`](resultados-etapa2.md).
+- **Documentação da etapa**: [`gramatica.md`](gramatica.md) (EBNF, precedência e
+  decisões de desambiguação), [`ast.md`](ast.md) (nós e notação),
+  [`roteiro-etapa2-parser.md`](roteiro-etapa2-parser.md) (plano executado, com o
+  checklist de conformidade marcado).
 - **Base teórica**: aulas 6 a 12 — GLC (aula 6, com
   [roteiro falado em texto](../ref/slides/aula-06-roteiro.txt)), descida
   recursiva (7), ascendente (8, 11), FIRST/FOLLOW (9), LL(1) (10) e integração

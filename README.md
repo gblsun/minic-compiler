@@ -8,7 +8,7 @@ mesma saída para a mesma entrada.
 | Etapa | Componente | Status |
 |---|---|---|
 | 1 | Analisador léxico (scanner) | ✅ entregue |
-| 2 | Analisador sintático e AST (parser) | ⏳ em aberto — entrega **18/09/2026** |
+| 2 | Analisador sintático e AST (parser) | ✅ **concluída** — 195/195 verificações ([resultados](docs/resultados-etapa2.md)) |
 | 3 | Análise semântica e IR | não iniciada |
 | 4 | Geração de código e otimização | não iniciada |
 
@@ -33,11 +33,13 @@ Cada pasta tem seu próprio README com mais detalhes:
 
 ```text
 minic-compiler/
-├── docs/     documentação derivada da especificação (o que implementar e por quê)
-├── src/      código-fonte — src/python/ e src/c/, as duas implementações
-├── tests/    suíte de regressão do projeto (entradas, saídas gravadas, runners)
-└── ref/      material original da disciplina: especificação, aulas, enunciados,
-             scripts e pacotes de teste oficiais (fonte normativa, não editar)
+├── parser.py  ponto de entrada da etapa 2 em Python (exigido pelo enunciado)
+├── parser.c   ponto de entrada da etapa 2 em C (compila src/c/ em unidade única)
+├── docs/      documentação derivada da especificação (o que implementar e por quê)
+├── src/       código-fonte — src/python/ e src/c/, as duas implementações
+├── tests/     suítes de regressão do projeto (entradas, saídas gravadas, runners)
+└── ref/       material original da disciplina: especificação, aulas, enunciados,
+              scripts e pacotes de teste oficiais (fonte normativa, não editar)
 ```
 
 Atalhos úteis:
@@ -46,8 +48,10 @@ Atalhos úteis:
 |---|---|
 | entender a linguagem | [docs/especificacao.md](docs/especificacao.md) (léxico), [docs/gramatica.md](docs/gramatica.md) (sintaxe) |
 | entender o pipeline e os contratos | [docs/arquitetura.md](docs/arquitetura.md) |
-| implementar a etapa 2 | [docs/roteiro-etapa2-parser.md](docs/roteiro-etapa2-parser.md) + [docs/ast.md](docs/ast.md) |
+| ver a AST e sua notação | [docs/ast.md](docs/ast.md) |
+| ver os resultados dos testes da etapa 2 | [docs/resultados-etapa2.md](docs/resultados-etapa2.md) |
 | saber como a entrega é avaliada | [ref/testes-oficiais/README.md](ref/testes-oficiais/README.md) |
+| saber o que vem na etapa 3 | [docs/etapas.md](docs/etapas.md) |
 
 ## Etapa 1 — analisador léxico ✅
 
@@ -127,26 +131,69 @@ Abre `http://localhost:8501` no navegador; `Ctrl+C` no terminal para parar.
 > está no `PATH`. `python -m streamlit` sempre funciona, pois não depende do
 > `PATH`.
 
-## Etapa 2 — analisador sintático e AST ⏳
+## Etapa 2 — analisador sintático e AST ✅
 
-**Ainda não implementada.** O que já está pronto é a documentação necessária
-para escrever o parser:
+Parser por **descida recursiva** (sem yacc/bison/ANTLR) que consome os tokens
+do scanner da etapa 1, reconhece a gramática completa de
+[docs/gramatica.md](docs/gramatica.md) e constrói a AST de
+[docs/ast.md](docs/ast.md).
 
-- [docs/gramatica.md](docs/gramatica.md) — EBNF da linguagem, precedência,
-  associatividade e as decisões de desambiguação (`else` pendente, alvo de
-  atribuição, recursão à esquerda);
-- [docs/ast.md](docs/ast.md) — nós da AST, notação exata esperada pelos testes
-  oficiais e formato de impressão canônico;
-- [docs/roteiro-etapa2-parser.md](docs/roteiro-etapa2-parser.md) — plano de
-  execução, ordem de implementação e checklist de conformidade;
-- [ref/testes-oficiais/](ref/testes-oficiais/) — os 50 casos oficiais de
-  avaliação (25 aceitos com AST esperada, 25 rejeitados), com as armadilhas dos
-  scripts do professor já mapeadas.
+- **stdout**: a AST, quando o programa é sintaticamente válido.
+- **stderr**: os diagnósticos, no formato
+  `Erro sintático na linha L, coluna C: esperado X; encontrado Y.` — com
+  recuperação em modo pânico, então vários erros são reportados numa só
+  execução.
+- **código de saída**: `0` aceito, `3` erro sintático, `2` erro léxico
+  (o parser não roda), `1` erro de uso.
 
-Quando existir, o parser deverá ser invocável pelos comandos que o enunciado
-exige:
+### Rodar o parser (comandos do enunciado)
 
 ```bash
-python parser.py codigo.c
-./parser codigo.c
+python parser.py codigo.c     # versão Python
 ```
+
+```bash
+gcc -Wall -Wextra -std=c11 parser.c -o parser
+./parser codigo.c             # versão C
+```
+
+Exemplo, com um dos casos oficiais:
+
+```bash
+python parser.py ref/testes-oficiais/testes-parser-50/casos/09_if_com_else/codigo.c
+```
+
+```text
+Program(Function(int main() Block(VarDecl(int x=Lit(int,1)), If(Id(x),ExprStmt(Assign(Id(x),Lit(int,2))),ExprStmt(Assign(Id(x),Lit(int,3)))), Return(Id(x)))))
+```
+
+Opções extras (iguais nas duas implementações): `--tree` imprime a AST
+indentada, um nó por linha; `--tokens` imprime só os tokens do scanner.
+
+### Testes da etapa 2
+
+```bash
+python tests/run_parser_tests.py          # 50 casos oficiais + 15 próprios + equivalência Python/C
+python tests/run_parser_tests.py --update # regrava os golden dos casos próprios
+bash src/python/test_parser_python.sh     # script oficial da disciplina (Python)
+bash src/c/test_parser_c.sh               # script oficial da disciplina (C)
+```
+
+Resultado atual: **195/195 verificações** — 50/50 casos oficiais e 15/15 casos
+próprios em cada implementação, mais 65/65 entradas com saída byte a byte
+idêntica entre Python e C. Os scripts oficiais do professor marcam
+16 aprovados / 25 erros sintáticos detectados, que é o teto do pacote de testes
+— o porquê está em [docs/resultados-etapa2.md](docs/resultados-etapa2.md).
+
+### Onde está o quê
+
+| Arquivo | Papel |
+|---|---|
+| [parser.py](parser.py) | ponto de entrada exigido pelo enunciado (atalho para `src/python/parser.py`) |
+| [parser.c](parser.c) | ponto de entrada em C; compila os fontes de `src/c/` como unidade única, que é como o script do professor compila |
+| [src/python/parser.py](src/python/parser.py) | o parser em Python + CLI |
+| [src/python/minic_ast.py](src/python/minic_ast.py) | nós da AST e as duas impressões (compacta e indentada) |
+| [src/c/parser.c](src/c/parser.c) / [parser.h](src/c/parser.h) | o parser em C |
+| [src/c/ast.c](src/c/ast.c) / [ast.h](src/c/ast.h) | a AST em C |
+| [src/c/parser_main.c](src/c/parser_main.c) | CLI em C |
+| [tests/run_parser_tests.py](tests/run_parser_tests.py) | as três suítes de teste do parser |

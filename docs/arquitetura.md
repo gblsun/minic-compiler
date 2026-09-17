@@ -14,7 +14,7 @@ arquivo .mc / .c
   scanner  ──► sequência de tokens (tipo, lexema, linha, coluna) + erros léxicos   [etapa 1 ✅]
       │
       ▼
-  parser   ──► AST ou diagnóstico sintático                                        [etapa 2 ⏳]
+  parser   ──► AST ou diagnóstico sintático                                        [etapa 2 ✅]
       │
       ▼
   semântica ─► AST anotada + tabela de símbolos                                    [etapa 3]
@@ -73,9 +73,10 @@ Mais:
 - **Tokenizar não aborta no primeiro erro léxico.** O scanner opera em modo
   pânico: registra o erro, descarta o mínimo necessário e continua. O resultado
   é o par `(tokens, errors)` — tokens válidos convivem com a lista de erros.
-- Decisão em aberto para a etapa 2: se houve erro léxico, o parser **não deve
-  rodar** (a especificação manda sair com código 2, e um fluxo de tokens
-  corrompido só geraria erros sintáticos em cascata).
+- Decisão implementada na etapa 2: havendo erro léxico, o parser **não roda** —
+  os erros léxicos são impressos e o processo sai com código 2 (um fluxo de
+  tokens corrompido só geraria erros sintáticos em cascata, mascarando a causa
+  real).
 
 ## Interface de linha de comando
 
@@ -99,12 +100,14 @@ invocação, e é por eles que a entrega é avaliada.
 | Etapa | Comando exigido pela atividade | O que existe aqui |
 |---|---|---|
 | 1 — scanner | `python scanner.py arquivo.c` / `./scanner arquivo.c` | `python src/python/main.py arquivo.mc` e `src/c/scanner arquivo.mc` |
-| 2 — parser | `python parser.py codigo.c` / `./parser codigo.c` | ainda não existe |
+| 2 — parser | `python parser.py codigo.c` / `./parser codigo.c` | `parser.py` e `parser.c` na raiz, atendendo aos comandos exatos |
 
-Ou seja, a etapa 2 exige um ponto de entrada chamado literalmente `parser.py`
-(e um executável `parser`) — ver
-[`roteiro-etapa2-parser.md`](roteiro-etapa2-parser.md) para como acomodar isso
-sem desmontar a organização de `src/`.
+A etapa 2 exige um ponto de entrada chamado literalmente `parser.py` (e um
+executável `parser`), e é por isso que existem [`parser.py`](../parser.py) e
+[`parser.c`](../parser.c) na raiz: o primeiro só ajusta o `sys.path` e chama o
+`main()` de `src/python/parser.py`; o segundo inclui os fontes de `src/c/` para
+compilar como uma única unidade de tradução, que é como o script de teste do
+professor compila. Nenhum dos dois duplica lógica.
 
 ## Códigos de saída (Seção 11.1)
 

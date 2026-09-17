@@ -1,0 +1,1 @@
+Erro sintático na linha 2, coluna 11: esperado ABRE_PAREN; encontrado INT.

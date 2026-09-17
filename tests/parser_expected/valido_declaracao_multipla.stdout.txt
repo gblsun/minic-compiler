@@ -1,0 +1,1 @@
+Program(VarDecl(int a), VarDecl(int b=Lit(int,2)), VarDecl(int v size=Lit(int,3)), Function(int main() Block(VarDecl(float x=Lit(real,1.5)), VarDecl(float y), VarDecl(bool ok=Lit(bool,true)), VarDecl(bool nao=Lit(bool,false)), Return(Binary(+,Id(a),Id(b))))))
