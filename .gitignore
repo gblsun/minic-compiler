@@ -9,6 +9,8 @@ venv/
 *.exe
 src/c/scanner
 src/c/parser
+# o script oficial testar_parser_c.sh compila para ./parser na raiz
+/parser
 
 # Saídas geradas pelos scripts de teste da disciplina
 output.jsonl

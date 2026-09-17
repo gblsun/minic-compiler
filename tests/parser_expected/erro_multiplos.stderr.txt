@@ -1,0 +1,3 @@
+Erro sintático na linha 3, coluna 5: esperado PONTO_E_VIRGULA; encontrado KW_INT.
+Erro sintático na linha 3, coluna 13: esperado expressão (identificador, literal ou ABRE_PAREN); encontrado PONTO_E_VIRGULA.
+Erro sintático na linha 4, coluna 15: esperado FECHA_PAREN; encontrado ABRE_CHAVE.

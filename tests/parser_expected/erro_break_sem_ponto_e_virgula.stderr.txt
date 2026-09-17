@@ -1,0 +1,2 @@
+Erro sintático na linha 4, coluna 5: esperado PONTO_E_VIRGULA; encontrado FECHA_CHAVE.
+Erro sintático na linha 7, coluna 1: esperado FECHA_CHAVE; encontrado fim do arquivo.

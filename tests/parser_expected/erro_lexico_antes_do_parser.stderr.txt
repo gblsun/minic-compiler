@@ -1,0 +1,1 @@
+Erro léxico na linha 2, coluna 16: símbolo "@" não reconhecido.

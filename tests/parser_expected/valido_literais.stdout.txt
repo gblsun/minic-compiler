@@ -1,0 +1,1 @@
+Program(VarDecl(char inicial=Lit(char,'A')), VarDecl(char quebra=Lit(char,'\n')), VarDecl(char tab=Lit(char,'\t')), VarDecl(char aspa=Lit(char,'\'')), Function(int main() Block(Print(Lit(string,"texto com \"aspas\" e \\ barra")), Print(Lit(string,"tab\tquebra\n")), Print(Lit(char,'x')), Return(Lit(int,0)))))
