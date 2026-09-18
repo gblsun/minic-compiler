@@ -1,7 +1,7 @@
 # Pendências — o que precisa ser corrigido, revisado e decidido
 
 Lista de trabalho do grupo. Não é backlog de ideias (isso é
-[`possiveis_features.md`](possiveis_features.md)): aqui só entra o que está
+[`possiveis_features.md`](docs/possiveis_features.md)): aqui só entra o que está
 **errado**, **em aberto** ou **precisa de uma segunda opinião** antes da
 entrega.
 
@@ -14,7 +14,7 @@ Como ler cada item:
 
 Estado do projeto no momento em que esta lista foi escrita: etapas 1 e 2
 implementadas, 195/195 verificações nas suítes
-([`resultados-etapa2.md`](resultados-etapa2.md)), tudo commitado em `main`,
+([`resultados-etapa2.md`](docs/resultados-etapa2.md)), tudo commitado em `main`,
 **nada enviado ao GitHub ainda**.
 
 ---
@@ -32,7 +32,7 @@ python parser.py /tmp/acento.c    # Program(VarDecl(int açao=Lit(int,1)))  exit
 ./parser /tmp/acento.c            # 2 erros léxicos                        exit 2
 ```
 
-Causa: [`src/python/lexer.py`](../src/python/lexer.py) usa `ch.isalpha()`, que
+Causa: [`src/python/lexer.py`](src/python/lexer.py) usa `ch.isalpha()`, que
 em Python é **Unicode** — `"ç".isalpha()` é `True`. O C usa `isalpha()` da
 libc, que em locale C só aceita `[A-Za-z]`. A Seção 3.5 da especificação define
 identificador como `[A-Za-z_][A-Za-z0-9_]*`, então **quem está errado é o
@@ -65,7 +65,7 @@ byte cru. Como um byte solto de uma sequência UTF-8 não é UTF-8 válido, quem
 lê a saída em UTF-8 quebra (a nossa própria auditoria quebrou com
 `UnicodeDecodeError` ao ler o stderr do C).
 
-O que fazer: em [`src/c/lexer.c`](../src/c/lexer.c), imprimir bytes não
+O que fazer: em [`src/c/lexer.c`](src/c/lexer.c), imprimir bytes não
 imprimíveis/não-ASCII na forma `\xNN` em vez do caractere cru.
 
 ### 1.4 Expressão muito aninhada: traceback no Python, crash no C
@@ -117,7 +117,7 @@ do grupo ler e concordar (ou discordar antes de entregar).
 O arquivo `ast.esperada.txt` do caso 24 tem um `)` faltando, o que joga o
 `Return` para fora do corpo da função. Nosso runner compara contra a árvore
 corrigida e **diz isso no relatório**. Detalhes em
-[`ref/testes-oficiais/README.md`](../ref/testes-oficiais/README.md#defeitos-conhecidos-do-pacote).
+[`ref/testes-oficiais/README.md`](ref/testes-oficiais/README.md#defeitos-conhecidos-do-pacote).
 
 Revisar: vale avisar o professor do defeito na entrega? (Sugestão: sim, uma
 linha no comentário da atividade.)
@@ -127,18 +127,18 @@ linha no comentário da atividade.)
 Os arquivos oficiais formatam o mesmo construto de dois jeitos diferentes, então
 nenhum impressor determinístico casa com todos. Escolhemos a regra que casa
 exatamente com 16 dos 25 e comparamos o resto ignorando espaço em branco fora
-de lexemas. Ver [`ast.md`](ast.md#por-que-não-dá-para-comparar-byte-a-byte).
+de lexemas. Ver [`ast.md`](docs/ast.md#por-que-não-dá-para-comparar-byte-a-byte).
 
 Revisar: o script oficial vai mostrar **16 aprovados / 34 reprovados**, e isso
 precisa estar claro para quem corrigir — está explicado em
-[`resultados-etapa2.md`](resultados-etapa2.md#scripts-oficiais-da-disciplina),
+[`resultados-etapa2.md`](docs/resultados-etapa2.md#scripts-oficiais-da-disciplina),
 mas talvez valha repetir no comentário da entrega.
 
 ### 2.3 Três pontos em que seguimos os casos oficiais, não a gramática do PDF
 
 Comandos soltos no topo do arquivo, vetor em declaração global e `main` não
 exigida pelo parser. Registrados em
-[`gramatica.md`](gramatica.md#divergências-entre-a-especificação-e-os-casos-oficiais).
+[`gramatica.md`](docs/gramatica.md#divergências-entre-a-especificação-e-os-casos-oficiais).
 
 ### 2.4 Caso 41: nossa mensagem difere da pista do pacote
 
@@ -222,7 +222,7 @@ entrega.
 **Prioridade: baixa** (não afeta a entrega da etapa 2)
 
 O `MANIFESTO.md` de
-[`ref/testes-oficiais/testes-scanner-minic/`](../ref/testes-oficiais/testes-scanner-minic/)
+[`ref/testes-oficiais/testes-scanner-minic/`](ref/testes-oficiais/testes-scanner-minic/)
 lista sete casos válidos (`v01`–`v07`) e um oitavo inválido (`i07`) que **não
 vieram no download**; o `i06` veio sem o `.minic`. Para completar, é preciso
 rebaixar o pacote no Classroom ou pedir ao professor.
@@ -235,7 +235,7 @@ A etapa 1 foi entregue com a notação do material de aula (`<TOKEN, lexema>`), 
 as fixtures oficiais usam JSONL com outros nomes de token. Se um dia for
 preciso rodá-las, o caminho é um modo `--jsonl` no `main.py`/`main.c` com um
 mapa de nomes — sem tocar nas regras léxicas. Tabela das diferenças em
-[`ref/testes-oficiais/README.md`](../ref/testes-oficiais/README.md#divergências-entre-estas-fixtures-e-o-nosso-scanner).
+[`ref/testes-oficiais/README.md`](ref/testes-oficiais/README.md#divergências-entre-estas-fixtures-e-o-nosso-scanner).
 
 ---
 
@@ -247,10 +247,10 @@ mapa de nomes — sem tocar nas regras léxicas. Tabela das diferenças em
 - [ ] **`git push`** — os commits das etapas estão só na máquina local.
 - [ ] Conferir que o repositório do GitHub é público (ou que o professor tem
       acesso).
-- [ ] Conferir nomes e RAs do grupo no [README](../README.md) e em
-      [`etapas.md`](etapas.md).
+- [ ] Conferir nomes e RAs do grupo no [README](README.md) e em
+      [`etapas.md`](docs/etapas.md).
 - [ ] Cada integrante clonar do zero e rodar os comandos do
-      [README](../README.md) — se falhar para alguém, falha para o professor.
+      [README](README.md) — se falhar para alguém, falha para o professor.
 - [ ] Decidir se os itens 1.1–1.4 entram antes da entrega ou ficam para depois
       (nenhum deles afeta os 50 casos oficiais nem os 15 nossos).
 
@@ -260,7 +260,7 @@ mapa de nomes — sem tocar nas regras léxicas. Tabela das diferenças em
 
 Nada quebrado, mas vale um olhar:
 
-- **`ast_free()` em [`src/c/ast.c`](../src/c/ast.c) não é usada por ninguém.** O
+- **`ast_free()` em [`src/c/ast.c`](src/c/ast.c) não é usada por ninguém.** O
   parser é dono dos nós e libera com `ast_free_node()` (raso). Manter a função
   recursiva como API pública ou remover? Se ficar, vale um teste que a exercite.
 - **Cobertura de `Print`/`Read`/`For` na versão C**: os casos próprios cobrem,

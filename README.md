@@ -52,7 +52,7 @@ Atalhos úteis:
 | ver os resultados dos testes da etapa 2 | [docs/resultados-etapa2.md](docs/resultados-etapa2.md) |
 | saber como a entrega é avaliada | [ref/testes-oficiais/README.md](ref/testes-oficiais/README.md) |
 | saber o que vem na etapa 3 | [docs/etapas.md](docs/etapas.md) |
-| saber o que ainda falta corrigir/revisar | [docs/pendencias.md](docs/pendencias.md) |
+| saber o que ainda falta corrigir/revisar | [PENDENCIAS.md](PENDENCIAS.md) |
 
 ## Etapa 1 — analisador léxico ✅
 
