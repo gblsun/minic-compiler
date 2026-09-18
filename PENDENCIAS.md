@@ -5,12 +5,34 @@ Lista de trabalho do grupo. Não é backlog de ideias (isso é
 **errado**, **em aberto** ou **precisa de uma segunda opinião** antes da
 entrega.
 
+**Responsável pela lista: Fellipe Augusto Silva Pereira (RA 2401525)** — revisar,
+priorizar e repartir os itens no grupo. A coluna *Responsável* do índice abaixo
+começa toda com ele; é só editar a linha para passar um item adiante.
+
 Como ler cada item:
 
 - **Confirmado** — reproduzido nesta máquina, com o comando anotado.
 - **Não verificado** — risco identificado por leitura do código, ainda sem
   teste que prove (ou descarte) o problema.
 - **Decisão** — já resolvido de um jeito; falta o grupo concordar.
+
+## Índice
+
+| Item | Assunto | Prioridade | Status | Responsável |
+|---|---|---|---|---|
+| [1.1](#11-o-lexer-python-aceita-identificador-fora-do-ascii-o-c-não) | Python aceita identificador não-ASCII; C não | alta | confirmado | Fellipe |
+| [1.2](#12-o-lexer-python-aceita-dígito-fora-do-ascii) | Python aceita dígito não-ASCII | alta | confirmado | Fellipe |
+| [1.3](#13-mensagem-de-erro-do-c-corrompe-a-saída-em-byte-não-ascii) | Mensagem do C corrompe a saída | média | confirmado | Fellipe |
+| [1.4](#14-expressão-muito-aninhada-traceback-no-python-crash-no-c) | Aninhamento profundo derruba os dois | média | confirmado | Fellipe |
+| [1.5](#15-contagem-de-coluna-o-c-conta-bytes-o-python-conta-caracteres) | Coluna em bytes vs. caracteres | baixa | confirmado | Fellipe |
+| [2.1](#21-o-caso-oficial-24-é-comparado-contra-uma-ast-corrigida)–[2.4](#24-caso-41-nossa-mensagem-difere-da-pista-do-pacote) | Decisões que pedem revisão do grupo | — | decisão | Fellipe |
+| [3.1](#31-rodar-a-entrega-inteira-em-linux) | Rodar a entrega inteira em Linux | alta | não verificado | Fellipe |
+| [3.2](#32-versão-do-python-do-professor) | Versão do Python do professor | média | não verificado | Fellipe |
+| [3.3](#33-parserpy-da-raiz-e-o-módulo-parser-da-biblioteca-padrão) | `parser.py` vs. módulo `parser` embutido | média | não verificado | Fellipe |
+| [3.4](#34-locale-no-script-oficial) | Locale no script oficial | baixa | contornado | Fellipe |
+| [4.1](#41-pacote-de-fixtures-do-scanner-está-incompleto)–[4.2](#42-nosso-scanner-não-produz-o-jsonl-das-fixtures-oficiais) | Material da disciplina em falta | baixa | em aberto | Fellipe |
+| [5](#5-antes-de-entregar-operacional) | Checklist da entrega (inclui o `git push`) | alta | em aberto | Fellipe |
+| [6](#6-revisões-de-código-sugeridas) | Revisões de código sugeridas | baixa | em aberto | Fellipe |
 
 Estado do projeto no momento em que esta lista foi escrita: etapas 1 e 2
 implementadas, 195/195 verificações nas suítes
