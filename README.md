@@ -9,8 +9,6 @@ mesma saída para a mesma entrada.
 | ----- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
 | 1     | Analisador léxico (scanner)         | ✅ entregue                                                                                                        |
 | 2     | Analisador sintático e AST (parser) | ✅ **concluída** — 195/195 verificações ([resultados](docs/resultados-etapa2.md))                                   |
-| 3     | Análise semântica e IR              | não iniciada                                                                                                      |
-| 4     | Geração de código e otimização      | não iniciada                                                                                                      |
 
 Detalhes de cada etapa, prazos e comandos exigidos por cada atividade: [docs/etapas.md](docs/etapas.md).
 
