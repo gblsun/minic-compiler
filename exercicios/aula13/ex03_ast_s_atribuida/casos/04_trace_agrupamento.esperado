@@ -1,0 +1,15 @@
+F -> num      F.node = Number(2)
+T -> F        T.node = F.node
+F -> num      F.node = Number(3)
+T -> F        T.node = F.node
+E -> T        E.node = T.node
+F -> num      F.node = Number(4)
+T -> F        T.node = F.node
+E -> E + T    E.node = Binary('+', E1.node, T.node)
+F -> ( E )    F.node = E.node
+T -> T * F    T.node = Binary('*', T1.node, F.node)
+E -> T        E.node = T.node
+prefixa: (* 2 (+ 3 4))
+valor: 14
+--- stderr ---
+--- exit: 0 ---

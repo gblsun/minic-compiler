@@ -1,0 +1,9 @@
+Programa
+  While @1:1
+    cond: x
+    corpo: Block @1:11
+      Assign @1:13
+        alvo: x
+        valor: (- x 1)
+--- stderr ---
+--- exit: 0 ---

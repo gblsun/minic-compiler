@@ -1,0 +1,13 @@
+Programa
+  VarDecl f : float [global] @1:7
+    init: 1:int
+  Assign @2:1
+    alvo: f:float
+    valor: (+:float f:float 2:int)
+  Assign @3:1
+    alvo: f:float
+    valor: (*:float 3:int f:float)
+  Return @4:1
+    valor: f:float
+--- stderr ---
+--- exit: 0 ---

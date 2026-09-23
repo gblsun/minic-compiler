@@ -1,0 +1,5 @@
+(+:erro x:erro 1:int)
+(+:int x:int 1:int)
+--- stderr ---
+Erro semântico na linha 1, coluna 1: identificador 'x' não declarado.
+--- exit: 4 ---

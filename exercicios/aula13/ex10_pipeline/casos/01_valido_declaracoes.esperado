@@ -1,0 +1,11 @@
+Programa
+  VarDecl a : int [global] @1:5
+    init: 1:int
+  VarDecl b : int [global] @1:12
+    init: (+:int a:int (*:int 2:int 3:int))
+  VarDecl media : float [global] @2:7
+    init: (/:int a:int 2:int)
+  VarDecl ok : bool [global] @3:6
+    init: (&&:bool (<:bool a:int b:int) (!:bool false:bool))
+--- stderr ---
+--- exit: 0 ---

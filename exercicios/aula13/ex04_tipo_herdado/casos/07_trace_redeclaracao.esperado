@@ -1,0 +1,13 @@
+T -> int      T.type = int
+D -> T L ;    L.inh = T.type = int
+L -> id       addtype(a, L.inh) -> a : int
+T -> char     T.type = char
+D -> T L ;    L.inh = T.type = char
+L -> id       addtype(b, L.inh) -> b : char
+L -> L , id   addtype(a, L.inh) -> redeclaração
+tabela de símbolos:
+  a : int (linha 1, coluna 5)
+  b : char (linha 2, coluna 6)
+--- stderr ---
+Erro semântico na linha 2, coluna 9: redeclaração de 'a' (declarado na linha 1, coluna 5).
+--- exit: 4 ---

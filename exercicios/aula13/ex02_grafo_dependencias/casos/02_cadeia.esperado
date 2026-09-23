@@ -1,0 +1,16 @@
+atributos: 5, dependências: 6
+  d -> e
+  c -> d
+  b -> c
+  a -> e
+  a -> c
+  a -> b
+ordem de avaliação:
+  1. a := 7
+  2. b := soma(a, a) = soma(7, 7) = 14
+  3. c := sub(b, a) = sub(14, 7) = 7
+  4. d := mul(c, c) = mul(7, 7) = 49
+  5. e := soma(d, a) = soma(49, 7) = 56
+resultado: e = 56
+--- stderr ---
+--- exit: 0 ---

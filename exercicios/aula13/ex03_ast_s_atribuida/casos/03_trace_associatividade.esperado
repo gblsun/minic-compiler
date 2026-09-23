@@ -1,0 +1,13 @@
+F -> id       F.node = Identifier(a)
+T -> F        T.node = F.node
+E -> T        E.node = T.node
+F -> num      F.node = Number(4)
+T -> F        T.node = F.node
+E -> E - T    E.node = Binary('-', E1.node, T.node)
+F -> id       F.node = Identifier(c)
+T -> F        T.node = F.node
+E -> E + T    E.node = Binary('+', E1.node, T.node)
+prefixa: (+ (- a 4) c)
+valor: não avaliável (identificador 'a' na linha 1, coluna 1)
+--- stderr ---
+--- exit: 0 ---

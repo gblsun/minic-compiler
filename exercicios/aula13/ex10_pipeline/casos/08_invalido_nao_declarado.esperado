@@ -1,0 +1,13 @@
+Programa
+  VarDecl a : int [global] @1:5
+    init: 1:int
+  Block [bloco1] @2:1
+    VarDecl b : int [bloco1] @3:9
+      init: (+:erro a:int c:erro)
+  Assign @5:1
+    alvo: b:erro
+    valor: 2:int
+--- stderr ---
+Erro semântico na linha 3, coluna 17: identificador 'c' não declarado.
+Erro semântico na linha 5, coluna 1: identificador 'b' não declarado.
+--- exit: 4 ---

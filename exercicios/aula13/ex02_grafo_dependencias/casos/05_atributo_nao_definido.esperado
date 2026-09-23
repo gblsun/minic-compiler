@@ -1,0 +1,3 @@
+--- stderr ---
+Erro semântico na linha 1: atributo 'num.lexval' usado por 'F.val' não foi definido.
+--- exit: 4 ---

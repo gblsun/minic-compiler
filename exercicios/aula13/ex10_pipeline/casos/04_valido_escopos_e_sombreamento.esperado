@@ -1,0 +1,20 @@
+Programa
+  VarDecl x : int [global] @1:5
+    init: 1:int
+  Block [bloco1] @2:1
+    VarDecl x : float [bloco1] @3:11
+      init: 1.5:float
+    Assign @4:5
+      alvo: x:float
+      valor: (*:float x:float 2:int)
+    Block [bloco2] @5:5
+      VarDecl x : bool [bloco2] @6:14
+        init: true:bool
+      Assign @7:9
+        alvo: x:bool
+        valor: (!:bool x:bool)
+  Assign @10:1
+    alvo: x:int
+    valor: (+:int x:int 1:int)
+--- stderr ---
+--- exit: 0 ---

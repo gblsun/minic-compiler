@@ -1,0 +1,3 @@
+--- stderr ---
+Erro de sintaxe na linha 2, coluna 1: esperado '}'; encontrado fim da entrada.
+--- exit: 3 ---

@@ -1,0 +1,9 @@
+x = 10;
+while (x > 0) {
+    if (x % 2 == 0) {
+        pares = pares + 1;
+    } else
+        impares = impares + 1;
+    x = x - 1;
+}
+return pares;

@@ -1,0 +1,7 @@
+Programa
+  ExprStmt @1:1
+    expr: f
+  ExprStmt @2:1
+    expr: (+ a b)
+--- stderr ---
+--- exit: 0 ---

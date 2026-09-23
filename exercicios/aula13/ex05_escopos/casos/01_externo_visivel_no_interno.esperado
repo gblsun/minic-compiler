@@ -1,0 +1,8 @@
+Block escopo=global
+  VarDecl x : int @1:5 [global]
+  Block escopo=bloco1
+    Assign @3:5
+      Id x @3:5 -> int [global, declarado em 1:5]
+      Num 1 @3:9
+--- stderr ---
+--- exit: 0 ---

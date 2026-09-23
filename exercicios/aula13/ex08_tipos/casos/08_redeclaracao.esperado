@@ -1,0 +1,4 @@
+(+:float a:int 0.5:float)
+--- stderr ---
+Erro semântico na linha 2, coluna 7: redeclaração de 'a'.
+--- exit: 4 ---

@@ -1,0 +1,9 @@
+int n = 10, pares = 0;
+while (n > 0) {
+    if (n % 2 == 0) {
+        pares = pares + 1;
+    } else
+        n = n - 0;
+    n = n - 1;
+}
+return pares;

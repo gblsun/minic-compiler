@@ -1,0 +1,3 @@
+--- stderr ---
+Erro de sintaxe na linha 2: ação desconhecida 'potencia'.
+--- exit: 3 ---

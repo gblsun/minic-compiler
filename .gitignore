@@ -14,3 +14,6 @@ src/c/parser
 
 # Saídas geradas pelos scripts de teste da disciplina
 output.jsonl
+
+# Executáveis dos exercícios da aula 13 (run_tests.py compila para cá)
+exercicios/aula13/build/

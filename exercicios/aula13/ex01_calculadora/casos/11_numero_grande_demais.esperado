@@ -1,0 +1,3 @@
+--- stderr ---
+Erro semântico na linha 1, coluna 1: número 99999999999999999999 fora do intervalo de 64 bits.
+--- exit: 4 ---

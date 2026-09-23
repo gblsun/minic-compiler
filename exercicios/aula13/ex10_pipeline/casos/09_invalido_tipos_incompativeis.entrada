@@ -1,0 +1,4 @@
+int a = 1.5;
+bool b = 1;
+float f = true + 1;
+a = a < 2;

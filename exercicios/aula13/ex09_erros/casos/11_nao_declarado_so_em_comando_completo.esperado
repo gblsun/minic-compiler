@@ -1,0 +1,5 @@
+AST inválida: 2 diagnóstico(s); nenhuma árvore publicada.
+--- stderr ---
+[sintático] linha 1, coluna 5: esperado expressão; lexema: ';'
+[semântico] linha 2, coluna 1: identificador 'w' não declarado; lexema: 'w'
+--- exit: 3 ---

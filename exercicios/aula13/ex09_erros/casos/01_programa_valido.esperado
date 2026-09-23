@@ -1,0 +1,20 @@
+AST válida:
+Programa
+  VarDecl x : int @1:5
+  VarDecl y : int @1:8
+  Assign @2:1
+    alvo: x
+    valor: 10
+  While @3:1
+    cond: (> x 0)
+    corpo: Block @3:15
+      Assign @4:5
+        alvo: y
+        valor: (+ y x)
+      Assign @5:5
+        alvo: x
+        valor: (- x 1)
+  Return @7:1
+    valor: y
+--- stderr ---
+--- exit: 0 ---

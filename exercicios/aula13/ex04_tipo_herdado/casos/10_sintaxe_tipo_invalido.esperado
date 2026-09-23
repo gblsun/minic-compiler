@@ -1,0 +1,3 @@
+--- stderr ---
+Erro de sintaxe na linha 1, coluna 1: esperado tipo (int, float ou char); encontrado 'bool'.
+--- exit: 3 ---

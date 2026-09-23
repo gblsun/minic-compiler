@@ -1,0 +1,9 @@
+Programa
+  If @1:1
+    cond: (> x 0)
+    entao: Assign @1:12
+      alvo: y
+      valor: 1
+    senao: <ausente>
+--- stderr ---
+--- exit: 0 ---

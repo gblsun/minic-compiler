@@ -1,0 +1,3 @@
+a = const -7
+b = const 2
+q = div a b

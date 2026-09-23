@@ -1,0 +1,3 @@
+--- stderr ---
+Erro léxico na linha 2, coluna 7: símbolo "#" não reconhecido.
+--- exit: 2 ---

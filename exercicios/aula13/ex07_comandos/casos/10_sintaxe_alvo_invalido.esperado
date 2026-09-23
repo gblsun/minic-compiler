@@ -1,0 +1,3 @@
+--- stderr ---
+Erro de sintaxe na linha 1, coluna 7: esperado ';' (o lado esquerdo de '=' deve ser um identificador); encontrado '='.
+--- exit: 3 ---

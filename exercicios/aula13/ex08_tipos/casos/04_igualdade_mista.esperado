@@ -1,0 +1,6 @@
+(==:erro b:bool 1:int)
+(==:bool 1:int 1.0:float)
+(!=:bool b:bool false:bool)
+--- stderr ---
+Erro semântico na linha 2, coluna 3: operador '==' exige operandos do mesmo tipo (numéricos ou bool); recebeu bool e int.
+--- exit: 4 ---

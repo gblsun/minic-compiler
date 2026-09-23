@@ -1,0 +1,7 @@
+# cadeia a -> b -> c -> d -> e, declarada de trás para frente
+e = soma d a
+d = mul c c
+c = sub b a
+b = soma a a
+a = const 7
+resultado e

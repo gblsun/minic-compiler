@@ -1,0 +1,4 @@
+prefixa: (/ (- (- 7)) 2)
+valor: 3
+--- stderr ---
+--- exit: 0 ---

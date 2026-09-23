@@ -1,0 +1,7 @@
+(*:int i:int 2:int)
+(+:float i:int f:float)
+(==:bool (<:bool i:int f:float) b:bool)
+(-:float f:float)
+(||:bool (!:bool b:bool) (>:bool i:int 0:int))
+--- stderr ---
+--- exit: 0 ---

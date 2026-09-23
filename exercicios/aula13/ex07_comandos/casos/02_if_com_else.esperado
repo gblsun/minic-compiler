@@ -1,0 +1,11 @@
+Programa
+  If @1:1
+    cond: a
+    entao: Assign @1:8
+      alvo: b
+      valor: 1
+    senao: Assign @1:18
+      alvo: b
+      valor: 2
+--- stderr ---
+--- exit: 0 ---

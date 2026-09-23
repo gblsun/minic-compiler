@@ -1,0 +1,4 @@
+float f = 1;
+f = f + 2;
+f = 3 * f;
+return f;

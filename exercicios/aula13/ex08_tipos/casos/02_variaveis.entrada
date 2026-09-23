@@ -1,0 +1,6 @@
+int i; float f; bool b;
+i * 2;
+i + f;
+i < f == b;
+-f;
+!b || i > 0;

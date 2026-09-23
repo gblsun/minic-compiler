@@ -1,0 +1,9 @@
+# SDD de 3 * 5:  T -> T1 * F2,  T1 -> F1,  F1 -> num1,  F2 -> num2
+# Declarado de propósito fora de ordem: quem decide a ordem é o grafo.
+T.val = mul T1.val F2.val
+T1.val = copia F1.val
+F1.val = copia num1.lexval
+F2.val = copia num2.lexval
+num1.lexval = const 3
+num2.lexval = const 5
+resultado T.val

@@ -1,0 +1,5 @@
+(%:int i:int 2:int)
+(%:erro f:float 2:int)
+--- stderr ---
+Erro semântico na linha 3, coluna 3: operador '%' exige operandos int; recebeu float e int.
+--- exit: 4 ---

@@ -1,0 +1,3 @@
+--- stderr ---
+Erro semântico na linha 1, coluna 3: divisão por zero (1 / 0).
+--- exit: 4 ---

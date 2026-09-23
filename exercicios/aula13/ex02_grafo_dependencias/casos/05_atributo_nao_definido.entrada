@@ -1,0 +1,2 @@
+F.val = copia num.lexval
+T.val = copia F.val

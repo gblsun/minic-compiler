@@ -1,0 +1,16 @@
+Programa
+  VarDecl a : int [global] @1:5
+    init: 1.5:float
+  VarDecl b : bool [global] @2:6
+    init: 1:int
+  VarDecl f : float [global] @3:7
+    init: (+:erro true:bool 1:int)
+  Assign @4:1
+    alvo: a:int
+    valor: (<:bool a:int 2:int)
+--- stderr ---
+Erro semântico na linha 1, coluna 9: não é possível inicializar 'a' (int) com float.
+Erro semântico na linha 2, coluna 10: não é possível inicializar 'b' (bool) com int.
+Erro semântico na linha 3, coluna 16: operador '+' exige operandos numéricos; recebeu bool e int.
+Erro semântico na linha 4, coluna 7: não é possível atribuir bool a 'a' (int).
+--- exit: 4 ---

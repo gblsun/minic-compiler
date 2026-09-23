@@ -1,0 +1,9 @@
+atributos: 3, dependências: 2
+  zero -> q
+  um -> q
+ordem de avaliação:
+  1. zero := 0
+  2. um := 1
+--- stderr ---
+Erro semântico na linha 3: divisão por zero ao avaliar 'q' (div(1, 0)).
+--- exit: 4 ---

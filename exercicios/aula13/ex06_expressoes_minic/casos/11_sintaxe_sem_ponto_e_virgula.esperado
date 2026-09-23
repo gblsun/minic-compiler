@@ -1,0 +1,3 @@
+--- stderr ---
+Erro de sintaxe na linha 2, coluna 1: esperado operador ou ';'; encontrado 'c'.
+--- exit: 3 ---

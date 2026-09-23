@@ -1,0 +1,10 @@
+Programa
+  VarDecl a : int [global] @1:5
+  VarDecl a : float [global] @2:7
+  Block [bloco1] @3:1
+    VarDecl a : int [bloco1] @4:9
+    VarDecl a : bool [bloco1] @5:10
+--- stderr ---
+Erro semântico na linha 2, coluna 7: redeclaração de 'a' no escopo global (declarado na linha 1, coluna 5).
+Erro semântico na linha 5, coluna 10: redeclaração de 'a' no escopo bloco1 (declarado na linha 4, coluna 9).
+--- exit: 4 ---

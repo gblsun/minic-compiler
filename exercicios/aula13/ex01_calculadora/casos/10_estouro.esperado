@@ -1,0 +1,3 @@
+--- stderr ---
+Erro semântico na linha 1, coluna 21: estouro de inteiro de 64 bits (9223372036854775807 + 1).
+--- exit: 4 ---

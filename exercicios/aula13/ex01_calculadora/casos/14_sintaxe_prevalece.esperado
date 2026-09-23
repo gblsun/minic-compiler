@@ -1,0 +1,3 @@
+--- stderr ---
+Erro de sintaxe na linha 1, coluna 7: esperado operador ou fim da entrada; encontrado ')'.
+--- exit: 3 ---

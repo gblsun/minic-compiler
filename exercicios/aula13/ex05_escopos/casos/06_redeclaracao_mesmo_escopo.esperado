@@ -1,0 +1,8 @@
+Block escopo=global
+  Block escopo=bloco1
+    VarDecl x : int @2:9 [bloco1]
+    VarDecl y : int @2:12 [bloco1]
+    VarDecl x : char @3:10 [bloco1] redeclaração
+--- stderr ---
+Erro semântico na linha 3, coluna 10: redeclaração de 'x' no escopo bloco1 (declarado na linha 2, coluna 9).
+--- exit: 4 ---

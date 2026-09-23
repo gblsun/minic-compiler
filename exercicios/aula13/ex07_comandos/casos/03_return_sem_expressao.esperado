@@ -1,0 +1,7 @@
+Programa
+  Return @1:1
+    valor: <ausente>
+  Return @2:1
+    valor: (* a 2)
+--- stderr ---
+--- exit: 0 ---

@@ -1,0 +1,10 @@
+F -> num      F.val = num.lexval = 18
+T -> F        T.val = F.val = 18
+F -> num      F.val = num.lexval = 3
+T -> T / F    T.val = T1.val / F.val = 18 / 3 = 6
+F -> num      F.val = num.lexval = 2
+T -> T / F    T.val = T1.val / F.val = 6 / 2 = 3
+E -> T        E.val = T.val = 3
+resultado = 3
+--- stderr ---
+--- exit: 0 ---

@@ -13,6 +13,7 @@ existem para não precisar reabrir os PDFs toda hora.
 - Vai mexer no **parser**? → [gramatica.md](gramatica.md), [ast.md](ast.md) e [roteiro-etapa2-parser.md](roteiro-etapa2-parser.md)
 - Quer os **resultados dos testes**? → [resultados-etapa2.md](resultados-etapa2.md)
 - Quer saber **o que mudou depois da avaliação da etapa 2**? → [correcoes-etapa2.md](correcoes-etapa2.md)
+- Quer os **exercícios da aula 13** (tradução dirigida por sintaxe)? → [exercicios/aula13/](../exercicios/aula13/)
 - Quer saber **o que ainda está errado ou em aberto**? → [PENDENCIAS.md](../PENDENCIAS.md)
 
 ## Visão geral e planejamento

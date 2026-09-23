@@ -1,0 +1,4 @@
+prefixa: (/ 10 (- 5 5))
+--- stderr ---
+Erro semântico na linha 1, coluna 4: divisão por zero (10 / 0).
+--- exit: 4 ---

@@ -1,0 +1,3 @@
+zero = const 0
+um = const 1
+q = div um zero

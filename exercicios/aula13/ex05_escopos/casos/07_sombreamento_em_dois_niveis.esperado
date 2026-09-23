@@ -1,0 +1,14 @@
+Block escopo=global
+  VarDecl f : bool @1:6 [global]
+  Block escopo=bloco1
+    VarDecl f : int @3:9 [bloco1] sombreia f de global (1:6)
+    Block escopo=bloco2
+      VarDecl f : char @5:14 [bloco2] sombreia f de bloco1 (3:9)
+      Assign @6:9
+        Id f @6:9 -> char [bloco2, declarado em 5:14]
+        Id f @6:13 -> char [bloco2, declarado em 5:14]
+    Assign @8:5
+      Id f @8:5 -> int [bloco1, declarado em 3:9]
+      Num 0 @8:9
+--- stderr ---
+--- exit: 0 ---

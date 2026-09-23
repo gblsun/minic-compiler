@@ -1,0 +1,24 @@
+Programa
+  VarDecl n : int [global] @1:5
+    init: 10:int
+  VarDecl pares : int [global] @1:13
+    init: 0:int
+  While @2:1
+    cond: (>:bool n:int 0:int)
+    corpo: Block [bloco1] @2:15
+      If @3:5
+        cond: (==:bool (%:int n:int 2:int) 0:int)
+        entao: Block [bloco2] @3:21
+          Assign @4:9
+            alvo: pares:int
+            valor: (+:int pares:int 1:int)
+        senao: Assign @6:9
+          alvo: n:int
+          valor: (-:int n:int 0:int)
+      Assign @7:5
+        alvo: n:int
+        valor: (-:int n:int 1:int)
+  Return @9:1
+    valor: pares:int
+--- stderr ---
+--- exit: 0 ---

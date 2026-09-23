@@ -1,0 +1,3 @@
+--- stderr ---
+Erro léxico na linha 1, coluna 3: símbolo "@" não reconhecido.
+--- exit: 2 ---

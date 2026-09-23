@@ -1,0 +1,9 @@
+Block escopo=global
+  VarDecl a : int @1:5 [global]
+  Block escopo=bloco1
+    Assign @3:5
+      Id a @3:5 -> int [global, declarado em 1:5]
+      Id b @3:9 -> não declarado
+--- stderr ---
+Erro semântico na linha 3, coluna 9: identificador 'b' não declarado.
+--- exit: 4 ---

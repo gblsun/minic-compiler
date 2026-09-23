@@ -1,0 +1,7 @@
+tabela de símbolos:
+  x : int (linha 1, coluna 5)
+  y : float (linha 2, coluna 7)
+--- stderr ---
+Erro semântico na linha 2, coluna 10: redeclaração de 'x' (declarado na linha 1, coluna 5).
+Erro semântico na linha 3, coluna 6: redeclaração de 'y' (declarado na linha 2, coluna 7).
+--- exit: 4 ---

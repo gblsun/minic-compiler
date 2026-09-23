@@ -1,0 +1,4 @@
+(&&:erro n:int true:bool)
+--- stderr ---
+Erro semântico na linha 2, coluna 3: operador '&&' exige operandos bool; recebeu int e bool.
+--- exit: 4 ---

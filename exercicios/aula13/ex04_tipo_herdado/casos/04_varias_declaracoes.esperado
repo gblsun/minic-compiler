@@ -1,0 +1,9 @@
+tabela de símbolos:
+  a : int (linha 1, coluna 5)
+  b : int (linha 1, coluna 8)
+  c : int (linha 1, coluna 11)
+  media : float (linha 2, coluna 7)
+  letra : char (linha 3, coluna 6)
+  digito : char (linha 3, coluna 13)
+--- stderr ---
+--- exit: 0 ---

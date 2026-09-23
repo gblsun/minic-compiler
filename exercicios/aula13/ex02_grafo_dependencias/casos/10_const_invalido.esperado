@@ -1,0 +1,3 @@
+--- stderr ---
+Erro de sintaxe na linha 1: 'const' espera um inteiro, encontrado '3x'.
+--- exit: 3 ---

@@ -1,0 +1,4 @@
+AST inválida: 1 diagnóstico(s); nenhuma árvore publicada.
+--- stderr ---
+[sintático] linha 4, coluna 1: esperado '}'; lexema: fim da entrada
+--- exit: 3 ---

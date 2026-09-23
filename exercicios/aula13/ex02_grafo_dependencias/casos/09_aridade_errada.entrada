@@ -1,0 +1,2 @@
+a = const 1
+b = soma a

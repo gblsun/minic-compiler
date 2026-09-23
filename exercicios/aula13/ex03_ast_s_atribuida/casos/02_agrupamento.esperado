@@ -1,0 +1,4 @@
+prefixa: (* 2 (+ 3 4))
+valor: 14
+--- stderr ---
+--- exit: 0 ---

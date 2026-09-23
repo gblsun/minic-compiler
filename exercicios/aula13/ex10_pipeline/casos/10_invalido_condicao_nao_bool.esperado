@@ -1,0 +1,18 @@
+Programa
+  VarDecl n : int [global] @1:5
+    init: 3:int
+  While @2:1
+    cond: n:int
+    corpo: Assign @2:11
+      alvo: n:int
+      valor: (-:int n:int 1:int)
+  If @3:1
+    cond: (+:int n:int 1:int)
+    entao: Return @3:12
+      valor: <ausente>
+    senao: Return @3:25
+      valor: n:int
+--- stderr ---
+Erro semântico na linha 2, coluna 8: condição do while deve ser bool; recebeu int.
+Erro semântico na linha 3, coluna 7: condição do if deve ser bool; recebeu int.
+--- exit: 4 ---

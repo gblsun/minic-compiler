@@ -1,0 +1,3 @@
+--- stderr ---
+Erro de sintaxe na linha 2: 'soma' espera 2 argumento(s).
+--- exit: 3 ---

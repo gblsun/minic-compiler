@@ -1,0 +1,7 @@
+# X é avaliável, mas D depende do ciclo A -> B -> C -> A:
+# nada é executado, e D também aparece como bloqueado.
+X = const 1
+A = soma X C
+B = copia A
+C = copia B
+D = copia A

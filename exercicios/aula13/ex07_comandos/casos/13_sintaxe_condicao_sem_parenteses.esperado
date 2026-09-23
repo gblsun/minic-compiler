@@ -1,0 +1,3 @@
+--- stderr ---
+Erro de sintaxe na linha 1, coluna 4: esperado '('; encontrado 'a'.
+--- exit: 3 ---

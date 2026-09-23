@@ -1,0 +1,19 @@
+Block escopo=global
+  VarDecl a : int @1:5 [global]
+  Block escopo=bloco1
+    VarDecl b : int @3:9 [bloco1]
+    Block escopo=bloco2
+      VarDecl c : int @5:13 [bloco2]
+      Block escopo=bloco3
+        Assign @7:13
+          Id c @7:13 -> int [bloco2, declarado em 5:13]
+          Id a @7:17 -> int [global, declarado em 1:5]
+        Assign @8:13
+          Id b @8:13 -> int [bloco1, declarado em 3:9]
+          Id c @8:17 -> int [bloco2, declarado em 5:13]
+    Block escopo=bloco4
+      Assign @12:9
+        Id b @12:9 -> int [bloco1, declarado em 3:9]
+        Num 7 @12:13
+--- stderr ---
+--- exit: 0 ---

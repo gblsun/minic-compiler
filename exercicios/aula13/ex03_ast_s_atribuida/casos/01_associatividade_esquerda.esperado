@@ -1,0 +1,4 @@
+prefixa: (+ (- a 4) c)
+valor: não avaliável (identificador 'a' na linha 1, coluna 1)
+--- stderr ---
+--- exit: 0 ---

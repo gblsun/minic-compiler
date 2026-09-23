@@ -1,0 +1,3 @@
+--- stderr ---
+Erro de sintaxe na linha 2, coluna 5: esperado identificador ou número; encontrado ';'.
+--- exit: 3 ---

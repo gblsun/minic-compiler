@@ -1,0 +1,4 @@
+# A -> B -> C -> A
+A = copia C
+B = copia A
+C = copia B

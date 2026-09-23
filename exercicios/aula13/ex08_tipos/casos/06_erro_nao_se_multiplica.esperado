@@ -1,0 +1,4 @@
+(-:erro (*:erro (+:erro 1:int b:bool) 2:int) 3:int)
+--- stderr ---
+Erro semântico na linha 2, coluna 4: operador '+' exige operandos numéricos; recebeu int e bool.
+--- exit: 4 ---

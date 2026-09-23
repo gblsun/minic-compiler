@@ -1,0 +1,16 @@
+atributos: 6, dependências: 5
+  T1.val -> T.val
+  F1.val -> T1.val
+  F2.val -> T.val
+  num1.lexval -> F1.val
+  num2.lexval -> F2.val
+ordem de avaliação:
+  1. num1.lexval := 3
+  2. num2.lexval := 5
+  3. F1.val := num1.lexval = 3
+  4. F2.val := num2.lexval = 5
+  5. T1.val := F1.val = 3
+  6. T.val := mul(T1.val, F2.val) = mul(3, 5) = 15
+resultado: T.val = 15
+--- stderr ---
+--- exit: 0 ---

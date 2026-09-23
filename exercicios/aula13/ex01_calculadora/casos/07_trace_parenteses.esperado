@@ -1,0 +1,14 @@
+F -> num      F.val = num.lexval = 2
+T -> F        T.val = F.val = 2
+E -> T        E.val = T.val = 2
+F -> num      F.val = num.lexval = 3
+T -> F        T.val = F.val = 3
+E -> E + T    E.val = E1.val + T.val = 2 + 3 = 5
+F -> ( E )    F.val = E.val = 5
+T -> F        T.val = F.val = 5
+F -> num      F.val = num.lexval = 4
+T -> T * F    T.val = T1.val * F.val = 5 * 4 = 20
+E -> T        E.val = T.val = 20
+resultado = 20
+--- stderr ---
+--- exit: 0 ---

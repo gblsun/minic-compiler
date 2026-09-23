@@ -1,0 +1,9 @@
+Programa
+  VarDecl x : int [global] @1:5
+    init: (-:int (-:int 10:int 4:int) 3:int)
+  VarDecl y : int [global] @2:5
+    init: (+:int 2:int (%:int (*:int 3:int 4:int) 5:int))
+  VarDecl r : bool [global] @3:6
+    init: (||:bool (==:bool (<:bool x:int y:int) (>:bool y:int x:int)) false:bool)
+--- stderr ---
+--- exit: 0 ---

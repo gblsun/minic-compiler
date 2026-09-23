@@ -16,7 +16,7 @@ ref/
 ├── slides/          slides das aulas 01–11 + roteiro falado da aula 06
 ├── apostilas/       apostilas das aulas 02–12 + tutorial tokens→AST
 ├── enunciados/      enunciados das atividades (prints do Classroom)
-├── exercicios/      exercícios das aulas 6 a 9 (.docx)
+├── exercicios/      exercícios das aulas 6 a 9 (.docx) e da aula 13 (.pdf)
 ├── scripts/         scripts de teste fornecidos pelo professor
 └── testes-oficiais/ pacotes de teste oficiais (scanner e parser)
 ```
@@ -83,6 +83,11 @@ Exercícios das aulas 6 a 9 (GLC e análise sintática), em `.docx`:
 [resultados esperados](exercicios/exercicios-aulas-6-a-9-resultados-esperados.docx) e
 [gabarito](exercicios/exercicios-aulas-6-a-9-gabarito.docx).
 
+Exercícios práticos da aula 13 (tradução dirigida por sintaxe, 10 atividades
+em Python e em C):
+[exercicios-aula-13-enunciados.pdf](exercicios/exercicios-aula-13-enunciados.pdf).
+A resolução está em [`exercicios/aula13/`](../exercicios/aula13/).
+
 ## scripts/
 
 Scripts de teste **fornecidos pelo professor**, no formato original. Todos
@@ -124,6 +129,7 @@ Para reencontrar um arquivo no Classroom ou conferir que nada foi trocado:
 | `enunciados/ap-analisador-sintatico-enunciado.pdf` | `AP 1 - analisador sintático - Sala de Aula.pdf` |
 | `enunciados/scripts-de-teste-para-o-parser-enunciado.pdf` | `Scripts de teste para o parser - Sala de Aula.pdf` |
 | `exercicios/*.docx` | idêntico ao original |
+| `exercicios/exercicios-aula-13-enunciados.pdf` | `aula13_exercicios_praticos_python_c.pdf` |
 | `scripts/*.sh` | idêntico ao original |
 | `testes-oficiais/testes-scanner-minic/` | `Testes para o analisador léxico/testes-scanner-minic_codes/` |
 | `testes-oficiais/testes-parser-50{,.tar.gz}` | `testes-parser-50.tar.gz` |

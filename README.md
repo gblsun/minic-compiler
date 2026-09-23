@@ -35,6 +35,7 @@ minic-compiler/
 ├── docs/      documentação derivada da especificação (o que implementar e por quê)
 ├── src/       código-fonte — src/python/ e src/c/, as duas implementações
 ├── tests/     suítes de regressão do projeto (entradas, saídas gravadas, runners)
+├── exercicios/ exercícios de aula resolvidos (aula 13: tradução dirigida por sintaxe, Python e C)
 └── ref/       material original da disciplina: especificação, aulas, enunciados,
               scripts e pacotes de teste oficiais (fonte normativa, não editar)
 ```
@@ -214,3 +215,24 @@ As correções feitas depois da avaliação da etapa 2 estão em
 | [src/c/ast.c](src/c/ast.c) / [ast.h](src/c/ast.h)         | a AST em C                                                                                                        |
 | [src/c/parser_main.c](src/c/parser_main.c)                | CLI em C                                                                                                          |
 | [tests/run_parser_tests.py](tests/run_parser_tests.py)    | as três suítes de teste do parser                                                                                 |
+
+## Exercícios da aula 13 — tradução dirigida por sintaxe
+
+Os 10 exercícios práticos da aula 13
+([enunciado](ref/exercicios/exercicios-aula-13-enunciados.pdf)) estão
+resolvidos em [`exercicios/aula13/`](exercicios/aula13/), cada um em Python e
+em C: atributos sintetizados e herdados, grafo de dependências com ordenação
+topológica, SDDs S- e L-atribuídas, construção de AST, escopos, tipos,
+recuperação de erros e um mini pipeline scanner → parser → atributos → AST.
+Eles reaproveitam o lexer da etapa 1 (sem copiá-lo).
+
+```
+python exercicios/aula13/run_tests.py          # 120 casos × Python e C (+ 10 compilações)
+python exercicios/aula13/run_tests.py --python # só Python, se não houver gcc
+```
+
+Resultado: **250/250 verificações**. As duas linguagens são comparadas com a
+mesma saída esperada, byte a byte, e o C compila sem avisos com
+`-Wall -Wextra -std=c11`. As regras de cada exercício, as decisões tomadas, os
+exemplos de saída e as limitações estão no
+[README dos exercícios](exercicios/aula13/README.md).

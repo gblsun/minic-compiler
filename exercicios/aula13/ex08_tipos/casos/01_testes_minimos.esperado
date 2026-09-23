@@ -1,0 +1,7 @@
+(+:int 3:int 4:int)
+(+:float 3.0:float 4:int)
+(&&:bool true:bool false:bool)
+(+:erro 3:int true:bool)
+--- stderr ---
+Erro semântico na linha 4, coluna 3: operador '+' exige operandos numéricos; recebeu int e bool.
+--- exit: 4 ---

@@ -1,0 +1,5 @@
+AST inválida: 2 diagnóstico(s); nenhuma árvore publicada.
+--- stderr ---
+[léxico] linha 2, coluna 7: símbolo "@" não reconhecido; lexema: '@'
+[sintático] linha 2, coluna 9: esperado operador ou ';'; lexema: '4'
+--- exit: 2 ---

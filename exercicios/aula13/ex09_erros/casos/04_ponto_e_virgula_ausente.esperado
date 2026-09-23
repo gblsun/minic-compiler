@@ -1,0 +1,4 @@
+AST inválida: 1 diagnóstico(s); nenhuma árvore publicada.
+--- stderr ---
+[sintático] linha 3, coluna 1: esperado operador ou ';'; lexema: 'return'
+--- exit: 3 ---

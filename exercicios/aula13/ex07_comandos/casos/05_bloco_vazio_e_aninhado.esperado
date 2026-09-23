@@ -1,0 +1,15 @@
+Programa
+  Block @1:1 (vazio)
+  While @2:1
+    cond: a
+    corpo: Block @2:11
+      Block @2:13 (vazio)
+      If @2:17
+        cond: b
+        entao: Block @2:24
+          Assign @2:26
+            alvo: c
+            valor: 1
+        senao: <ausente>
+--- stderr ---
+--- exit: 0 ---

@@ -1,0 +1,9 @@
+bool f;
+{
+    int f;
+    {
+        char f;
+        f = f;
+    }
+    f = 0;
+}

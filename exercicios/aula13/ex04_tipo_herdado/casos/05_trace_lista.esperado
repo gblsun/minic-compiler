@@ -1,0 +1,11 @@
+T -> int      T.type = int
+D -> T L ;    L.inh = T.type = int
+L -> id       addtype(a, L.inh) -> a : int
+L -> L , id   addtype(b, L.inh) -> b : int
+L -> L , id   addtype(c, L.inh) -> c : int
+tabela de símbolos:
+  a : int (linha 1, coluna 5)
+  b : int (linha 1, coluna 8)
+  c : int (linha 1, coluna 11)
+--- stderr ---
+--- exit: 0 ---

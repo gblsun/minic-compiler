@@ -1,0 +1,12 @@
+Block escopo=global
+  VarDecl x : int @1:5 [global]
+  Block escopo=bloco1
+    VarDecl x : float @3:11 [bloco1] sombreia x de global (1:5)
+    Assign @4:5
+      Id x @4:5 -> float [bloco1, declarado em 3:11]
+      Num 2 @4:9
+  Assign @6:1
+    Id x @6:1 -> int [global, declarado em 1:5]
+    Num 3 @6:5
+--- stderr ---
+--- exit: 0 ---

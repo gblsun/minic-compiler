@@ -1,0 +1,4 @@
+(* a b)
+--- stderr ---
+Erro de sintaxe na linha 2, coluna 3: esperado operador ou ';'; encontrado 'b'.
+--- exit: 3 ---

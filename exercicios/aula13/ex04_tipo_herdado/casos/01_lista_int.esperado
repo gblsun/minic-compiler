@@ -1,0 +1,5 @@
+tabela de símbolos:
+  a : int (linha 1, coluna 5)
+  b : int (linha 1, coluna 8)
+--- stderr ---
+--- exit: 0 ---

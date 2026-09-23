@@ -1,0 +1,23 @@
+Programa
+  Assign @1:1
+    alvo: x
+    valor: 10
+  While @2:1
+    cond: (> x 0)
+    corpo: Block @2:15
+      If @3:5
+        cond: (== (% x 2) 0)
+        entao: Block @3:21
+          Assign @4:9
+            alvo: pares
+            valor: (+ pares 1)
+        senao: Assign @6:9
+          alvo: impares
+          valor: (+ impares 1)
+      Assign @7:5
+        alvo: x
+        valor: (- x 1)
+  Return @9:1
+    valor: pares
+--- stderr ---
+--- exit: 0 ---

@@ -1,0 +1,10 @@
+int x = 1;
+{
+    float x = 1.5;
+    x = x * 2;
+    {
+        bool x = true;
+        x = !x;
+    }
+}
+x = x + 1;

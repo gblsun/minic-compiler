@@ -1,0 +1,10 @@
+atributos: 3, dependências: 2
+  a -> q
+  b -> q
+ordem de avaliação:
+  1. a := -7
+  2. b := 2
+  3. q := div(a, b) = div(-7, 2) = -3
+resultado: q = -3
+--- stderr ---
+--- exit: 0 ---

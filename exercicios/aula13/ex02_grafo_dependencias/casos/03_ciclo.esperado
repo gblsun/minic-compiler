@@ -1,0 +1,8 @@
+atributos: 3, dependências: 3
+  A -> B
+  B -> C
+  C -> A
+ordem de avaliação:
+--- stderr ---
+Erro semântico: ciclo de dependências; atributos bloqueados: A, B, C.
+--- exit: 4 ---

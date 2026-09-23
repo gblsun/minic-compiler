@@ -1,0 +1,12 @@
+Block escopo=global
+  Block escopo=bloco1
+    VarDecl temp : int @2:9 [bloco1]
+    Assign @3:5
+      Id temp @3:5 -> int [bloco1, declarado em 2:9]
+      Num 1 @3:12
+  Assign @5:1
+    Id temp @5:1 -> não declarado
+    Num 2 @5:8
+--- stderr ---
+Erro semântico na linha 5, coluna 1: identificador 'temp' não declarado.
+--- exit: 4 ---

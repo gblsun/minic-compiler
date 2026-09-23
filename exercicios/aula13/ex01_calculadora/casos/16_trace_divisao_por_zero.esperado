@@ -1,0 +1,11 @@
+F -> num      F.val = num.lexval = 4
+T -> F        T.val = F.val = 4
+E -> T        E.val = T.val = 4
+F -> num      F.val = num.lexval = 1
+T -> F        T.val = F.val = 1
+F -> num      F.val = num.lexval = 0
+T -> T / F    T.val = T1.val / F.val = 1 / 0 = indefinido
+E -> E - T    E.val = E1.val - T.val = 4 - indefinido = indefinido
+--- stderr ---
+Erro semântico na linha 1, coluna 7: divisão por zero (1 / 0).
+--- exit: 4 ---
