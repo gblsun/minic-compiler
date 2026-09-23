@@ -12,6 +12,7 @@ existem para não precisar reabrir os PDFs toda hora.
 - Vai mexer no **scanner**? → [especificacao.md](especificacao.md) e [tokens.md](tokens.md)
 - Vai mexer no **parser**? → [gramatica.md](gramatica.md), [ast.md](ast.md) e [roteiro-etapa2-parser.md](roteiro-etapa2-parser.md)
 - Quer os **resultados dos testes**? → [resultados-etapa2.md](resultados-etapa2.md)
+- Quer saber **o que mudou depois da avaliação da etapa 2**? → [correcoes-etapa2.md](correcoes-etapa2.md)
 - Quer saber **o que ainda está errado ou em aberto**? → [PENDENCIAS.md](../PENDENCIAS.md)
 
 ## Visão geral e planejamento
@@ -36,7 +37,8 @@ existem para não precisar reabrir os PDFs toda hora.
 |---|---|
 | [roteiro-etapa1-lexer.md](roteiro-etapa1-lexer.md) | Roteiro e checklist usados na **etapa 1** (analisador léxico), já concluída — mantido como registro do que foi entregue. |
 | [roteiro-etapa2-parser.md](roteiro-etapa2-parser.md) | Plano de execução da **etapa 2** (parser e AST), já executado: decisões tomadas, ordem de implementação, tratamento de erros, pontos de entrada exigidos, testes e checklist de conformidade marcado. |
-| [resultados-etapa2.md](resultados-etapa2.md) | Registro da execução das suítes da etapa 2 (195/195), como ler o resumo dos scripts oficiais do professor e a tabela dos diagnósticos emitidos nos 25 casos de rejeição. |
+| [resultados-etapa2.md](resultados-etapa2.md) | Registro da execução das suítes da etapa 2 (201/201), como ler o resumo dos scripts oficiais do professor e a tabela dos diagnósticos emitidos nos 25 casos de rejeição. |
+| [correcoes-etapa2.md](correcoes-etapa2.md) | Resposta à avaliação da etapa 2: cada apontamento, a causa encontrada, a correção e como conferir. |
 | [PENDENCIAS.md](../PENDENCIAS.md) | O que precisa ser corrigido, revisado ou decidido antes da entrega: bugs confirmados (com a reprodução anotada), decisões que pedem uma segunda opinião do grupo, riscos de ambiente ainda não testados e o checklist operacional da entrega. |
 | [possiveis_features.md](possiveis_features.md) | Backlog de ideias/diferenciais observados em outros projetos da mesma disciplina. Nada ali é exigência do enunciado — é uma lista para avaliar o que vale incorporar. |
 

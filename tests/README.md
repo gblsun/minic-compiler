@@ -105,10 +105,10 @@ python tests/run_parser_tests.py -v         # detalha caso a caso
 | Suíte | Fonte dos casos | Critério |
 |---|---|---|
 | 50 casos oficiais | [`ref/testes-oficiais/testes-parser-50/`](../ref/testes-oficiais/testes-parser-50/) (material do professor) | 01–25: exit 0, stderr vazio e AST igual à esperada (espaços normalizados); 26–50: exit 3, nenhuma AST e diagnóstico "Erro de sintaxe" |
-| 15 casos próprios | [`parser_inputs/`](parser_inputs/) | stdout, stderr e exit code idênticos aos golden de [`parser_expected/`](parser_expected/) |
-| Equivalência | as 65 entradas das duas suítes acima | a versão Python e a versão C devem devolver **exatamente** o mesmo stdout, stderr e exit code |
+| 17 casos próprios | [`parser_inputs/`](parser_inputs/) | stdout, stderr e exit code idênticos aos golden de [`parser_expected/`](parser_expected/) |
+| Equivalência | as 67 entradas das duas suítes acima | a versão Python e a versão C devem devolver **exatamente** o mesmo stdout, stderr e exit code |
 
-Resultado atual: 195/195 — registro em
+Resultado atual: 201/201 — registro em
 [`docs/resultados-etapa2.md`](../docs/resultados-etapa2.md).
 
 ### Por que os casos próprios existem

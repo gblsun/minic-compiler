@@ -8,7 +8,7 @@ mesma saída para a mesma entrada.
 | Etapa | Componente                          | Status                                                                                                            |
 | ----- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
 | 1     | Analisador léxico (scanner)         | ✅ entregue                                                                                                        |
-| 2     | Analisador sintático e AST (parser) | ✅ **concluída** — 195/195 verificações ([resultados](docs/resultados-etapa2.md))                                   |
+| 2     | Analisador sintático e AST (parser) | ✅ **concluída** — 201/201 verificações ([resultados](docs/resultados-etapa2.md))                                   |
 
 Detalhes de cada etapa, prazos e comandos exigidos por cada atividade: [docs/etapas.md](docs/etapas.md).
 
@@ -199,6 +199,8 @@ próprios em cada implementação, mais 67/67 entradas com saída byte a byte
 idêntica entre Python e C. Os scripts oficiais do professor marcam
 16 aprovados / 25 erros sintáticos detectados, que é o teto do pacote de testes
 — o porquê está em [docs/resultados-etapa2.md](docs/resultados-etapa2.md).
+As correções feitas depois da avaliação da etapa 2 estão em
+[docs/correcoes-etapa2.md](docs/correcoes-etapa2.md).
 
 ### Onde está o quê
 

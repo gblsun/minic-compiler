@@ -5,17 +5,22 @@ testes com os respectivos resultados". Os números abaixo são reproduzíveis co
 os comandos indicados; as saídas gravadas de cada caso próprio ficam em
 [`tests/parser_expected/`](../tests/parser_expected/).
 
-Ambiente da execução: Windows 11, Python 3.14, gcc (MinGW-w64) com
-`-Wall -Wextra -std=c11` (compilação sem nenhum aviso).
+Ambiente da execução: Linux (container `gcc:14`), Python 3.13 e gcc 14 com
+`-Wall -Wextra -std=c11` (compilação sem nenhum aviso), que é o ambiente em
+que o professor roda os scripts. A suíte Python também foi conferida no
+Windows 11 com Python 3.14.
+
+As correções feitas depois da avaliação estão em
+[correcoes-etapa2.md](correcoes-etapa2.md).
 
 ## Resumo
 
 | Suíte | Python | C |
 |---|---|---|
 | 50 casos oficiais (`ref/testes-oficiais/testes-parser-50/`) | 50/50 | 50/50 |
-| 15 casos próprios (`tests/parser_inputs/`) | 15/15 | 15/15 |
-| Equivalência Python ↔ C (65 entradas, byte a byte) | 65/65 | — |
-| **Total** | **195/195** | |
+| 17 casos próprios (`tests/parser_inputs/`) | 17/17 | 17/17 |
+| Equivalência Python ↔ C (67 entradas, byte a byte) | 67/67 | — |
+| **Total** | **201/201** | |
 
 ```bash
 python tests/run_parser_tests.py
@@ -23,11 +28,11 @@ python tests/run_parser_tests.py
 
 ```text
 Python — oficiais: 50/50
-Python — próprios: 15/15
+Python — próprios: 17/17
 C — oficiais: 50/50
-C — próprios: 15/15
-Equivalência: 65/65 entradas com saída idêntica
-Total: 195/195 verificações conformes.
+C — próprios: 17/17
+Equivalência: 67/67 entradas com saída idêntica
+Total: 201/201 verificações conformes.
 ```
 
 Critério de cada suíte:
@@ -43,7 +48,7 @@ Critério de cada suíte:
 - **Próprios**: comparação byte a byte de stdout, stderr e código de saída com
   os golden gravados.
 - **Equivalência**: as duas implementações têm de devolver exatamente o mesmo
-  stdout, stderr e código de saída para cada uma das 65 entradas.
+  stdout, stderr e código de saída para cada uma das 67 entradas.
 
 ## Scripts oficiais da disciplina
 
@@ -84,14 +89,17 @@ falha do parser:
 Detalhamento dos defeitos do pacote em
 [`ref/testes-oficiais/README.md`](../ref/testes-oficiais/README.md#defeitos-conhecidos-do-pacote).
 
-> Se o contador "Erros sintáticos" aparecer como 0, o locale do shell está em
-> `C`: o `grep` do script oficial procura por "sintático" e só casa com o "á"
-> em locale UTF-8. Os wrappers em `src/` já exportam `LC_ALL=C.UTF-8`.
+> O resumo é o mesmo em qualquer locale. Antes, com a mensagem "Erro
+> sintático", o contador "Erros sintáticos" zerava em locale `C`, porque o
+> `grep` do script oficial não casa o "á" nesse locale. Os diagnósticos agora
+> começam com "Erro de sintaxe" (ASCII); ver
+> [correcoes-etapa2.md](correcoes-etapa2.md#3-python-erros-sintáticos-0-e-erros-de-execução-25).
 
 ## Etapa 1 continua verde
 
-A etapa 2 reaproveita o lexer sem alterá-lo; as três suítes da etapa 1 seguem
-passando:
+A etapa 2 reaproveita o lexer da etapa 1. As únicas mudanças nele vieram das
+correções da avaliação (identificador e dígito só ASCII, e caractere não-ASCII
+reportado inteiro), e as três suítes da etapa 1 seguem passando:
 
 ```bash
 python tests/run_tests.py                 # 9/9 testes passaram

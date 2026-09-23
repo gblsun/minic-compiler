@@ -76,8 +76,8 @@ disciplina abre uma atividade no Classroom para cada uma.
   exatos que o enunciado pede; AST com impressão compacta e indentada;
   diagnósticos com linha/coluna e recuperação em modo pânico; três suítes de
   teste em [`tests/run_parser_tests.py`](../tests/run_parser_tests.py).
-- **Resultado**: 195/195 verificações — 50/50 casos oficiais e 15/15 casos
-  próprios em cada implementação, e 65/65 entradas com saída idêntica entre
+- **Resultado**: 201/201 verificações — 50/50 casos oficiais e 17/17 casos
+  próprios em cada implementação, e 67/67 entradas com saída idêntica entre
   Python e C. Registro completo em
   [`resultados-etapa2.md`](resultados-etapa2.md).
 - **Documentação da etapa**: [`gramatica.md`](gramatica.md) (EBNF, precedência e
