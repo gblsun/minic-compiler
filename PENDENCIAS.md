@@ -20,15 +20,15 @@ Como ler cada item:
 
 | Item | Assunto | Prioridade | Status | Responsável |
 |---|---|---|---|---|
-| [1.1](#11-o-lexer-python-aceita-identificador-fora-do-ascii-o-c-não) | Python aceita identificador não-ASCII; C não | alta | confirmado | Fellipe |
-| [1.2](#12-o-lexer-python-aceita-dígito-fora-do-ascii) | Python aceita dígito não-ASCII | alta | confirmado | Fellipe |
-| [1.3](#13-mensagem-de-erro-do-c-corrompe-a-saída-em-byte-não-ascii) | Mensagem do C corrompe a saída | média | confirmado | Fellipe |
-| [1.4](#14-expressão-muito-aninhada-traceback-no-python-crash-no-c) | Aninhamento profundo derruba os dois | média | confirmado | Fellipe |
+| [1.1](#11-o-lexer-python-aceita-identificador-fora-do-ascii-o-c-não) | Python aceita identificador não-ASCII; C não | alta | **resolvido** | Fellipe |
+| [1.2](#12-o-lexer-python-aceita-dígito-fora-do-ascii) | Python aceita dígito não-ASCII | alta | **resolvido** | Fellipe |
+| [1.3](#13-mensagem-de-erro-do-c-corrompe-a-saída-em-byte-não-ascii) | Mensagem do C corrompe a saída | média | **resolvido** | Fellipe |
+| [1.4](#14-expressão-muito-aninhada-traceback-no-python-crash-no-c) | Aninhamento profundo derruba os dois | média | **resolvido** | Fellipe |
 | [1.5](#15-contagem-de-coluna-o-c-conta-bytes-o-python-conta-caracteres) | Coluna em bytes vs. caracteres | baixa | confirmado | Fellipe |
 | [2.1](#21-o-caso-oficial-24-é-comparado-contra-uma-ast-corrigida)–[2.4](#24-caso-41-nossa-mensagem-difere-da-pista-do-pacote) | Decisões que pedem revisão do grupo | — | decisão | Fellipe |
 | [3.1](#31-rodar-a-entrega-inteira-em-linux) | Rodar a entrega inteira em Linux | alta | não verificado | Fellipe |
 | [3.2](#32-versão-do-python-do-professor) | Versão do Python do professor | média | não verificado | Fellipe |
-| [3.3](#33-parserpy-da-raiz-e-o-módulo-parser-da-biblioteca-padrão) | `parser.py` vs. módulo `parser` embutido | média | não verificado | Fellipe |
+| [3.3](#33-parserpy-da-raiz-e-o-módulo-parser-da-biblioteca-padrão) | `parser.py` vs. módulo `parser` embutido | média | **resolvido** | Fellipe |
 | [3.4](#34-locale-no-script-oficial) | Locale no script oficial | baixa | contornado | Fellipe |
 | [4.1](#41-pacote-de-fixtures-do-scanner-está-incompleto)–[4.2](#42-nosso-scanner-não-produz-o-jsonl-das-fixtures-oficiais) | Material da disciplina em falta | baixa | em aberto | Fellipe |
 | [5](#5-antes-de-entregar-operacional) | Checklist da entrega (inclui o `git push`) | alta | em aberto | Fellipe |
@@ -44,6 +44,9 @@ implementadas, 195/195 verificações nas suítes
 ## 1. Bugs confirmados
 
 ### 1.1 O lexer Python aceita identificador fora do ASCII; o C não
+
+> **Resolvido:** `lexer.py` usa `_eh_letra`/`_eh_digito` (ASCII explícito).
+> Caso de regressão: `tests/parser_inputs/erro_identificador_nao_ascii.c`.
 
 **Prioridade: alta** (quebra a equivalência entre as duas implementações, que é
 requisito do projeto) · **Confirmado**
@@ -66,6 +69,8 @@ entradas de teste são ASCII — conferido).
 
 ### 1.2 O lexer Python aceita dígito fora do ASCII
 
+> **Resolvido** junto com o 1.1.
+
 **Prioridade: alta** · **Confirmado** · mesma causa e mesma correção do 1.1
 
 ```bash
@@ -79,6 +84,11 @@ entra na AST como literal válido. A especificação define inteiro como `[0-9]+
 
 ### 1.3 Mensagem de erro do C corrompe a saída em byte não-ASCII
 
+> **Resolvido:** o C consome a sequência UTF-8 inteira e a reporta como um
+> erro só (igual ao Python); byte inválido sai como `\xNN` nas duas
+> implementações. O Python lê o arquivo com `errors="surrogateescape"`,
+> então arquivo com UTF-8 inválido também deixou de gerar traceback.
+
 **Prioridade: média** (só ocorre em entrada inválida, mas produz saída
 inválida) · **Confirmado**
 
@@ -91,6 +101,12 @@ O que fazer: em [`src/c/lexer.c`](src/c/lexer.c), imprimir bytes não
 imprimíveis/não-ASCII na forma `\xNN` em vez do caractere cru.
 
 ### 1.4 Expressão muito aninhada: traceback no Python, crash no C
+
+> **Resolvido:** limite de 200 níveis (`LIMITE_ANINHAMENTO`) nos dois parsers,
+> contando atribuições, unários e comandos. Passou do limite, a análise é
+> abortada com um único `Erro de sintaxe ...: aninhamento acima do limite de
+> 200 níveis; encontrado X.` e exit 3. Caso de regressão:
+> `tests/parser_inputs/erro_aninhamento_profundo.c`.
 
 **Prioridade: média** (nenhuma entrada real chega perto disso, mas a falha é
 feia nos dois lados) · **Confirmado**
@@ -112,7 +128,7 @@ limite do Python (~100 parênteses) é bem mais baixo que o do C (~milhares).
 
 O que fazer: contar profundidade no parser e, ao passar de um limite (o mesmo
 nas duas implementações), emitir um diagnóstico normal —
-`Erro sintático na linha L, coluna C: expressão aninhada demais` — com exit 3,
+`Erro de sintaxe na linha L, coluna C: expressão aninhada demais` — com exit 3,
 em vez de traceback/crash. Assim as duas voltam a concordar.
 
 ### 1.5 Contagem de coluna: o C conta bytes, o Python conta caracteres
@@ -211,6 +227,10 @@ acrescentar `from __future__ import annotations` no topo de
 `src/python/parser.py`, `minic_ast.py` e `tests/run_parser_tests.py`.
 
 ### 3.3 `parser.py` da raiz e o módulo `parser` da biblioteca padrão
+
+> **Resolvido:** o `parser.py` da raiz carrega `src/python/parser.py` com
+> `importlib.util.spec_from_file_location`, e `src/python/parser.py` põe o
+> próprio diretório no `sys.path` antes de importar `lexer`/`minic_ast`.
 
 **Prioridade: média** · **Não verificado**
 

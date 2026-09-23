@@ -1,1 +1,1 @@
-Erro sintático na linha 2, coluna 15: read espera uma variável ou elemento de vetor; encontrado FECHA_PAREN.
+Erro de sintaxe na linha 2, coluna 15: read espera uma variável ou elemento de vetor; encontrado FECHA_PAREN.

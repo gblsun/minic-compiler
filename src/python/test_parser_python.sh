@@ -37,10 +37,10 @@
 # Ver ref/testes-oficiais/README.md para o levantamento completo.
 #
 # NOTA sobre o contador "Erros sintáticos": o script oficial conta os erros com
-# um `grep -Ei 'erro[[:space:]_-]*(sint[aá]tico|de sintaxe)'`, que só casa com
-# "Erro sintático" em locale UTF-8 (por causa do "á"). Por isso o wrapper
-# exporta LC_ALL=C.UTF-8 — sem isso, em locale C, o contador zera mesmo com o
-# parser funcionando.
+# um `grep -Ei 'erro[[:space:]_-]*(sint[aá]tico|de sintaxe)'`. A variante com
+# "á" só casa em locale UTF-8, por isso os diagnósticos usam "Erro de sintaxe"
+# (ASCII), que casa em qualquer locale. O LC_ALL exportado abaixo ficou só
+# como garantia para a saída acentuada.
 
 set -uo pipefail
 

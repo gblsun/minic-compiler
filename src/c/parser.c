@@ -12,6 +12,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Limite de aninhamento (parênteses, unários, atribuições encadeadas, comandos
+ * dentro de comandos). Sem ele, uma entrada patológica estouraria a pilha da
+ * descida recursiva. Mesmo valor de LIMITE_ANINHAMENTO em src/python/parser.py,
+ * para as duas implementações rejeitarem as mesmas entradas. */
+#define LIMITE_ANINHAMENTO 200
+
 /* Os quatro tipos de dado (`void` só aparece como tipo de retorno). */
 static const TokenType TIPOS[] = {TOK_KW_INT, TOK_KW_FLOAT, TOK_KW_BOOL, TOK_KW_CHAR};
 
@@ -133,6 +139,7 @@ void parser_init(Parser *p, const Token *tokens, size_t tokens_len) {
     p->pending = NULL;
     p->pending_line = 0;
     p->pending_column = 0;
+    p->profundidade = 0;
 }
 
 void parser_free(Parser *p) {
@@ -155,7 +162,7 @@ void parser_free(Parser *p) {
 }
 
 char *parseerror_to_string(const ParseError *error) {
-    return parser_format("Erro sintático na linha %d, coluna %d: %s.", error->line,
+    return parser_format("Erro de sintaxe na linha %d, coluna %d: %s.", error->line,
                          error->column, error->message);
 }
 
@@ -262,6 +269,26 @@ static void registrar_pendente(Parser *p) {
     p->pending = NULL; /* a posse da string passou para o ParseError */
 }
 
+/* Chama `funcao` contando um nível de aninhamento. Passando do limite, o erro
+ * não vai para o ponto de recuperação mais próximo (`recover`), e sim para
+ * `abortar`, que encerra a análise: retomar dentro de 200 blocos abertos só
+ * geraria uma cascata de erros — com `{` repetido, o mesmo erro para sempre. */
+static Ast *aninhado(Parser *p, Ast *(*funcao)(Parser *)) {
+    if (p->profundidade >= LIMITE_ANINHAMENTO) {
+        const Token *token = p_peek(p);
+        free(p->pending);
+        p->pending = parser_format("aninhamento acima do limite de %d níveis; encontrado %s",
+                                   LIMITE_ANINHAMENTO, nome_token(token->type));
+        p->pending_line = token->line;
+        p->pending_column = token->column;
+        longjmp(p->abortar, 1);
+    }
+    p->profundidade++;
+    Ast *resultado = funcao(p);
+    p->profundidade--;
+    return resultado;
+}
+
 /* Modo pânico: descarta tokens até um ponto seguro para retomar. Mesma lista
  * de sincronizadores do Python. */
 static void sincronizar(Parser *p) {
@@ -304,10 +331,20 @@ Ast *parser_parse(Parser *p) {
     const Token *primeiro = p_peek(p);
     Ast *programa = novo_no(p, AST_PROGRAM, primeiro);
 
+    if (setjmp(p->abortar) != 0) {
+        registrar_pendente(p);
+        return programa;
+    }
+
     while (!p_check(p, TOK_EOF)) {
+        /* O longjmp pula os `profundidade--` de `aninhado`; quem retoma
+         * restaura o valor que havia antes da tentativa (em Python, o `finally`
+         * de `_aninhado` faz isso sozinho). */
+        int profundidade = p->profundidade;
         if (setjmp(p->recover) == 0) {
             parse_item_de_topo(p, programa);
         } else {
+            p->profundidade = profundidade;
             registrar_pendente(p);
             sincronizar(p);
         }
@@ -427,9 +464,11 @@ static Ast *parse_bloco(Parser *p) {
     memcpy(anterior, p->recover, sizeof(jmp_buf));
 
     while (!p_check(p, TOK_RBRACE) && !p_check(p, TOK_EOF)) {
+        int profundidade = p->profundidade;
         if (setjmp(p->recover) == 0) {
             parse_item_de_bloco(p, bloco);
         } else {
+            p->profundidade = profundidade;
             registrar_pendente(p);
             sincronizar(p);
         }
@@ -531,7 +570,7 @@ static Ast *parse_comando_read(Parser *p) {
     return no;
 }
 
-static Ast *parse_comando(Parser *p) {
+static Ast *parse_comando_sem_limite(Parser *p) {
     const Token *token = p_peek(p);
     TokenType tipo = token->type;
 
@@ -584,6 +623,8 @@ static Ast *parse_comando(Parser *p) {
     p_expect(p, TOK_SEMICOLON, NULL);
     return no;
 }
+
+static Ast *parse_comando(Parser *p) { return aninhado(p, parse_comando_sem_limite); }
 
 /* ------------------------------------------------------------------ *
  * Expressões — um nível por função, do mais fraco ao mais forte
@@ -648,7 +689,9 @@ static Ast *parse_logico_ou(Parser *p) {
     return binario_esquerda(p, parse_logico_e, ops, 1);
 }
 
-static Ast *parse_atribuicao(Parser *p) {
+static Ast *parse_atribuicao(Parser *p);
+
+static Ast *parse_atribuicao_sem_limite(Parser *p) {
     Ast *esquerda = parse_logico_ou(p);
     if (!p_check(p, TOK_ASSIGN)) {
         return esquerda;
@@ -668,6 +711,8 @@ static Ast *parse_atribuicao(Parser *p) {
     return no;
 }
 
+static Ast *parse_atribuicao(Parser *p) { return aninhado(p, parse_atribuicao_sem_limite); }
+
 static Ast *parse_expressao(Parser *p) { return parse_atribuicao(p); }
 
 static Ast *parse_unaria(Parser *p) {
@@ -675,7 +720,7 @@ static Ast *parse_unaria(Parser *p) {
         const Token *op = p_advance(p);
         Ast *no = novo_no(p, AST_UNARY, op);
         no->text = duplicar(operador_lexema(op->type));
-        no->a = parse_unaria(p); /* associativo à direita */
+        no->a = aninhado(p, parse_unaria); /* associativo à direita */
         return no;
     }
     return parse_posfixa(p);

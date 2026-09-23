@@ -85,9 +85,10 @@ funcionar:
 
 ## 4. Erros sintáticos e recuperação (Parte C)
 
-- formato: `Erro sintático na linha L, coluna C: esperado X; encontrado Y.` —
-  o prefixo "Erro sintático" importa, porque o script oficial procura por ele
-  com `grep` para contar os erros detectados;
+- formato: `Erro de sintaxe na linha L, coluna C: esperado X; encontrado Y.` —
+  o prefixo importa, porque o script oficial procura por ele com `grep` para
+  contar os erros detectados (e precisa ser ASCII: em locale `C` o `grep` não
+  casa "sintático");
 - exit code **3** (Seção 11.1 da especificação) — diferente do 2 do erro léxico;
 - os 25 casos de rejeição indicam as mensagens que precisam existir; as pistas
   em `resultado.esperado.txt` dizem o que o professor espera ver apontado;
@@ -181,7 +182,7 @@ com os respectivos resultados"; nada indica que mudou. Então, antes de entregar
 
 **Erros**
 
-- [x] `Erro sintático na linha L, coluna C: …` com token/lexema encontrado
+- [x] `Erro de sintaxe na linha L, coluna C: …` com token/lexema encontrado
 - [x] exit code 3
 - [x] mais de um erro por execução (modo pânico com sincronização)
 - [x] nenhuma AST impressa quando a entrada é rejeitada

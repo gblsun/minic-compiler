@@ -14,7 +14,7 @@ Uso:
 Contrato de saída (Seções 11.1 e 12 da especificação):
 
 - **stdout**: a AST, quando o programa é sintaticamente válido;
-- **stderr**: os diagnósticos (`Erro sintático na linha L, coluna C: ...`);
+- **stderr**: os diagnósticos (`Erro de sintaxe na linha L, coluna C: ...`);
 - **código de saída**: 0 = aceito, 1 = erro de uso, 2 = erro léxico,
   3 = erro sintático.
 
@@ -34,11 +34,27 @@ que os casos oficiais de teste fixam (ver docs/gramatica.md):
 import sys
 from pathlib import Path
 
-import minic_ast as A
-from lexer import Lexer
+# Os módulos irmãos (`lexer.py`, `minic_ast.py`) são achados pelo diretório
+# deste arquivo, e não pelo diretório de onde o parser foi chamado.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import minic_ast as A  # noqa: E402
+from lexer import Lexer  # noqa: E402
 
 # Os quatro tipos de dado da linguagem (`void` só aparece como tipo de retorno).
 TIPOS = ("KW_INT", "KW_FLOAT", "KW_BOOL", "KW_CHAR")
+
+# Limite de aninhamento (parênteses, unários, atribuições encadeadas, comandos
+# dentro de comandos). A descida recursiva gasta pilha a cada nível; sem um
+# limite explícito, uma entrada patológica derrubaria o Python com
+# RecursionError e o C com estouro de pilha. O valor é o mesmo em
+# src/c/parser.c, para as duas implementações rejeitarem as mesmas entradas.
+LIMITE_ANINHAMENTO = 200
+
+# Cada nível de aninhamento custa ~15 molduras de pilha (uma por nível de
+# precedência, mais a impressão da AST); o limite padrão do Python (1000) não
+# chega aos LIMITE_ANINHAMENTO níveis que o parser aceita.
+sys.setrecursionlimit(max(sys.getrecursionlimit(), 25 * LIMITE_ANINHAMENTO + 1000))
 
 # Nomes "didáticos" dos tokens nas mensagens de erro. São os mesmos rótulos que
 # o pacote de testes oficial usa nas pistas dos casos inválidos
@@ -97,7 +113,7 @@ class SyntaxErr:
         self.column = column
 
     def __str__(self):
-        return f"Erro sintático na linha {self.line}, coluna {self.column}: {self.message}."
+        return f"Erro de sintaxe na linha {self.line}, coluna {self.column}: {self.message}."
 
 
 class ParseError(Exception):
@@ -115,6 +131,19 @@ class ParseError(Exception):
         self.info = SyntaxErr(message, line, column)
 
 
+class AninhamentoExcessivo(Exception):
+    """Aninhamento acima de LIMITE_ANINHAMENTO: aborta a análise inteira.
+
+    Não herda de ParseError de propósito: os laços de recuperação não podem
+    capturá-la. Retomar a análise dentro de 200 blocos abertos só produziria
+    uma cascata de erros (ou, com `{` repetido, o mesmo erro para sempre).
+    """
+
+    def __init__(self, info: SyntaxErr):
+        super().__init__(info.message)
+        self.info = info
+
+
 class Parser:
     """Consome a lista de tokens do lexer e devolve `(Program, erros)`."""
 
@@ -122,6 +151,7 @@ class Parser:
         self.tokens = tokens
         self.pos = 0
         self.errors: list[SyntaxErr] = []
+        self.profundidade = 0
 
     # -- cursor sobre a lista de tokens -----------------------------------
     # Mesma ideia do cursor do lexer, um nível acima: lá o cursor andava sobre
@@ -161,6 +191,24 @@ class Parser:
         raise ParseError(
             f"{mensagem}; encontrado {encontrado}", token.line, token.column
         )
+
+    def _aninhado(self, funcao):
+        """Chama `funcao` contando um nível de aninhamento (ver LIMITE_ANINHAMENTO)."""
+        if self.profundidade >= LIMITE_ANINHAMENTO:
+            token = self._peek()
+            raise AninhamentoExcessivo(
+                SyntaxErr(
+                    f"aninhamento acima do limite de {LIMITE_ANINHAMENTO} níveis; "
+                    f"encontrado {nome_token(token.type)}",
+                    token.line,
+                    token.column,
+                )
+            )
+        self.profundidade += 1
+        try:
+            return funcao()
+        finally:
+            self.profundidade -= 1
 
     def _registra(self, erro: ParseError):
         self.errors.append(erro.info)
@@ -212,6 +260,9 @@ class Parser:
                 self._registra(erro)
                 self._sincroniza()
                 continue
+            except AninhamentoExcessivo as erro:
+                self.errors.append(erro.info)
+                break
             # `int a, b = 2;` devolve vários VarDecl de uma vez — a lista é
             # achatada aqui (o mesmo acontece dentro de `_bloco`).
             if isinstance(item, list):
@@ -338,6 +389,9 @@ class Parser:
         return self._comando()
 
     def _comando(self):
+        return self._aninhado(self._comando_sem_limite)
+
+    def _comando_sem_limite(self):
         """Despacha o comando pelo token atual (FIRST de cada produção)."""
         token = self._peek()
         tipo = token.type
@@ -452,6 +506,9 @@ class Parser:
         return self._atribuicao()
 
     def _atribuicao(self):
+        return self._aninhado(self._atribuicao_sem_limite)
+
+    def _atribuicao_sem_limite(self):
         esquerda = self._logico_ou()
         igual = self._match("ASSIGN")
         if igual is None:
@@ -498,7 +555,7 @@ class Parser:
         op = self._match("MINUS", "NOT")
         if op is not None:
             # Recursão direta: os unários são associativos à direita (`--x`).
-            operando = self._unaria()
+            operando = self._aninhado(self._unaria)
             return A.Unary(op.line, op.column, OPERADORES[op.type], operando)
         return self._posfixa()
 
@@ -583,8 +640,10 @@ def parse_source(source: str):
 def main(argv: list[str]) -> int:
     # Mesmo cuidado de main.py: forçar UTF-8 para os acentos das mensagens
     # saírem iguais em qualquer console.
-    sys.stdout.reconfigure(encoding="utf-8")
-    sys.stderr.reconfigure(encoding="utf-8")
+    # `surrogateescape` devolve intactos os bytes inválidos em UTF-8 que a
+    # leitura do arquivo preservou (ver `_mostrar` em lexer.py), como faz o C.
+    sys.stdout.reconfigure(encoding="utf-8", errors="surrogateescape")
+    sys.stderr.reconfigure(encoding="utf-8", errors="surrogateescape")
 
     modo = "sexpr"
     args = []
@@ -605,7 +664,7 @@ def main(argv: list[str]) -> int:
 
     caminho = Path(args[0])
     try:
-        source = caminho.read_text(encoding="utf-8")
+        source = caminho.read_text(encoding="utf-8", errors="surrogateescape")
     except OSError as exc:
         print(f"erro ao abrir '{caminho}': {exc}", file=sys.stderr)
         return 1

@@ -14,7 +14,7 @@ professor, não editado):
 - **01–25 (ACEITO)**: o parser precisa sair com código 0, imprimir uma AST em
   stdout, nada em stderr, e a AST tem de ser igual à de `ast.esperada.txt`.
 - **26–50 (REJEITADO)**: precisa sair com código 3, **não** imprimir AST e
-  emitir pelo menos um diagnóstico começando com "Erro sintático".
+  emitir pelo menos um diagnóstico começando com "Erro de sintaxe".
 
 Por que a comparação normaliza espaços: os arquivos oficiais escrevem o mesmo
 construto de duas formas diferentes em casos diferentes (`VarDecl(int x =
@@ -167,7 +167,7 @@ def verificar_oficial(caso: Path, comando: list[str]) -> tuple[bool, str]:
         return False, f"esperava rejeitar com código 3, saiu {codigo}"
     if stdout:
         return False, f"não deveria imprimir AST, imprimiu: {stdout[:60]}"
-    if not re.search(r"^Erro sintático na linha \d+, coluna \d+:", stderr, re.M):
+    if not re.search(r"^Erro de sintaxe na linha \d+, coluna \d+:", stderr, re.M):
         return False, f"diagnóstico fora do formato esperado: {stderr[:80]}"
     return True, stderr.splitlines()[0]
 

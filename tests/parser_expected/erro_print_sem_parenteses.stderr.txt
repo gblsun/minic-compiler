@@ -1,1 +1,1 @@
-Erro sintático na linha 2, coluna 11: esperado ABRE_PAREN; encontrado INT.
+Erro de sintaxe na linha 2, coluna 11: esperado ABRE_PAREN; encontrado INT.

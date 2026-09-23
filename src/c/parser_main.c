@@ -7,7 +7,7 @@
  * Mesmo contrato de src/python/parser.py, para que as duas implementações
  * possam ser comparadas byte a byte:
  *   - stdout: a AST, quando o programa é sintaticamente válido;
- *   - stderr: os diagnósticos ("Erro sintático na linha L, coluna C: ...");
+ *   - stderr: os diagnósticos ("Erro de sintaxe na linha L, coluna C: ...");
  *   - código de saída: 0 = aceito, 1 = erro de uso, 2 = erro léxico,
  *     3 = erro sintático (Seção 11.1 da especificação).
  */

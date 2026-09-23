@@ -31,7 +31,7 @@ Cada pasta tem seu próprio README com mais detalhes:
 ```
 minic-compiler/
 ├── parser.py  ponto de entrada da etapa 2 em Python (exigido pelo enunciado)
-├── main.c     ponto de entrada da etapa 2 em C (compila src/c/ em unidade única)
+├── parser.c   ponto de entrada da etapa 2 em C (compila src/c/ em unidade única)
 ├── docs/      documentação derivada da especificação (o que implementar e por quê)
 ├── src/       código-fonte — src/python/ e src/c/, as duas implementações
 ├── tests/     suítes de regressão do projeto (entradas, saídas gravadas, runners)
@@ -136,7 +136,7 @@ do scanner da etapa 1, reconhece a gramática completa de
 
 - **stdout**: a AST, quando o programa é sintaticamente válido.
 - **stderr**: os diagnósticos, no formato
-  `Erro sintático na linha L, coluna C: esperado X; encontrado Y.` — com
+  `Erro de sintaxe na linha L, coluna C: esperado X; encontrado Y.` — com
   recuperação em modo pânico, então vários erros são reportados numa só
   execução.
 - **código de saída**: `0` aceito, `3` erro sintático, `2` erro léxico
@@ -149,7 +149,7 @@ python parser.py codigo.c     # versão Python
 ```
 
 ```
-gcc -Wall -Wextra -std=c11 main.c -o parser
+gcc -Wall -Wextra -std=c11 parser.c -o parser
 ./parser codigo.c             # versão C
 ```
 
@@ -169,7 +169,7 @@ indentada, um nó por linha; `--tokens` imprime só os tokens do scanner.
 ### Testes da etapa 2
 
 ```
-python tests/run_parser_tests.py          # 50 casos oficiais + 15 próprios + equivalência Python/C
+python tests/run_parser_tests.py          # 50 casos oficiais + 17 próprios + equivalência Python/C
 python tests/run_parser_tests.py --update # regrava os golden dos casos próprios
 bash src/python/test_parser_python.sh     # script oficial da disciplina (Python)
 bash src/c/test_parser_c.sh               # script oficial da disciplina (C)
@@ -179,17 +179,23 @@ Os dois últimos são atalhos para os scripts do professor, que também podem se
 chamados direto — o pacote de 50 casos está versionado no repositório:
 
 ```
-LC_ALL=C.UTF-8 bash ref/scripts/testar_parser_python.sh ref/testes-oficiais/testes-parser-50 ./parser.py
-LC_ALL=C.UTF-8 bash ref/scripts/testar_parser_c.sh      ref/testes-oficiais/testes-parser-50 ./main.c
+bash ref/scripts/testar_parser_python.sh ref/testes-oficiais/testes-parser-50 ./parser.py
+bash ref/scripts/testar_parser_c.sh      ref/testes-oficiais/testes-parser-50 ./parser.c
 ```
 
-> O `LC_ALL=C.UTF-8` não é frescura: o script oficial conta os erros com um
-> `grep` que procura por "sintático", e em locale `C` o "á" não casa — o
-> contador "Erros sintáticos" apareceria como 0 mesmo com o parser detectando
-> todos os 25. Os wrappers em `src/` já exportam isso.
+> Os diagnósticos começam com "Erro de sintaxe", só com ASCII, de propósito. O
+> script oficial conta os erros com um `grep` que procura por "sintático" ou
+> "de sintaxe"; em locale `C`/`POSIX` o "á" não casa, e com a mensagem antiga
+> ("Erro sintático") o contador "Erros sintáticos" dava 0 mesmo com os 25 casos
+> rejeitados. Com a mensagem atual o resultado é o mesmo em qualquer locale.
+>
+> O parser em C não chama nenhum programa externo: `parser.c` inclui o lexer,
+> a AST e o parser de `src/c/`, e tudo roda no mesmo processo. Basta compilar
+> esse único arquivo, e o nome do arquivo de entrada vai direto para `fopen`
+> (funciona com espaços, caracteres especiais e caminhos de qualquer tamanho).
 
-Resultado atual: **195/195 verificações** — 50/50 casos oficiais e 15/15 casos
-próprios em cada implementação, mais 65/65 entradas com saída byte a byte
+Resultado atual: **201/201 verificações** — 50/50 casos oficiais e 17/17 casos
+próprios em cada implementação, mais 67/67 entradas com saída byte a byte
 idêntica entre Python e C. Os scripts oficiais do professor marcam
 16 aprovados / 25 erros sintáticos detectados, que é o teto do pacote de testes
 — o porquê está em [docs/resultados-etapa2.md](docs/resultados-etapa2.md).
@@ -199,7 +205,7 @@ idêntica entre Python e C. Os scripts oficiais do professor marcam
 | Arquivo                                                | Papel                                                                                                             |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | [parser.py](parser.py)                                   | ponto de entrada exigido pelo enunciado (atalho para `src/python/parser.py`)                                      |
-| [main.c](main.c)                                          | ponto de entrada em C; compila os fontes de `src/c/` como unidade única, que é como o script do professor compila |
+| [parser.c](parser.c)                                      | ponto de entrada em C; compila os fontes de `src/c/` como unidade única, que é como o script do professor compila |
 | [src/python/parser.py](src/python/parser.py)              | o parser em Python + CLI                                                                                          |
 | [src/python/minic_ast.py](src/python/minic_ast.py)        | nós da AST e as duas impressões (compacta e indentada)                                                            |
 | [src/c/parser.c](src/c/parser.c) / [parser.h](src/c/parser.h) | o parser em C                                                                                                 |

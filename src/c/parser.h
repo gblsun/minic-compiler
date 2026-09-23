@@ -51,6 +51,10 @@ typedef struct {
 
     /* Ponto de retomada e o erro que está "em voo" até chegar nele. */
     jmp_buf recover;
+    /* Saída de emergência para aninhamento acima de LIMITE_ANINHAMENTO: pula
+     * todos os pontos de recuperação e encerra a análise (ver parser.c). */
+    jmp_buf abortar;
+    int profundidade; /* níveis de aninhamento abertos agora */
     char *pending;
     int pending_line;
     int pending_column;

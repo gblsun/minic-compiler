@@ -553,7 +553,37 @@ static void lexer_scan_symbol(Lexer *lexer, char ch, int line, int column) {
         }
     }
 
-    lexer_add_error(lexer, format_string("símbolo \"%c\" não reconhecido", ch), line, column);
+    unsigned char lead = (unsigned char)ch;
+    if (lead < 0x80) {
+        lexer_add_error(lexer, format_string("símbolo \"%c\" não reconhecido", ch), line,
+                         column);
+        return;
+    }
+
+    /* Fora do ASCII: o caractere ocupa de 2 a 4 bytes em UTF-8. Imprimir só o
+     * primeiro byte deixaria a mensagem com UTF-8 inválido (e daria um erro por
+     * byte), então a sequência inteira é consumida e reportada de uma vez, como
+     * no Python. Byte que não inicia sequência válida sai como \xNN. */
+    size_t extra = (lead >= 0xC2 && lead <= 0xDF)   ? 1
+                   : (lead >= 0xE0 && lead <= 0xEF) ? 2
+                   : (lead >= 0xF0 && lead <= 0xF4) ? 3
+                                                    : 0;
+    int valido = extra > 0;
+    for (size_t i = 0; i < extra && valido; i++) {
+        unsigned char c = (unsigned char)lexer_peek(lexer, (int)i);
+        valido = c >= 0x80 && c <= 0xBF;
+    }
+    if (!valido) {
+        lexer_add_error(lexer, format_string("símbolo \"\\x%02X\" não reconhecido", lead),
+                         line, column);
+        return;
+    }
+    char seq[5] = {ch, '\0', '\0', '\0', '\0'};
+    memcpy(seq + 1, lexer->source + lexer->pos, extra);
+    /* Os bytes de continuação avançam o cursor mas não a coluna: é um
+     * caractere só, e assim as colunas seguintes batem com as do Python. */
+    lexer->pos += extra;
+    lexer_add_error(lexer, format_string("símbolo \"%s\" não reconhecido", seq), line, column);
 }
 
 /* Decide, a partir do primeiro caractere, qual tipo de token começa aqui.

@@ -84,6 +84,30 @@ ONE_CHAR_SYMBOLS = {
 }
 
 
+# Classes de caracteres da Seção 3.5 da especificação, **só ASCII**. Os métodos
+# `str.isalpha()`/`isdigit()` do Python aceitam qualquer letra ou dígito Unicode
+# ("ç", "٣"), o que faria o lexer aceitar identificadores e números que a
+# especificação — e o lexer em C — rejeitam.
+def _eh_letra(ch: str) -> bool:
+    return ("a" <= ch <= "z") or ("A" <= ch <= "Z") or ch == "_"
+
+
+def _eh_digito(ch: str) -> bool:
+    return "0" <= ch <= "9"
+
+
+def _mostrar(ch: str) -> str:
+    r"""Caractere para a mensagem de erro.
+
+    Um byte inválido em UTF-8 chega aqui como substituto U+DC80..U+DCFF (o
+    arquivo é lido com `errors="surrogateescape"`); ele sai como `\xNN`, que é
+    o que o lexer em C imprime para o mesmo byte.
+    """
+    if 0xDC80 <= ord(ch) <= 0xDCFF:
+        return f"\\x{ord(ch) - 0xDC00:02X}"
+    return ch
+
+
 @dataclass
 class Token:
     """Um token reconhecido pelo lexer.
@@ -250,9 +274,9 @@ class Lexer:
         line, column = self.line, self.column
         ch = self._advance()
 
-        if ch.isalpha() or ch == "_":
+        if _eh_letra(ch):
             self._scan_identifier_or_keyword(ch, line, column)
-        elif ch.isdigit():
+        elif _eh_digito(ch):
             self._scan_number(ch, line, column)
         elif ch == '"':
             self._scan_string(line, column)
@@ -270,7 +294,7 @@ class Lexer:
         quebraria identificadores como `inteiro` ou `index`.
         """
         chars = [first]
-        while not self._at_end() and (self._peek().isalnum() or self._peek() == "_"):
+        while not self._at_end() and (_eh_letra(self._peek()) or _eh_digito(self._peek())):
             chars.append(self._advance())
         lexeme = "".join(chars)
         token_type = KEYWORDS.get(lexeme, "IDENT")
@@ -280,20 +304,20 @@ class Lexer:
         """Lê um número inteiro ou de ponto flutuante.
 
         A parte fracionária só é consumida se houver um dígito logo depois do
-        ponto (`self._peek(1).isdigit()`). Isso evita, por exemplo, tratar
+        ponto (`_eh_digito(self._peek(1))`). Isso evita, por exemplo, tratar
         "3." como início de um float incompleto: nesse caso o "3" vira um
         INT normal e o "." sobra para ser tratado (e provavelmente rejeitado,
         já que "." sozinho não é um símbolo reconhecido) na próxima chamada.
         """
         chars = [first]
-        while not self._at_end() and self._peek().isdigit():
+        while not self._at_end() and _eh_digito(self._peek()):
             chars.append(self._advance())
 
         is_float = False
-        if self._peek() == "." and self._peek(1).isdigit():
+        if self._peek() == "." and _eh_digito(self._peek(1)):
             is_float = True
             chars.append(self._advance())
-            while not self._at_end() and self._peek().isdigit():
+            while not self._at_end() and _eh_digito(self._peek()):
                 chars.append(self._advance())
 
         lexeme = "".join(chars)
@@ -417,7 +441,7 @@ class Lexer:
             self._add_token(ONE_CHAR_SYMBOLS[ch], ch, line, column)
             return
 
-        self._add_error(f'símbolo "{ch}" não reconhecido', line, column)
+        self._add_error(f'símbolo "{_mostrar(ch)}" não reconhecido', line, column)
 
 
 def tokenize(source: str):

@@ -132,7 +132,7 @@ especificação:
 
 ```text
 Erro léxico na linha 3, coluna 12: símbolo "@" não reconhecido.
-Erro sintático na linha 4, coluna 8: esperado ")" após a condição; encontrado "{".
+Erro de sintaxe na linha 4, coluna 8: esperado ")" após a condição; encontrado "{".
 Erro semântico na linha 6, coluna 5: identificador "resultado" não foi declarado.
 ```
 
@@ -143,9 +143,11 @@ Convenções do projeto:
 - **mais de um erro por execução**: o scanner já faz isso (modo pânico); o
   parser deve fazer o mesmo, sincronizando em `;`, `}`, `)` ou numa palavra
   reservada que inicie construção, "sem mascarar a causa original";
-- a frase começa com a categoria exata (`Erro léxico`, `Erro sintático`) — o
+- a frase começa com a categoria exata (`Erro léxico`, `Erro de sintaxe`) — o
   script oficial `testar_parser_*.sh` procura por esse padrão com `grep` para
-  contar os erros sintáticos detectados.
+  contar os erros sintáticos detectados. O "de sintaxe" (em vez do "sintático"
+  da especificação) é ASCII puro: o `[aá]` do `grep` não casa com o "á" em
+  UTF-8 quando o locale é `C`/`POSIX`, e o contador zerava.
 
 ## Organização de pastas
 

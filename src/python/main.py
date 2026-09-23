@@ -22,8 +22,10 @@ def main(argv: list[str]) -> int:
     # por padrão (cp1252/cp850), o que quebraria a impressão de acentos nas
     # mensagens de erro em português. Forçamos UTF-8 explicitamente em
     # stdout/stderr para o programa se comportar igual em qualquer SO.
-    sys.stdout.reconfigure(encoding="utf-8")
-    sys.stderr.reconfigure(encoding="utf-8")
+    # `surrogateescape` devolve intactos os bytes inválidos em UTF-8 que a
+    # leitura do arquivo preservou (ver `_mostrar` em lexer.py), como faz o C.
+    sys.stdout.reconfigure(encoding="utf-8", errors="surrogateescape")
+    sys.stderr.reconfigure(encoding="utf-8", errors="surrogateescape")
 
     # argv[0] é o nome do script; o programa espera exatamente um argumento
     # depois dele, o caminho do arquivo .mc a analisar.
@@ -33,7 +35,7 @@ def main(argv: list[str]) -> int:
 
     path = Path(argv[1])
     try:
-        source = path.read_text(encoding="utf-8")
+        source = path.read_text(encoding="utf-8", errors="surrogateescape")
     except OSError as exc:
         # Arquivo inexistente, sem permissão de leitura, etc. Isso é um erro
         # de uso do programa (código 1), diferente de um erro léxico dentro

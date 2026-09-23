@@ -39,7 +39,7 @@ Critério de cada suíte:
   pacote tem um `)` faltando; isso aparece explicitamente no relatório do
   runner.
 - **Oficiais 26–50 (REJEITADO)**: código de saída 3, nenhuma AST impressa e
-  pelo menos um diagnóstico no formato `Erro sintático na linha L, coluna C: …`.
+  pelo menos um diagnóstico no formato `Erro de sintaxe na linha L, coluna C: …`.
 - **Próprios**: comparação byte a byte de stdout, stderr e código de saída com
   os golden gravados.
 - **Equivalência**: as duas implementações têm de devolver exatamente o mesmo
@@ -137,9 +137,9 @@ Diagnóstico de erro sintático, com recuperação (vários erros numa execuçã
 `tests/parser_inputs/erro_multiplos.c`):
 
 ```text
-Erro sintático na linha 3, coluna 5: esperado PONTO_E_VIRGULA; encontrado KW_INT.
-Erro sintático na linha 3, coluna 13: esperado expressão (identificador, literal ou ABRE_PAREN); encontrado PONTO_E_VIRGULA.
-Erro sintático na linha 4, coluna 15: esperado FECHA_PAREN; encontrado ABRE_CHAVE.
+Erro de sintaxe na linha 3, coluna 5: esperado PONTO_E_VIRGULA; encontrado KW_INT.
+Erro de sintaxe na linha 3, coluna 13: esperado expressão (identificador, literal ou ABRE_PAREN); encontrado PONTO_E_VIRGULA.
+Erro de sintaxe na linha 4, coluna 15: esperado FECHA_PAREN; encontrado ABRE_CHAVE.
 ```
 
 Código de saída 3 (erro sintático), 2 (erro léxico — o parser não roda) e 0

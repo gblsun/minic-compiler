@@ -1,0 +1,3 @@
+Erro léxico na linha 4, coluna 10: símbolo "ç" não reconhecido.
+Erro léxico na linha 4, coluna 11: símbolo "ã" não reconhecido.
+Erro léxico na linha 4, coluna 16: símbolo "٣" não reconhecido.
