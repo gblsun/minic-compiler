@@ -1,7 +1,8 @@
 # src/c/
 
-Implementação em C do MINIC — analisador léxico (etapa 1) e analisador sintático
-com AST (etapa 2) —, portada à mão a partir das versões Python
+Implementação em C do MINIC — analisador léxico (etapa 1), analisador sintático
+com AST (etapa 2) e analisador semântico (etapa 3) —, portada à mão a partir das
+versões Python
 ([`lexer.py`](../python/lexer.py), [`parser.py`](../python/parser.py),
 [`minic_ast.py`](../python/minic_ast.py)), sem `re`/`lex`/`flex` nem gerador de
 parser, para produzir exatamente os mesmos tokens, a mesma AST e as mesmas
@@ -17,6 +18,9 @@ mensagens de erro.
 | [parser.h](parser.h) | Interface do parser: `ParseError`, a struct `Parser` (tokens, erros, lista de nós e o ponto de recuperação) e `parser_init`/`parser_parse`/`parser_free`/`parseerror_to_string`. |
 | [parser.c](parser.c) | O parser por descida recursiva: uma função por não terminal, na mesma ordem de `parser.py`. |
 | [parser_main.c](parser_main.c) | CLI do parser: `./parser <arquivo.c>`, com `--tree` e `--tokens`, e os exit codes 0/1/2/3 da Seção 11.1. |
+| [tabela_simbolos.h](tabela_simbolos.h) / [tabela_simbolos.c](tabela_simbolos.c) | Tabela de símbolos (etapa 3), transcrição de [`tabela_simbolos.py`](../python/tabela_simbolos.py): `Simbolo` e a pilha de escopos `TabelaSimbolos` (`tabela_inserir`, `tabela_buscar`, `tabela_buscar_no_escopo_atual`, `tabela_abrir_escopo`, `tabela_fechar_escopo`). Os símbolos apontam para strings da AST em vez de copiá-las. |
+| [semantico.h](semantico.h) / [semantico.c](semantico.c) | O analisador semântico, transcrição de [`semantico.py`](../python/semantico.py): mesmas passagens, mesma ordem de visita e as mesmas mensagens. Tipos são `SemTipo {base, vetor}`, e os diagnósticos são ordenados com `qsort` mais um campo `ordem`, que faz o papel da estabilidade do `sorted()` do Python. |
+| [minic_main.c](minic_main.c) | CLI do pipeline (etapa 3): `./minic <arquivo.c>`, lexer → parser → semântica, códigos 0/1/2/3/4. No Windows põe stdout/stderr em modo binário, para o relatório sair com os mesmos bytes do Linux. |
 | [test_parser_c.sh](test_parser_c.sh) | Roda o script de teste do parser fornecido pela disciplina ([`../../ref/scripts/testar_parser_c.sh`](../../ref/scripts/testar_parser_c.sh)) com os caminhos deste repositório; o cabeçalho explica como ler o resultado. |
 | [test_scanner_c.sh](test_scanner_c.sh) | Script de teste (formato pedido pela disciplina — ver o original em [`../../ref/scripts/test_scanner_c.sh`](../../ref/scripts/test_scanner_c.sh), adaptado aqui para compilar este scanner e comparar com `tests/expected/`; ver [`tests/README.md`](../../tests/README.md) para como os três runners de teste do projeto se encaixam). |
 
@@ -50,7 +54,18 @@ Saída idêntica à da versão Python (mesmo formato de token, mesmas mensagens 
 erro, mesmo exit code) — ver o [README.md](../../README.md) da raiz para o
 contrato completo de stdout/stderr/exit code.
 
+Analisador semântico (etapa 3), com o `minic.c` da raiz em unidade única,
+como o script da AP 2 compila:
+
+```bash
+gcc -Wall -Wextra minic.c -o minic
+./minic ref/testes-oficiais/testes-semanticos-20/17_tipos_de_argumentos.c
+```
+
 ## Rodando os testes
+
+`python tests/run_semantic_tests.py --c` roda a suíte da etapa 3 só na versão
+C (sem a opção, roda as duas e a equivalência entre elas).
 
 ```bash
 bash src/c/test_scanner_c.sh            # etapa 1: scanner
