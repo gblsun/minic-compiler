@@ -1,0 +1,10 @@
+SEM007 — linha 10, coluna 9: “media” espera 2 argumentos, mas recebeu 1.
+SEM007 — linha 11, coluna 9: “media” espera 2 argumentos, mas recebeu 3.
+SEM008 — linha 12, coluna 15: Argumento 1 de “media”: esperado vetor de int, recebido int (expressão “n”).
+SEM008 — linha 13, coluna 18: Argumento 2 de “media”: esperado int, recebido float (expressão “2.5”).
+SEM012 — linha 14, coluna 10: Função “acao” não produz valor (retorno void) e não pode ser usada como argumento.
+SEM012 — linha 15, coluna 9: Função “acao” não produz valor (retorno void) e não pode ser usada como operando.
+SEM012 — linha 16, coluna 9: Função “acao” não produz valor (retorno void) e não pode ser usada como condição.
+SEM012 — linha 17, coluna 11: Função “acao” não produz valor (retorno void) e não pode ser usada como argumento de print.
+SEM009 — linha 18, coluna 12: Retorno float incompatível com o tipo int da função “main”; conversão implícita de float para int não permitida.
+Análise semântica concluída: 9 erros; programa rejeitado.

@@ -9,12 +9,54 @@ ser avaliada, e por isso valem uma leitura atenta antes de cada etapa.
 ref/testes-oficiais/
 ├── testes-scanner-minic/    etapa 1 — tokens em JSONL (6 casos inválidos + 5 programas C)
 ├── testes-parser-50/        etapa 2 — 50 programas (25 aceitos + 25 rejeitados) com AST esperada
+├── testes-semanticos-20/    etapa 3 — 20 programas (10 aceitos + 10 rejeitados) com gabarito
 └── testes-parser-50.tar.gz  o pacote original, como veio do Classroom
 ```
 
 O `.tar.gz` fica versionado junto do conteúdo extraído de propósito: o
 extraído é o que se lê e se usa no dia a dia, e o compactado é a prova de que
 nada foi alterado (`tar -tzf testes-parser-50.tar.gz` lista o original).
+
+---
+
+## testes-semanticos-20/ — etapa 3 (análise semântica)
+
+Anexo da atividade "AP 2 - Analisador Semântico"
+([enunciado](../enunciados/ap-analisador-semantico-enunciado.md)). São 20
+programas `NN_nome.c`, cada um com o seu `NN_nome.gabarito`, mais o
+[`GABARITO.md`](testes-semanticos-20/GABARITO.md), que explica cada caso e o
+catálogo de códigos SEM001–SEM013, e um [`README.md`](testes-semanticos-20/README.md).
+
+- **01–10 aceitos**: o gabarito é só a linha
+  `Análise semântica concluída: 0 erros; programa aceito.`
+- **11–20 rejeitados**: um diagnóstico por linha
+  (`SEM003 — linha 3, coluna 9: …`) e o resumo com a contagem.
+
+Os scripts [`testes_semanticos_py.sh`](../scripts/testes_semanticos_py.sh) e
+[`testes_semanticos_c.sh`](../scripts/testes_semanticos_c.sh) comparam a saída
+(stdout e stderr juntos) com o `.gabarito` usando **`diff` exato**. Por isso,
+detalhes que costumam passar despercebidos contam:
+
+- os `.gabarito` separam as linhas com **CRLF** e **não terminam com quebra de
+  linha**. A saída precisa reproduzir esses bytes, e a pasta está marcada como
+  `-text` no [`.gitattributes`](../../.gitattributes) para o git não
+  normalizar nada;
+- as mensagens usam travessão (`—`) e aspas curvas (`“ ”`) em UTF-8;
+- as colunas começam em 1, e uma mensagem sobre uma expressão aponta o
+  **início** dela (em `combina(1 < 2, …)`, a coluna do `1`).
+
+Três pontos em que o pacote diverge da especificação, e o pacote prevaleceu
+(detalhes em [`docs/semantica.md`](../../docs/semantica.md#decisões-de-projeto)):
+
+- nenhum dos 20 programas tem `main` (usam `principal`), e os 10 válidos são
+  aceitos: a exigência de `main` da Seção 2 não é verificada;
+- o caso 20 (`3 = n;`) espera o erro **semântico** SEM013 na coluna do `3`. O
+  parser da etapa 2 rejeitava isso como erro de sintaxe, e no pipeline
+  semântico ele passa a aceitar a forma geral;
+- o caso 09 (`a = b = 3;`) exige que a atribuição tenha valor.
+
+Resultado: 20/20 nas duas implementações
+([`docs/resultados-etapa3.md`](../../docs/resultados-etapa3.md)).
 
 ---
 

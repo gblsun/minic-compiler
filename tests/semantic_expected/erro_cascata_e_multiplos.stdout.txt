@@ -1,0 +1,8 @@
+SEM001 — linha 3, coluna 9: Identificador “ausente” não declarado neste escopo.
+SEM001 — linha 3, coluna 23: Identificador “outro” não declarado neste escopo.
+SEM001 — linha 4, coluna 9: Identificador “ausente” não declarado neste escopo.
+SEM001 — linha 5, coluna 10: Identificador “ausente” não declarado neste escopo.
+SEM003 — linha 6, coluna 9: Não é possível atribuir float a int sem conversão permitida (destino “n”; expressão “2.5”).
+SEM005 — linha 7, coluna 12: Condição de while deve ter tipo bool; recebeu int (expressão “n”).
+SEM005 — linha 8, coluna 9: Condição de if deve ter tipo bool; recebeu int (expressão “n = 1”).
+Análise semântica concluída: 7 erros; programa rejeitado.

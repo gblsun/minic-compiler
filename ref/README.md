@@ -18,7 +18,7 @@ ref/
 ├── enunciados/      enunciados das atividades (Classroom) e orientações de entrega
 ├── exercicios/      exercícios das aulas 6 a 9 (.docx), 13 e 13–14 (.pdf)
 ├── scripts/         scripts de teste fornecidos pelo professor
-└── testes-oficiais/ pacotes de teste oficiais (scanner e parser)
+└── testes-oficiais/ pacotes de teste oficiais (scanner, parser e semântico)
 ```
 
 ## Especificação
@@ -74,6 +74,7 @@ pedido e quando.
 |---|---|
 | [ap-analisador-sintatico-enunciado.pdf](enunciados/ap-analisador-sintatico-enunciado.pdf) | Atividade **"AP 1 - analisador sintático"** (10 pontos). Define os comandos obrigatórios de invocação do parser e anexa o pacote `testes-parser-50.tar.gz`. Atenção ao nome: no Classroom a atividade se chama "AP 1", mas corresponde à **etapa 2** do projeto (parser e AST) — a etapa 1 foi o analisador léxico. Prazos em [`docs/etapas.md`](../docs/etapas.md). |
 | [scripts-de-teste-para-o-parser-enunciado.pdf](enunciados/scripts-de-teste-para-o-parser-enunciado.pdf) | Como chamar os scripts de teste do parser e onde eles devem ficar. |
+| [ap-analisador-semantico-enunciado.md](enunciados/ap-analisador-semantico-enunciado.md) | Atividade **"AP 2 - Analisador Semântico"**: os comandos de invocação (`./testes_semanticos_py.sh minic.py [diretorio]` e `./testes_semanticos_c.sh minic.c [diretorio]`). Os testes e os scripts que vieram junto estão em `testes-oficiais/testes-semanticos-20/` e em `scripts/`. |
 | [orientacoes-entrega-analisador-semantico.pdf](enunciados/orientacoes-entrega-analisador-semantico.pdf) | Orientações da entrega do **analisador semântico** (etapa 3): repositório no GitHub com scanner, parser e analisador semântico em arquivos separados, mais testes com resultados. Critérios: desacoplamento entre componentes, equivalência C × Python, lógica de implementação e casos de teste ("passar em todos os testes não significa estar correto"). |
 
 > O enunciado da etapa 1 (analisador léxico) não foi salvo em PDF; o texto do
@@ -111,6 +112,8 @@ como os runners se encaixam.
 | [test_scanner_python.sh](scripts/test_scanner_python.sh) | Roda `scanner.py` sobre cada caso e compara a saída **JSONL** com `<entrada>.expected.jsonl`. | [`src/python/test_scanner_python.sh`](../src/python/test_scanner_python.sh) |
 | [test_scanner_c.sh](scripts/test_scanner_c.sh) | Compila `scanner.c` com `gcc -Wall -Wextra -std=c11` e faz a mesma comparação JSONL. | [`src/c/test_scanner_c.sh`](../src/c/test_scanner_c.sh) |
 | [testar_parser_python.sh](scripts/testar_parser_python.sh) | `bash testar_parser_python.sh ./testes-parser-50 ./parser.py` — roda o parser em cada `codigo.c` e compara stdout+stderr com o esperado. | [`src/python/test_parser_python.sh`](../src/python/test_parser_python.sh) (wrapper: chama este script sem alterá-lo, com os caminhos do repo) |
+| [testes_semanticos_py.sh](scripts/testes_semanticos_py.sh) | `bash testes_semanticos_py.sh minic.py <diretorio>` — roda `python3 minic.py` em cada `.c` e compara stdout+stderr com o `.gabarito` usando `diff` exato (AP 2). | não precisa: chama-se direto, com `./minic.py` e `ref/testes-oficiais/testes-semanticos-20` |
+| [testes_semanticos_c.sh](scripts/testes_semanticos_c.sh) | `bash testes_semanticos_c.sh minic.c <diretorio>` — compila `gcc -Wall -Wextra minic.c` (unidade única) num diretório temporário e faz a mesma comparação. | idem, com `./minic.c` |
 | [testar_parser_c.sh](scripts/testar_parser_c.sh) | `bash testar_parser_c.sh ./testes-parser-50 ./parser.c` — compila o parser como **unidade única** (`gcc … $PARSER -o parser`) e faz a mesma comparação. | [`src/c/test_parser_c.sh`](../src/c/test_parser_c.sh) (wrapper, idem) |
 
 As armadilhas conhecidas desses quatro scripts (comparação byte a byte,
@@ -119,7 +122,7 @@ exigência de bit de execução, compilação em arquivo único) estão detalhad
 
 ## testes-oficiais/
 
-Pacotes de teste oficiais do scanner e do parser. Têm
+Pacotes de teste oficiais do scanner, do parser e do analisador semântico. Têm
 [README próprio](testes-oficiais/README.md), porque exigem explicação: o que
 cada pacote cobre, o que está faltando neles e como interpretar o resultado
 dos scripts.
@@ -143,6 +146,9 @@ Para reencontrar um arquivo no Classroom ou conferir que nada foi trocado:
 | `exercicios/exercicios-aula-13-enunciados.pdf` | `aula13_exercicios_praticos_python_c.pdf` |
 | `exercicios/exercicios-aulas-13-14-enunciados.pdf` | `exercicios_praticos_minic_aulas_13_14.pdf` |
 | `scripts/*.sh` | idêntico ao original |
+| `enunciados/ap-analisador-semantico-enunciado.md` | `Avaliação Parcial II/Avaliação Parcial II - analisador Semântico.md` |
+| `testes-oficiais/testes-semanticos-20/` | `Avaliação Parcial II/minic-testes-semanticos/` |
+| `scripts/testes_semanticos_{py,c}.sh` | `Avaliação Parcial II/testes_semanticos_{py,c}.sh` |
 | `testes-oficiais/testes-scanner-minic/` | `Testes para o analisador léxico/testes-scanner-minic_codes/` |
 | `testes-oficiais/testes-parser-50{,.tar.gz}` | `testes-parser-50.tar.gz` |
 

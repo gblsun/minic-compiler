@@ -147,3 +147,56 @@ HÁ AST", e o espaçamento dos válidos é inconsistente). O porquê está em
 [`docs/resultados-etapa2.md`](../docs/resultados-etapa2.md#scripts-oficiais-da-disciplina)
 e em
 [`ref/testes-oficiais/README.md`](../ref/testes-oficiais/README.md#armadilhas-dos-scripts-oficiais).
+
+## Suíte do analisador semântico (etapa 3)
+
+```bash
+python tests/run_semantic_tests.py            # tudo
+python tests/run_semantic_tests.py --python   # só a versão Python
+python tests/run_semantic_tests.py --c        # só a versão C
+python tests/run_semantic_tests.py --update   # regrava os golden dos casos próprios
+python tests/run_semantic_tests.py -v         # detalha caso a caso
+```
+
+[`run_semantic_tests.py`](run_semantic_tests.py) roda **três** suítes, todas
+comparando **bytes** (o relatório tem CRLF entre as linhas e nenhuma quebra no
+fim, como os gabaritos oficiais):
+
+| Suíte | Fonte dos casos | Critério |
+|---|---|---|
+| 20 casos oficiais | [`ref/testes-oficiais/testes-semanticos-20/`](../ref/testes-oficiais/testes-semanticos-20/) (AP 2) | stdout idêntico ao `.gabarito`, stderr vazio, exit 0 (aceito) ou 4 (rejeitado) |
+| 16 casos próprios | [`semantic_inputs/`](semantic_inputs/) | stdout, stderr e exit code idênticos aos golden de [`semantic_expected/`](semantic_expected/) |
+| Equivalência | as 36 entradas acima + os 50 oficiais e os 17 próprios do parser (103 programas) | Python e C devolvem exatamente o mesmo stdout, stderr e exit code |
+
+Resultado atual: 175/175 — registro em
+[`docs/resultados-etapa3.md`](../docs/resultados-etapa3.md).
+
+Os casos próprios cobrem o que os oficiais não exercitam: operadores (SEM004),
+`break`/`continue`/`return` fora de contexto (SEM010), categoria (SEM014),
+divisão por zero constante (SEM015), tamanho e limites de vetor (SEM016),
+todas as variantes de SEM009, SEM011, SEM012 e SEM013, recursão mútua, `for`,
+`print`, `read`, `char`, supressão de cascata, colunas depois de caracteres
+acentuados e os erros léxico e sintático antes da semântica. Nomes:
+`aceito_*.c` para programas aceitos, `erro_*.c` para os rejeitados.
+
+Para adicionar um caso, o processo é o mesmo do parser: crie
+`tests/semantic_inputs/<nome>.c`, confira à mão a saída de
+`python minic.py tests/semantic_inputs/<nome>.c`, grave com `--update` (sempre
+a partir da versão Python), revise o `git diff` de `semantic_expected/` e rode
+a suíte completa para conferir o C.
+
+Os scripts oficiais da AP 2 rodam direto, sem wrapper:
+
+```bash
+bash ref/scripts/testes_semanticos_py.sh ./minic.py ref/testes-oficiais/testes-semanticos-20
+bash ref/scripts/testes_semanticos_c.sh  ./minic.c  ref/testes-oficiais/testes-semanticos-20
+```
+
+## Integração contínua
+
+O workflow [`.github/workflows/testes.yml`](../.github/workflows/testes.yml)
+roda, a cada push e pull request, num Ubuntu com `gcc` e `python3`: a
+compilação de `parser.c` e `minic.c` com `-Werror`, as suítes das etapas 1, 2
+e 3, os exercícios da aula 13 e os scripts oficiais do professor (o do parser
+em locale `C`, como na avaliação). É a forma de testar a versão C quando a
+máquina local não consegue compilar.

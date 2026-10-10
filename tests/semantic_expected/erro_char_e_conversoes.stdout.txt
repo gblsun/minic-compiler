@@ -1,0 +1,5 @@
+SEM003 — linha 2, coluna 14: Não é possível atribuir int a char sem conversão permitida (destino “c”; expressão “65”).
+SEM003 — linha 4, coluna 15: Não é possível atribuir char a float sem conversão permitida (destino “r”; expressão “'b'”).
+SEM003 — linha 5, coluna 14: Não é possível atribuir int a bool sem conversão permitida (destino “b”; expressão “0”).
+SEM003 — linha 9, coluna 9: Não é possível atribuir int a char sem conversão permitida (destino “c”; expressão “n”).
+Análise semântica concluída: 4 erros; programa rejeitado.

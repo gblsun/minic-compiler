@@ -1,7 +1,7 @@
 # src/python/
 
-Implementação em Python do MINIC: analisador léxico (etapa 1) e analisador
-sintático com AST (etapa 2).
+Implementação em Python do MINIC: analisador léxico (etapa 1), analisador
+sintático com AST (etapa 2) e analisador semântico (etapa 3).
 
 | Arquivo | O que é |
 |---|---|
@@ -9,6 +9,9 @@ sintático com AST (etapa 2).
 | [main.py](main.py) | CLI mínima: `python main.py <arquivo.mc>`. Lê o arquivo, chama `Lexer`, imprime tokens em stdout e erros em stderr, e devolve o exit code definido na especificação (0 = ok, 2 = erro léxico). |
 | [minic_ast.py](minic_ast.py) | Os nós da AST e as duas formas de imprimi-la: compacta (S-expression de uma linha, a notação dos testes oficiais) e indentada (`--tree`). O nome não é `ast.py` de propósito: `ast` é um módulo da biblioteca padrão, e um arquivo com esse nome aqui passaria a sombreá-lo. |
 | [parser.py](parser.py) | O analisador sintático por descida recursiva — uma função por não terminal da gramática de [`docs/gramatica.md`](../../docs/gramatica.md) — mais a CLI (`python parser.py <arquivo.c>`, com `--tree` e `--tokens`). Consome os tokens de `lexer.py`; se houver erro léxico, não roda. |
+| [tabela_simbolos.py](tabela_simbolos.py) | Tabela de símbolos (aula 14): `Simbolo` (nome, categoria, tipo, posição, vetor/tamanho, parâmetros) e `TabelaSimbolos`, uma pilha de escopos com `inserir`, `buscar`, `buscar_no_escopo_atual`, `abrir_escopo` e `fechar_escopo` (Seção 6.2 da especificação). Não sabe nada de AST nem de regras de tipo. |
+| [semantico.py](semantico.py) | O analisador semântico (etapa 3): duas passagens sobre a AST (coleta de assinaturas e globais; verificação), síntese de tipos, compatibilidade, contexto de laço e de função, análise de fluxo para retorno em todos os caminhos, e o relatório no formato do gabarito da AP 2. Regras em [`docs/semantica.md`](../../docs/semantica.md). |
+| [minic.py](minic.py) | CLI do pipeline completo: `python minic.py <arquivo.c>` roda lexer → parser → semântica, cada fase só se a anterior não teve erro; códigos de saída 0/1/2/3/4. |
 | [test_parser_python.sh](test_parser_python.sh) | Roda o script de teste do parser fornecido pela disciplina ([`../../ref/scripts/testar_parser_python.sh`](../../ref/scripts/testar_parser_python.sh)) com os caminhos deste repositório. O cabeçalho do arquivo explica como ler o resultado (16 aprovados / 25 erros sintáticos é o teto do pacote). |
 | [app_streamlit.py](app_streamlit.py) | Interface web opcional (não faz parte da entrega obrigatória) para testar o lexer interativamente. Reaproveita o mesmo `Lexer` de `lexer.py` — nenhuma regra léxica é duplicada aqui. |
 | [test_scanner_python.sh](test_scanner_python.sh) | Script de teste (formato pedido pela disciplina — ver o original em [`../../ref/scripts/test_scanner_python.sh`](../../ref/scripts/test_scanner_python.sh), adaptado aqui para rodar `main.py` e comparar com `tests/expected/`; ver [`tests/README.md`](../../tests/README.md) para como os três runners de teste do projeto se encaixam). |

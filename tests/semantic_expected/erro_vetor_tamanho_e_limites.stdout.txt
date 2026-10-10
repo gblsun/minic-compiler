@@ -1,0 +1,6 @@
+SEM016 — linha 2, coluna 11: Tamanho do vetor “a” deve ser um literal inteiro positivo; recebeu “0”.
+SEM016 — linha 4, coluna 11: Tamanho do vetor “c” deve ser um literal inteiro positivo; recebeu “-2”.
+SEM016 — linha 6, coluna 7: Índice “3” fora dos limites do vetor “b” (tamanho 3).
+SEM016 — linha 7, coluna 7: Índice “-1” fora dos limites do vetor “b” (tamanho 3).
+SEM016 — linha 9, coluna 11: Índice “5” fora dos limites do vetor “b” (tamanho 3).
+Análise semântica concluída: 5 erros; programa rejeitado.

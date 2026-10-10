@@ -133,6 +133,13 @@ em vez de traceback/crash. Assim as duas voltam a concordar.
 
 ### 1.5 Contagem de coluna: o C conta bytes, o Python conta caracteres
 
+**Resolvido na etapa 3.** O lexer C passou a contar colunas por caractere
+UTF-8, como o Python, e um literal `'é'` passou a ser um caractere só nas duas
+versões. Com a análise semântica, a diferença aparecia nos diagnósticos
+(`print("ação"); n = 2.5;` apontava a coluna errada no C). O caso
+`tests/semantic_inputs/erro_colunas_apos_utf8.c` cobre isso. Texto original
+abaixo, como registro.
+
 **Prioridade: baixa** · **Confirmado** (consequência dos itens acima)
 
 Em fonte 100% ASCII — todos os testes, todos os casos oficiais — não há

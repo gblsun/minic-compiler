@@ -246,18 +246,40 @@ static char lexer_peek(const Lexer *lexer, int offset) {
     return lexer->source[idx];
 }
 
+/* Quantos bytes de continuação seguem `lead` numa sequência UTF-8 válida a
+ * partir de lexer->pos (0 se `lead` é ASCII ou não inicia sequência válida). */
+static size_t lexer_utf8_extra(const Lexer *lexer, unsigned char lead) {
+    size_t extra = (lead >= 0xC2 && lead <= 0xDF)   ? 1
+                   : (lead >= 0xE0 && lead <= 0xEF) ? 2
+                   : (lead >= 0xF0 && lead <= 0xF4) ? 3
+                                                    : 0;
+    for (size_t i = 0; i < extra; i++) {
+        unsigned char c = (unsigned char)lexer_peek(lexer, (int)i);
+        if (c < 0x80 || c > 0xBF) {
+            return 0;
+        }
+    }
+    return extra;
+}
+
 /* Consome e devolve o caractere atual, avançando o cursor. É aqui que
  * linha/coluna são atualizadas: uma quebra de linha reinicia a coluna e
  * incrementa a linha; qualquer outro caractere só anda uma coluna para a
- * direita. */
+ * direita — um caractere, e não um byte: os bytes de continuação de uma
+ * sequência UTF-8 válida (dentro de cadeias, literais e comentários) não
+ * contam, e as colunas batem com as do Python. */
 static char lexer_advance(Lexer *lexer) {
     char ch = lexer->source[lexer->pos];
     lexer->pos += 1;
     if (ch == '\n') {
         lexer->line += 1;
         lexer->column = 1;
+        lexer->continuacoes = 0;
+    } else if (lexer->continuacoes > 0) {
+        lexer->continuacoes -= 1;
     } else {
         lexer->column += 1;
+        lexer->continuacoes = (int)lexer_utf8_extra(lexer, (unsigned char)ch);
     }
     return ch;
 }
@@ -488,21 +510,27 @@ static void lexer_scan_char(Lexer *lexer, int line, int column) {
         return;
     }
 
-    char ch_value;
+    /* Um caractere pode ocupar até 4 bytes em UTF-8 ('é' são 2): os bytes de
+     * continuação entram no lexema, e 'é' é um caractere só, como no Python. */
+    char seq[5] = {0};
+    size_t n = 0;
     if (lexer_peek(lexer, 0) == '\\') {
         lexer_advance(lexer);
-        ch_value = lexer_read_escape(lexer);
+        seq[n++] = lexer_read_escape(lexer);
     } else {
-        ch_value = lexer_advance(lexer);
+        seq[n++] = lexer_advance(lexer);
+        while (lexer->continuacoes > 0 && n < 4) {
+            seq[n++] = lexer_advance(lexer);
+        }
     }
 
     if (!lexer_at_end(lexer) && lexer_peek(lexer, 0) == '\'') {
         /* Caso feliz: um caractere (ou um escape, que conta como um só),
          * fechado corretamente. */
         lexer_advance(lexer);
-        char *lexeme = malloc(2);
-        lexeme[0] = ch_value;
-        lexeme[1] = '\0';
+        char *lexeme = malloc(n + 1);
+        memcpy(lexeme, seq, n);
+        lexeme[n] = '\0';
         TokenValue value;
         value.str_value = lexeme;
         lexer_add_token(lexer, TOK_CHAR, lexeme, line, column, value);
@@ -583,6 +611,7 @@ static void lexer_scan_symbol(Lexer *lexer, char ch, int line, int column) {
     /* Os bytes de continuação avançam o cursor mas não a coluna: é um
      * caractere só, e assim as colunas seguintes batem com as do Python. */
     lexer->pos += extra;
+    lexer->continuacoes = 0; /* consumidos aqui, sem passar por lexer_advance */
     lexer_add_error(lexer, format_string("símbolo \"%s\" não reconhecido", seq), line, column);
 }
 
@@ -618,6 +647,7 @@ void lexer_init(Lexer *lexer, const char *source) {
     lexer->pos = 0;
     lexer->line = 1;
     lexer->column = 1;
+    lexer->continuacoes = 0;
 
     lexer->tokens = NULL;
     lexer->tokens_len = 0;

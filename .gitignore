@@ -9,6 +9,7 @@ venv/
 *.exe
 src/c/scanner
 src/c/parser
+src/c/minic
 # o script oficial testar_parser_c.sh compila para ./parser na raiz
 /parser
 
@@ -17,3 +18,6 @@ output.jsonl
 
 # Executáveis dos exercícios da aula 13 (run_tests.py compila para cá)
 exercicios/aula13/build/
+
+# o script oficial da AP 2 compila para um diretório temporário; à mão, ./minic
+/minic

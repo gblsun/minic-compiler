@@ -1,0 +1,7 @@
+SEM002 — linha 2, coluna 7: “g” já declarado neste escopo; declaração anterior na linha 1, coluna 5 (tipo int).
+SEM002 — linha 3, coluna 14: “a” já declarado neste escopo; declaração anterior na linha 3, coluna 7 (tipo int).
+SEM002 — linha 4, coluna 9: “a” já declarado neste escopo; declaração anterior na linha 3, coluna 7 (tipo int).
+SEM001 — linha 9, coluna 12: Identificador “b” não declarado neste escopo.
+SEM002 — linha 11, coluna 1: “f” já declarado neste escopo; declaração anterior na linha 3, coluna 1 (função que retorna int).
+SEM001 — linha 15, coluna 14: Identificador “global_tardia” não declarado neste escopo.
+Análise semântica concluída: 6 erros; programa rejeitado.

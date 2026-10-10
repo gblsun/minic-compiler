@@ -19,3 +19,10 @@
 ref/testes-oficiais/testes-parser-50/** -text
 ref/testes-oficiais/testes-scanner-minic/** -text
 ref/slides/aula-06-roteiro.txt -text
+# Os gabaritos semânticos têm CRLF entre as linhas e nenhuma quebra no fim, e o
+# script oficial compara com `diff` exato: qualquer normalização os quebraria.
+ref/testes-oficiais/testes-semanticos-20/** -text
+
+# Golden da etapa 3: stdout com CRLF entre linhas e sem quebra no fim, igual
+# aos gabaritos oficiais; comparados byte a byte.
+tests/semantic_expected/** -text

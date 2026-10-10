@@ -1,0 +1,6 @@
+SEM013 — linha 6, coluna 5: Destino de atribuição não é atribuível; o literal real “2.5” não designa uma variável ou elemento de vetor.
+SEM013 — linha 7, coluna 5: Destino de atribuição não é atribuível; o literal lógico “true” não designa uma variável ou elemento de vetor.
+SEM013 — linha 8, coluna 5: Destino de atribuição não é atribuível; a chamada “f()” não designa uma variável ou elemento de vetor.
+SEM013 — linha 9, coluna 5: Destino de atribuição não é atribuível; a expressão “n + 1” não designa uma variável ou elemento de vetor.
+SEM013 — linha 10, coluna 5: Destino de atribuição não é atribuível; o literal de caractere “'a'” não designa uma variável ou elemento de vetor.
+Análise semântica concluída: 5 erros; programa rejeitado.

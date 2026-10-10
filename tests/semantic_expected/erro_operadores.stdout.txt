@@ -1,0 +1,8 @@
+SEM004 — linha 5, coluna 14: Operador * requer operandos numéricos; recebeu bool e int.
+SEM004 — linha 6, coluna 13: Operador % requer operandos int; recebeu float e int.
+SEM004 — linha 7, coluna 11: Operador && requer operandos bool; recebeu int e bool.
+SEM004 — linha 8, coluna 9: Operador ! requer operando bool; recebeu int.
+SEM004 — linha 9, coluna 9: Operador - requer operando numérico; recebeu bool.
+SEM004 — linha 10, coluna 11: Operador < requer operandos numéricos; recebeu bool e int.
+SEM004 — linha 11, coluna 11: Operador == requer operandos de tipos compatíveis; recebeu bool e int.
+Análise semântica concluída: 7 erros; programa rejeitado.

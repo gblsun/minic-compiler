@@ -28,7 +28,11 @@ que os casos oficiais de teste fixam (ver docs/gramatica.md):
    sintática: 13 dos 25 casos válidos não têm `main`.
 2. O alvo de uma atribuição é reconhecido analisando a expressão normalmente e
    **reinterpretando** o resultado: se depois dela vier `=`, o nó já construído
-   precisa ser um `Id` ou um `Index` (um lvalue).
+   precisa ser um `Id` ou um `Index` (um lvalue). Com `destino_generico=True`
+   (usado pelo pipeline semântico, `minic.py`), essa checagem fica para a
+   análise semântica, que a reporta como SEM013 — a apostila da aula 15 prevê
+   exatamente isso: "o parser pode aceitar a forma geral; a verificação
+   semântica confirma categoria e atribuibilidade".
 """
 
 import sys
@@ -147,8 +151,10 @@ class AninhamentoExcessivo(Exception):
 class Parser:
     """Consome a lista de tokens do lexer e devolve `(Program, erros)`."""
 
-    def __init__(self, tokens: list):
+    def __init__(self, tokens: list, destino_generico: bool = False):
         self.tokens = tokens
+        # Aceitar qualquer expressão à esquerda do `=` (ver docstring do módulo).
+        self.destino_generico = destino_generico
         self.pos = 0
         self.errors: list[SyntaxErr] = []
         self.profundidade = 0
@@ -513,7 +519,7 @@ class Parser:
         igual = self._match("ASSIGN")
         if igual is None:
             return esquerda
-        if not isinstance(esquerda, (A.Id, A.Index)):
+        if not self.destino_generico and not isinstance(esquerda, (A.Id, A.Index)):
             raise ParseError(
                 "lado esquerdo da atribuição não é atribuível; esperado identificador ou elemento de vetor",
                 igual.line,
@@ -618,9 +624,9 @@ class Parser:
         self._erro("esperado expressão (identificador, literal ou ABRE_PAREN)")
 
 
-def parse(tokens):
+def parse(tokens, destino_generico: bool = False):
     """Atalho: analisa uma lista de tokens e devolve `(Program, erros)`."""
-    return Parser(tokens).parse()
+    return Parser(tokens, destino_generico).parse()
 
 
 def parse_source(source: str):

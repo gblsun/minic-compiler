@@ -11,7 +11,8 @@ existem para não precisar reabrir os PDFs toda hora.
 - Quer entender **como as partes se encaixam**? → [arquitetura.md](arquitetura.md)
 - Vai mexer no **scanner**? → [especificacao.md](especificacao.md) e [tokens.md](tokens.md)
 - Vai mexer no **parser**? → [gramatica.md](gramatica.md), [ast.md](ast.md) e [roteiro-etapa2-parser.md](roteiro-etapa2-parser.md)
-- Quer os **resultados dos testes**? → [resultados-etapa2.md](resultados-etapa2.md)
+- Vai mexer na **análise semântica**? → [semantica.md](semantica.md)
+- Quer os **resultados dos testes**? → [resultados-etapa2.md](resultados-etapa2.md) e [resultados-etapa3.md](resultados-etapa3.md)
 - Quer saber **o que mudou depois da avaliação da etapa 2**? → [correcoes-etapa2.md](correcoes-etapa2.md)
 - Quer os **exercícios da aula 13** (tradução dirigida por sintaxe)? → [exercicios/aula13/](../exercicios/aula13/)
 - Quer saber **o que ainda está errado ou em aberto**? → [PENDENCIAS.md](../PENDENCIAS.md)
@@ -30,6 +31,7 @@ existem para não precisar reabrir os PDFs toda hora.
 | [especificacao.md](especificacao.md) | Resumo operacional da especificação **léxica** (Seção 3, mais os pontos das Seções 11.1, 12 e 13.2 relevantes para o lexer). |
 | [tokens.md](tokens.md) | Tabela de tokens da implementação (categoria → padrão → exemplo), com o formato de saída (`<TOKEN, lexema>` / `TOKEN`) documentado. |
 | [gramatica.md](gramatica.md) | Gramática **sintática** em EBNF (Seção 4), precedência e associatividade, os não terminais que a especificação deixa indefinidos, e as decisões de implementação (recursão à esquerda, `else` pendente, alvo de atribuição). |
+| [semantica.md](semantica.md) | **Análise semântica** (etapa 3): formato de saída, as duas passagens, decisões de projeto (escopos, conversões, `main`, destino de atribuição), sistema de tipos, retorno em todos os caminhos e o catálogo completo de diagnósticos SEM001–SEM016. |
 | [ast.md](ast.md) | Contrato dos nós da AST, a notação exata que os testes oficiais esperam, o formato de impressão canônico e as divergências entre as três fontes (especificação, apostila 12, pacote de testes). |
 
 ## Roteiros de entrega
@@ -40,6 +42,7 @@ existem para não precisar reabrir os PDFs toda hora.
 | [roteiro-etapa2-parser.md](roteiro-etapa2-parser.md) | Plano de execução da **etapa 2** (parser e AST), já executado: decisões tomadas, ordem de implementação, tratamento de erros, pontos de entrada exigidos, testes e checklist de conformidade marcado. |
 | [resultados-etapa2.md](resultados-etapa2.md) | Registro da execução das suítes da etapa 2 (201/201), como ler o resumo dos scripts oficiais do professor e a tabela dos diagnósticos emitidos nos 25 casos de rejeição. |
 | [correcoes-etapa2.md](correcoes-etapa2.md) | Resposta à avaliação da etapa 2: cada apontamento, a causa encontrada, a correção e como conferir. |
+| [resultados-etapa3.md](resultados-etapa3.md) | Registro da execução das suítes da etapa 3 (175/175) e dos scripts oficiais da AP 2 (20/20 em Python e em C). |
 | [PENDENCIAS.md](../PENDENCIAS.md) | O que precisa ser corrigido, revisado ou decidido antes da entrega: bugs confirmados (com a reprodução anotada), decisões que pedem uma segunda opinião do grupo, riscos de ambiente ainda não testados e o checklist operacional da entrega. |
 | [possiveis_features.md](possiveis_features.md) | Backlog de ideias/diferenciais observados em outros projetos da mesma disciplina. Nada ali é exigência do enunciado — é uma lista para avaliar o que vale incorporar. |
 

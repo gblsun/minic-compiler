@@ -1,0 +1,4 @@
+SEM010 — linha 2, coluna 1: return só pode ocorrer dentro de uma função.
+SEM010 — linha 4, coluna 5: break só pode ocorrer dentro de um laço.
+SEM010 — linha 9, coluna 5: continue só pode ocorrer dentro de um laço.
+Análise semântica concluída: 3 erros; programa rejeitado.

@@ -140,6 +140,7 @@ void parser_init(Parser *p, const Token *tokens, size_t tokens_len) {
     p->pending_line = 0;
     p->pending_column = 0;
     p->profundidade = 0;
+    p->destino_generico = 0;
 }
 
 void parser_free(Parser *p) {
@@ -697,7 +698,7 @@ static Ast *parse_atribuicao_sem_limite(Parser *p) {
         return esquerda;
     }
     const Token *igual = p_advance(p);
-    if (esquerda->kind != AST_ID && esquerda->kind != AST_INDEX) {
+    if (!p->destino_generico && esquerda->kind != AST_ID && esquerda->kind != AST_INDEX) {
         p_erro_posicao(p,
                        duplicar("lado esquerdo da atribuição não é atribuível; "
                                 "esperado identificador ou elemento de vetor"),
