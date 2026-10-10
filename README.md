@@ -51,7 +51,13 @@ bash ref/scripts/testar_parser_python.sh ref/testes-oficiais/testes-parser-50 ./
 bash ref/scripts/testar_parser_c.sh      ref/testes-oficiais/testes-parser-50 ./parser.c
 ```
 
-O resultado esperado dos scripts é **16 aprovados e 25 erros sintáticos detectados**, que é o teto do pacote (explicação em [docs/resultados-etapa2.md](docs/resultados-etapa2.md)). Detalhes da etapa em [Etapa 2](#etapa-2-analisador-sintático-e-ast-ap-1-) e correções posteriores à avaliação em [docs/correcoes-etapa2.md](docs/correcoes-etapa2.md).
+**O que esperar da saída dos scripts.** Eles imprimem `Aprovados: 16`, `Reprovados: 34`, `Erros sintáticos: 25` e a linha "há casos que precisam ser corrigidos". Isso é o esperado e **não indica falha do parser**:
+
+- os **25 casos de erro sintático são todos detectados**, e nenhum caso termina com erro de execução;
+- dos 34 reprovados, **25 são impossíveis por construção** (casos 26 a 50: o `ast.esperada.txt` contém a frase "NÃO HÁ AST: o parser deve rejeitar a entrada.", que nenhum parser imprime) e **9 diferem só em espaço em branco** na AST, porque os arquivos oficiais formatam o mesmo construto de dois jeitos diferentes;
+- o caso oficial 24 tem um `)` faltando no gabarito, e o nosso runner o compara com a AST corrigida.
+
+A explicação completa, caso a caso, está em [docs/resultados-etapa2.md](docs/resultados-etapa2.md). Detalhes da etapa em [Etapa 2](#etapa-2-analisador-sintático-e-ast-ap-1-) e correções posteriores à avaliação em [docs/correcoes-etapa2.md](docs/correcoes-etapa2.md).
 
 ---
 
@@ -107,7 +113,7 @@ Os critérios de correção, cada um com a evidência correspondente (desacoplam
 
 ## Pré-requisitos
 
-- **Python 3.10+** (testado com 3.10, 3.12 e 3.14)
+- **Python 3.10+** (o CI testa com 3.10 e 3.12)
 - **Compilador C11** (por exemplo `gcc`)
 - Opcional: `pip install -r requirements.txt` apenas para a interface Streamlit
 
@@ -150,7 +156,7 @@ Os arquivos `minic.*` e `parser.*` da raiz são só "cascas": existem porque os 
 | ver cada teste semântico com seu resultado    | [docs/testes-semanticos.md](docs/testes-semanticos.md)                                               |
 | ver os resultados das etapas 2 e 3            | [docs/resultados-etapa2.md](docs/resultados-etapa2.md), [docs/resultados-etapa3.md](docs/resultados-etapa3.md) |
 | saber como a entrega é avaliada               | [ref/testes-oficiais/README.md](ref/testes-oficiais/README.md)                                       |
-| saber o que ainda falta corrigir ou decidir   | [PENDENCIAS.md](PENDENCIAS.md)                                                                       |
+| ver as decisões do grupo e o checklist de entrega | [PENDENCIAS.md](PENDENCIAS.md)                                                                   |
 
 ---
 
@@ -236,7 +242,7 @@ bash src/python/test_parser_python.sh       # script oficial (Python)
 bash src/c/test_parser_c.sh                 # script oficial (C)
 ```
 
-Resultado: **201/201 verificações**, sendo 50/50 casos oficiais e 17/17 próprios em cada implementação, mais 67/67 entradas com saída idêntica entre Python e C. Os scripts oficiais marcam 16 aprovados e 25 erros sintáticos detectados, que é o teto do pacote de testes (explicação em [docs/resultados-etapa2.md](docs/resultados-etapa2.md)). As correções feitas depois da avaliação da etapa 2 estão em [docs/correcoes-etapa2.md](docs/correcoes-etapa2.md).
+Resultado: **201/201 verificações**, sendo 50/50 casos oficiais e 17/17 próprios em cada implementação, mais 67/67 entradas com saída idêntica entre Python e C. Os scripts oficiais marcam 16 aprovados e 34 reprovados, com os 25 erros sintáticos detectados; esse é o teto possível do pacote de testes (veja a explicação em [Avaliação rápida da AP 1](#avaliação-rápida-da-ap-1-analisador-sintático) e em [docs/resultados-etapa2.md](docs/resultados-etapa2.md)). As correções feitas depois da avaliação da etapa 2 estão em [docs/correcoes-etapa2.md](docs/correcoes-etapa2.md).
 
 > **Por que "Erro de sintaxe" e não "Erro sintático"?** O script oficial conta os erros com um `grep`. Em locale `C`/`POSIX` o "á" não casa, e o contador "Erros sintáticos" dava 0 mesmo com os 25 casos rejeitados. Com a mensagem só em ASCII o resultado é o mesmo em qualquer locale.
 
