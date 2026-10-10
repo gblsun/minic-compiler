@@ -1,0 +1,53 @@
+# Roda as suítes do scanner (etapa 1) e do parser (etapa 2) nas duas
+# implementações, num Ubuntu com gcc e python3 — o mesmo tipo de ambiente em
+# que o professor executa os scripts oficiais.
+name: testes
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Versões
+        run: gcc --version | head -1 && python3 --version
+
+      - name: Compila o parser C como o script oficial (unidade única, sem avisos)
+        run: gcc -Wall -Wextra -Werror -std=c11 parser.c -o /tmp/parser
+
+      - name: Scanner — Python
+        run: python3 tests/run_tests.py
+
+      - name: Scanner — C
+        run: bash src/c/test_scanner_c.sh
+
+      - name: Parser — suíte completa (oficiais + próprios + equivalência C × Python)
+        run: python3 tests/run_parser_tests.py
+
+      # Os scripts oficiais comparam byte a byte e sempre reprovam 9 casos por
+      # defeitos do próprio pacote (ver docs/correcoes-etapa2.md, seção 7), então
+      # o exit code deles não serve de critério. Conferimos o resumo: 16
+      # aprovados, 25 erros de sintaxe detectados e nenhum erro de execução —
+      # no locale C, em que a avaliação rodou.
+      - name: Parser — scripts oficiais da disciplina (LC_ALL=C)
+        env:
+          LC_ALL: C
+        run: |
+          for impl in python c; do
+            fonte=./parser.py; [ "$impl" = c ] && fonte=./parser.c
+            echo "=== $impl"
+            bash "ref/scripts/testar_parser_$impl.sh" ref/testes-oficiais/testes-parser-50 "$fonte" > "/tmp/oficial-$impl.txt" || true
+            tail -9 "/tmp/oficial-$impl.txt"
+            grep -q '^Aprovados: *16$'          "/tmp/oficial-$impl.txt"
+            grep -q '^Erros sintáticos: *25$'   "/tmp/oficial-$impl.txt"
+            grep -q '^Erros de execução: *0$'   "/tmp/oficial-$impl.txt"
+          done
