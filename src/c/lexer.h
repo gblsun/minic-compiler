@@ -121,6 +121,10 @@ typedef struct {
     size_t pos; /* índice absoluto do próximo caractere a ler em `source` */
     int line;
     int column;
+    /* Bytes de continuação UTF-8 ainda por consumir do caractere atual: eles
+     * avançam `pos` mas não `column`, para a coluna contar caracteres (como
+     * no Python) e não bytes. */
+    int continuacoes;
 
     Token *tokens;
     size_t tokens_len;

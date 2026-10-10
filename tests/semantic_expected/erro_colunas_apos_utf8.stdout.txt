@@ -1,0 +1,4 @@
+SEM003 — linha 3, coluna 24: Não é possível atribuir float a int sem conversão permitida (destino “n”; expressão “2.5”).
+SEM001 — linha 4, coluna 21: Identificador “ausente” não declarado neste escopo.
+SEM003 — linha 5, coluna 41: Não é possível atribuir bool a int sem conversão permitida (destino “n”; expressão “true”).
+Análise semântica concluída: 3 erros; programa rejeitado.
