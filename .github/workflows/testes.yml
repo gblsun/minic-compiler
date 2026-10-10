@@ -1,6 +1,6 @@
-# Roda as suítes do scanner (etapa 1) e do parser (etapa 2) nas duas
-# implementações, num Ubuntu com gcc e python3 — o mesmo tipo de ambiente em
-# que o professor executa os scripts oficiais.
+# Roda as suítes do scanner (etapa 1), do parser (etapa 2) e do analisador
+# semântico (etapa 3) nas duas implementações, num Ubuntu com gcc e python3 —
+# o mesmo tipo de ambiente em que o professor executa os scripts oficiais.
 name: testes
 
 on:
@@ -23,6 +23,13 @@ jobs:
 
       - name: Compila o parser C como o script oficial (unidade única, sem avisos)
         run: gcc -Wall -Wextra -Werror -std=c11 parser.c -o /tmp/parser
+
+      - name: Compila o minic.c (unidade única e arquivos separados, sem avisos)
+        run: |
+          gcc -Wall -Wextra -Werror minic.c -o /tmp/minic
+          gcc -Wall -Wextra -Werror -std=c11 -pedantic minic.c -o /tmp/minic
+          gcc -Wall -Wextra -Werror -std=c11 src/c/lexer.c src/c/ast.c src/c/parser.c \
+              src/c/tabela_simbolos.c src/c/semantico.c src/c/minic_main.c -o /tmp/minic-separado
 
       - name: Scanner — Python
         run: python3 tests/run_tests.py
@@ -51,3 +58,11 @@ jobs:
             grep -q '^Erros sintáticos: *25$'   "/tmp/oficial-$impl.txt"
             grep -q '^Erros de execução: *0$'   "/tmp/oficial-$impl.txt"
           done
+
+      - name: Semântico — suíte completa (oficiais + próprios + equivalência C × Python)
+        run: python3 tests/run_semantic_tests.py
+
+      - name: Semântico — scripts oficiais da AP 2
+        run: |
+          bash ref/scripts/testes_semanticos_py.sh ./minic.py ref/testes-oficiais/testes-semanticos-20
+          bash ref/scripts/testes_semanticos_c.sh ./minic.c ref/testes-oficiais/testes-semanticos-20

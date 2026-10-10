@@ -1,0 +1,8 @@
+SEM014 — linha 8, coluna 9: “x” não designa uma função; foi declarado como variável na linha 5, coluna 9.
+SEM014 — linha 9, coluna 9: “x” não é um vetor e não pode ser indexado; foi declarado como variável na linha 5, coluna 9.
+SEM014 — linha 10, coluna 9: A função “dobro” só pode ser usada em chamada.
+SEM013 — linha 11, coluna 5: Destino de atribuição não é atribuível; “v” é um vetor, e só seus elementos (“v[i]”) podem receber valores.
+SEM013 — linha 12, coluna 5: Destino de atribuição não é atribuível; a função “dobro” não designa uma variável ou elemento de vetor.
+SEM014 — linha 13, coluna 11: print não aceita o vetor “v” inteiro; imprima um elemento por vez.
+SEM013 — linha 14, coluna 10: Destino de leitura não é atribuível; “v” é um vetor, e só seus elementos (“v[i]”) podem receber valores.
+Análise semântica concluída: 7 erros; programa rejeitado.

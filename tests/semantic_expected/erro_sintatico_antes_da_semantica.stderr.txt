@@ -1,0 +1,1 @@
+Erro de sintaxe na linha 2, coluna 13: esperado expressão (identificador, literal ou ABRE_PAREN); encontrado PONTO_E_VIRGULA.

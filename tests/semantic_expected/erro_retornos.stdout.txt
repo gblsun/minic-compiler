@@ -1,0 +1,8 @@
+SEM009 — linha 2, coluna 12: A função “nada” é void e não pode retornar valor (expressão “3”).
+SEM009 — linha 5, coluna 5: Retorno sem valor na função “semvalor”, que deve retornar int.
+SEM009 — linha 8, coluna 12: Retorno int incompatível com o tipo bool da função “logico”; conversão implícita de int para bool não permitida.
+SEM011 — linha 13, coluna 1: A função “laco” pode terminar sem retornar int; o laço while da linha 14 pode terminar e alcançar o fim do corpo.
+SEM011 — linha 18, coluna 1: A função “vazio” pode terminar sem retornar int; o fim do corpo é alcançado sem return.
+SEM011 — linha 20, coluna 1: A função “ramos” pode terminar sem retornar int; o ramo em que “c” é verdadeiro alcança o fim do corpo.
+SEM001 — linha 22, coluna 9: Identificador “n” não declarado neste escopo.
+Análise semântica concluída: 7 erros; programa rejeitado.

@@ -55,6 +55,11 @@ typedef struct {
      * todos os pontos de recuperação e encerra a análise (ver parser.c). */
     jmp_buf abortar;
     int profundidade; /* níveis de aninhamento abertos agora */
+    /* 1 = aceitar qualquer expressão à esquerda do `=` e deixar a checagem de
+     * atribuibilidade para a análise semântica (SEM013). O parser_init deixa
+     * em 0, o comportamento da etapa 2; o minic_main.c liga. Mesmo papel do
+     * parâmetro `destino_generico` de src/python/parser.py. */
+    int destino_generico;
     char *pending;
     int pending_line;
     int pending_column;

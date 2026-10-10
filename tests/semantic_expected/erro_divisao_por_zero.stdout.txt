@@ -1,0 +1,4 @@
+SEM015 — linha 4, coluna 14: Divisão por zero: o divisor é a constante “0”.
+SEM015 — linha 5, coluna 14: Resto de divisão por zero: o divisor é a constante “0”.
+SEM015 — linha 6, coluna 15: Divisão por zero: o divisor é a constante “0.0”.
+Análise semântica concluída: 3 erros; programa rejeitado.
