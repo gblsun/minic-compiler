@@ -438,7 +438,8 @@ static Ast *parse_parametro(Parser *p) {
     }
     const Token *tipo = p_advance(p);
     const Token *nome = p_expect(p, TOK_IDENT, NULL);
-    Ast *no = novo_no(p, AST_PARAM, tipo);
+    /* Posição do nome, como em VarDecl: é para ele que a duplicidade aponta. */
+    Ast *no = novo_no(p, AST_PARAM, nome);
     no->type_name = duplicar(tipo->lexeme);
     no->text = duplicar(nome->lexeme);
     if (p_match(p, TOK_LBRACKET)) {

@@ -24,20 +24,23 @@ Como ler cada item:
 | [1.2](#12-o-lexer-python-aceita-dígito-fora-do-ascii) | Python aceita dígito não-ASCII | alta | **resolvido** | Fellipe |
 | [1.3](#13-mensagem-de-erro-do-c-corrompe-a-saída-em-byte-não-ascii) | Mensagem do C corrompe a saída | média | **resolvido** | Fellipe |
 | [1.4](#14-expressão-muito-aninhada-traceback-no-python-crash-no-c) | Aninhamento profundo derruba os dois | média | **resolvido** | Fellipe |
-| [1.5](#15-contagem-de-coluna-o-c-conta-bytes-o-python-conta-caracteres) | Coluna em bytes vs. caracteres | baixa | confirmado | Fellipe |
+| [1.5](#15-contagem-de-coluna-o-c-conta-bytes-o-python-conta-caracteres) | Coluna em bytes vs. caracteres | baixa | **resolvido** | Fellipe |
 | [2.1](#21-o-caso-oficial-24-é-comparado-contra-uma-ast-corrigida)–[2.4](#24-caso-41-nossa-mensagem-difere-da-pista-do-pacote) | Decisões que pedem revisão do grupo | — | decisão | Fellipe |
-| [3.1](#31-rodar-a-entrega-inteira-em-linux) | Rodar a entrega inteira em Linux | alta | não verificado | Fellipe |
-| [3.2](#32-versão-do-python-do-professor) | Versão do Python do professor | média | não verificado | Fellipe |
+| [2.5](#25-ap-2-pontos-em-que-o-pacote-oficial-prevaleceu-sobre-a-especificação) | AP 2: pacote oficial × especificação (`main`, `3 = n`, `a = b = 3`) | — | decisão | grupo |
+| [3.1](#31-rodar-a-entrega-inteira-em-linux) | Rodar a entrega inteira em Linux | alta | **verificado no CI** | Fellipe |
+| [3.2](#32-versão-do-python-do-professor) | Versão do Python do professor | média | **verificado (3.10+)** | Fellipe |
 | [3.3](#33-parserpy-da-raiz-e-o-módulo-parser-da-biblioteca-padrão) | `parser.py` vs. módulo `parser` embutido | média | **resolvido** | Fellipe |
 | [3.4](#34-locale-no-script-oficial) | Locale no script oficial | baixa | contornado | Fellipe |
+| [3.5](#35-ap-2-fins-de-linha-dos-gabaritos) | AP 2: fins de linha (CRLF) dos gabaritos | média | mitigado | grupo |
 | [4.1](#41-pacote-de-fixtures-do-scanner-está-incompleto)–[4.2](#42-nosso-scanner-não-produz-o-jsonl-das-fixtures-oficiais) | Material da disciplina em falta | baixa | em aberto | Fellipe |
 | [5](#5-antes-de-entregar-operacional) | Checklist da entrega (inclui o `git push`) | alta | em aberto | Fellipe |
 | [6](#6-revisões-de-código-sugeridas) | Revisões de código sugeridas | baixa | em aberto | Fellipe |
 
-Estado do projeto no momento em que esta lista foi escrita: etapas 1 e 2
-implementadas, 195/195 verificações nas suítes
-([`resultados-etapa2.md`](docs/resultados-etapa2.md)), tudo commitado em `main`,
-**nada enviado ao GitHub ainda**.
+Estado do projeto na última revisão (etapa 3, AP 2): etapas 1, 2 e 3
+implementadas, tudo no GitHub e testado no CI a cada push. Resultados em
+[`resultados-etapa2.md`](docs/resultados-etapa2.md) e
+[`resultados-etapa3.md`](docs/resultados-etapa3.md); resumo da AP 2 em
+[`entrega-ap2.md`](docs/entrega-ap2.md).
 
 ---
 
@@ -192,14 +195,38 @@ a pista do pacote esperava `FECHA_COLCHETE`. A gramática permite atribuição
 dentro do índice, então o primeiro problema real é mesmo o alvo inválido. O
 caso é rejeitado nas duas implementações, com posição exata.
 
+### 2.5 AP 2: pontos em que o pacote oficial prevaleceu sobre a especificação
+
+Três decisões da etapa 3 seguem os testes oficiais da AP 2 e não o texto da
+especificação. Estão documentadas e testadas, mas vale o grupo concordar:
+
+- **`main` não é exigida.** A Seção 2 da especificação diz que todo programa
+  tem exatamente uma `main`, mas os 10 programas válidos da AP 2 usam
+  `principal` e o gabarito os aceita. Se uma etapa futura exigir `main`, a
+  regra cabe na passagem A do analisador (`_coletar_globais`).
+- **`3 = n;` é erro semântico (SEM013), não sintático.** Só no pipeline
+  semântico (`minic`): o parser da etapa 2 (`parser.py`/`parser.c`) continua
+  rejeitando como antes.
+- **`a = b = 3` tem valor** (o tipo do destino), por causa do caso oficial 09,
+  embora a apostila diga que a atribuição "não produz valor no núcleo MINIC".
+
+Detalhes em [`docs/semantica.md`](docs/semantica.md#decisões-de-projeto).
+
 ---
 
-## 3. Riscos de ambiente (não verificados aqui)
+## 3. Riscos de ambiente
 
-Tudo foi desenvolvido e testado em **Windows 11, Python 3.14, gcc MinGW-w64**.
-A correção provavelmente acontece em Linux, e nada disso foi testado lá.
+O desenvolvimento é em **Windows 11, Python 3.14**. Desde a etapa 3, o CI do
+GitHub ([`.github/workflows/testes.yml`](.github/workflows/testes.yml)) roda
+tudo em Linux a cada push: Ubuntu 22.04 com gcc 11 e Python 3.10, e Ubuntu
+24.04 com gcc 13, clang 18 e Python 3.12.
 
 ### 3.1 Rodar a entrega inteira em Linux
+
+> **Verificado no CI:** o workflow faz exatamente isso a cada push (checkout
+> limpo, compilação e todos os scripts oficiais), nos dois ambientes acima. O
+> bit de execução, os fins de linha LF e a compilação sem aviso estão
+> conferidos ali. Texto original abaixo, como registro.
 
 **Prioridade: alta** · **Não verificado**
 
@@ -224,6 +251,10 @@ Pontos específicos para conferir nesse teste:
   `-Wall -Wextra`).
 
 ### 3.2 Versão do Python do professor
+
+> **Verificado:** o CI roda tudo em Python 3.10 e 3.12. E a avaliação da etapa
+> 2 mostra que o parser Python executou na máquina do professor (41/50), o que
+> só é possível em 3.10 ou mais novo, pela sintaxe `str | None`.
 
 **Prioridade: média** · **Não verificado**
 
@@ -261,6 +292,23 @@ README mostra a chamada direta com o locale.
 
 Se o professor rodar sem isso e vier 0, é este efeito — vale mencionar na
 entrega.
+
+### 3.5 AP 2: fins de linha dos gabaritos
+
+**Prioridade: média** · **Mitigado**
+
+Os `.gabarito` da AP 2 separam as linhas com **CRLF** e não terminam com quebra
+de linha, e o script oficial compara com `diff` exato. A nossa saída reproduz
+esses bytes, e o pacote está marcado como `-text` no `.gitattributes` para o
+git não convertê-lo.
+
+O risco que sobra está fora do repositório: se a cópia do pacote usada na
+correção tiver passado por uma conversão de fim de linha (por exemplo, editada
+num editor que salva LF), os 10 casos de rejeição deixariam de casar, nas duas
+implementações e em qualquer entrega. Os 10 de aceitação têm uma linha só e
+não são afetados. Não há como atender aos dois formatos com `diff` exato;
+seguimos o arquivo distribuído. Se acontecer, a explicação está em
+[`ref/testes-oficiais/README.md`](ref/testes-oficiais/README.md#testes-semanticos-20--etapa-3-análise-semântica).
 
 ---
 

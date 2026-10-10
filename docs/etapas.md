@@ -16,7 +16,7 @@ disciplina abre uma atividade no Classroom para cada uma.
 |---|---|---|---|
 | 1 | Analisador léxico | tokens, expressões regulares, scanner, erros e testes | ✅ entregue |
 | 2 | Parser e AST | gramática, parser, AST, recuperação e testes sintáticos | ✅ concluída |
-| 3 | Semântica e IR | tabela de símbolos, escopos, tipos, 3AC e testes | não iniciada |
+| 3 | Semântica e IR | tabela de símbolos, escopos, tipos, 3AC e testes | ✅ analisador semântico concluído (AP 2); IR ainda não |
 | 4 | Código e otimização | backend, duas otimizações, benchmarks, manual e apresentação | não iniciada |
 
 ## Etapa 1 — analisador léxico ✅
@@ -125,8 +125,12 @@ O que foi entregue:
   linguagens (`src/python/tabela_simbolos.py`, `src/python/semantico.py`,
   `src/c/tabela_simbolos.c`, `src/c/semantico.c`);
 - regras, decisões e catálogo de mensagens em [semantica.md](semantica.md);
-- 20/20 casos oficiais nas duas versões; 16 casos próprios; equivalência
-  C × Python em 103 programas ([resultados-etapa3.md](resultados-etapa3.md)).
+- 20/20 casos oficiais nas duas versões; 19 casos próprios com o resultado
+  de cada um ([testes-semanticos.md](testes-semanticos.md)); equivalência
+  C × Python em 106 programas fixos e 900 gerados
+  ([resultados-etapa3.md](resultados-etapa3.md));
+- a correspondência entre cada critério de correção e a evidência no
+  repositório: [entrega-ap2.md](entrega-ap2.md).
 
 Ainda pela frente, na especificação: a **representação intermediária** (código
 de três endereços, Seção 9.1), que a apostila da aula 15 coloca a partir da

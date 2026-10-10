@@ -165,10 +165,10 @@ fim, como os gabaritos oficiais):
 | Suíte | Fonte dos casos | Critério |
 |---|---|---|
 | 20 casos oficiais | [`ref/testes-oficiais/testes-semanticos-20/`](../ref/testes-oficiais/testes-semanticos-20/) (AP 2) | stdout idêntico ao `.gabarito`, stderr vazio, exit 0 (aceito) ou 4 (rejeitado) |
-| 16 casos próprios | [`semantic_inputs/`](semantic_inputs/) | stdout, stderr e exit code idênticos aos golden de [`semantic_expected/`](semantic_expected/) |
-| Equivalência | as 36 entradas acima + os 50 oficiais e os 17 próprios do parser (103 programas) | Python e C devolvem exatamente o mesmo stdout, stderr e exit code |
+| 19 casos próprios | [`semantic_inputs/`](semantic_inputs/) | stdout, stderr e exit code idênticos aos golden de [`semantic_expected/`](semantic_expected/) |
+| Equivalência | as 39 entradas acima + os 50 oficiais e os 17 próprios do parser (106 programas) | Python e C devolvem exatamente o mesmo stdout, stderr e exit code |
 
-Resultado atual: 175/175 — registro em
+Resultado atual: 184/184 — registro em
 [`docs/resultados-etapa3.md`](../docs/resultados-etapa3.md).
 
 Os casos próprios cobrem o que os oficiais não exercitam: operadores (SEM004),
@@ -192,11 +192,47 @@ bash ref/scripts/testes_semanticos_py.sh ./minic.py ref/testes-oficiais/testes-s
 bash ref/scripts/testes_semanticos_c.sh  ./minic.c  ref/testes-oficiais/testes-semanticos-20
 ```
 
+### Teste diferencial (programas gerados)
+
+```bash
+python tests/fuzz_semantico.py                  # só Python, com os oráculos (600 programas)
+python tests/fuzz_semantico.py --c ./minic      # Python × C
+python tests/fuzz_semantico.py --c ./minic -n 2000 --semente 7 --salvar /tmp/falhas
+```
+
+[`fuzz_semantico.py`](fuzz_semantico.py) gera programas em três modos, um
+terço de cada:
+
+| Modo | Como é gerado | O que tem de acontecer |
+|---|---|---|
+| aleatório | gramática completa, poucos nomes (colisões frequentes), tipos misturados, destinos inválidos | Python e C com stdout, stderr e exit idênticos; nenhum traceback ou crash |
+| bem tipado | acompanha escopos, tipos, vetores e assinaturas e só emite o que as regras permitem (promoções, sombreamento em bloco interno, `break` só em laço, índice literal dentro do vetor, `return` no fim de toda função não void) | os dois **aceitam** (pega falso positivo) |
+| um erro injetado | um programa bem tipado mais **um** comando com erro conhecido, de SEM001 a SEM016 | os dois reportam **exatamente** aquele código, e só ele (pega falso negativo e cascata) |
+
+A geração é determinística (`--semente`), então qualquer falha é reproduzível.
+No CI, o lado C é o binário compilado com AddressSanitizer e UBSan.
+
+O catálogo [`docs/testes-semanticos.md`](../docs/testes-semanticos.md) (cada
+teste com o código e a saída esperada) é gerado por
+[`gerar_catalogo_semantico.py`](gerar_catalogo_semantico.py). Depois de mudar
+um caso ou um golden, rode `python tests/gerar_catalogo_semantico.py`; o CI
+falha se o catálogo estiver desatualizado.
+
 ## Integração contínua
 
 O workflow [`.github/workflows/testes.yml`](../.github/workflows/testes.yml)
-roda, a cada push e pull request, num Ubuntu com `gcc` e `python3`: a
-compilação de `parser.c` e `minic.c` com `-Werror`, as suítes das etapas 1, 2
-e 3, os exercícios da aula 13 e os scripts oficiais do professor (o do parser
-em locale `C`, como na avaliação). É a forma de testar a versão C quando a
-máquina local não consegue compilar.
+roda a cada push e pull request:
+
+- **job `testes`**, em Ubuntu 22.04 (gcc 11, Python 3.10) e Ubuntu 24.04
+  (gcc 13, Python 3.12): compilação de `parser.c` e `minic.c` com `-Werror`,
+  as suítes das etapas 1, 2 e 3, os exercícios da aula 13 e os scripts
+  oficiais do professor (o do parser em locale `C`, como na avaliação);
+- **job `robustez`**: clang com `-Werror`; todas as entradas de teste do
+  repositório pelo binário com AddressSanitizer + UBSan; o teste diferencial
+  com 900 programas; os scripts oficiais da AP 2 rodando de uma cópia do
+  repositório em `/tmp/Avaliação Parcial II/minic compiler` (espaço e acento
+  no caminho), em locale `C`; e a conferência de que o catálogo de testes
+  está atualizado.
+
+É também a forma de testar a versão C quando a máquina local não consegue
+compilar.

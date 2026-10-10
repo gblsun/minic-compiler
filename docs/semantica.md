@@ -118,9 +118,10 @@ implementações.
   na coluna do `1`, e não na do `<`. Como a AST não guarda parênteses,
   `(a + b)` começa no `a`.
 - Diagnóstico sobre um **operador** (SEM004): aponta o operador.
-- Diagnóstico sobre um **nome** (SEM001, SEM002, SEM014): aponta o nome. Na
-  duplicidade de parâmetro e de função, aponta o tipo, que é onde a AST
-  posiciona esses nós.
+- Diagnóstico sobre um **nome** (SEM001, SEM002, SEM014): aponta o nome,
+  inclusive na duplicidade de parâmetro. Na duplicidade de **função**, aponta
+  o início da definição (o tipo de retorno), a mesma posição usada no
+  SEM011.
 - Diagnóstico sobre um **comando** (SEM009 sem valor, SEM010): aponta a
   palavra-chave. SEM011 aponta o início da definição da função.
 
@@ -215,20 +216,32 @@ parâmetros `T v[]` e índices calculados, que são verificação de execução
 ## Testes
 
 ```
-python tests/run_semantic_tests.py            # 20 oficiais + 16 próprios em cada versão + equivalência
+python tests/run_semantic_tests.py            # 20 oficiais + 19 próprios em cada versão + equivalência
+python tests/fuzz_semantico.py --c ./minic    # programas gerados: equivalência + oráculos
 bash ref/scripts/testes_semanticos_py.sh ./minic.py ref/testes-oficiais/testes-semanticos-20
 bash ref/scripts/testes_semanticos_c.sh  ./minic.c  ref/testes-oficiais/testes-semanticos-20
 ```
 
 O runner compara byte a byte e tem três suítes: os **20 casos oficiais** da
-AP 2, os **16 casos próprios** de [`tests/semantic_inputs/`](../tests/semantic_inputs/),
+AP 2, os **19 casos próprios** de [`tests/semantic_inputs/`](../tests/semantic_inputs/),
 com golden em [`tests/semantic_expected/`](../tests/semantic_expected/), e a
 **equivalência** C × Python. A equivalência roda, além das entradas das duas
 primeiras suítes, os 50 casos oficiais do parser e os 17 casos próprios da
-etapa 2 pelo pipeline completo: 103 programas ao todo. Os casos próprios
+etapa 2 pelo pipeline completo: 106 programas ao todo. Os casos próprios
 cobrem cada código do catálogo, inclusive os que os oficiais não exercitam
 (SEM004, SEM010, SEM014–SEM016), além de `for`, `print`, `read`, `char`,
-supressão de cascata, colunas depois de caracteres acentuados e os erros
-léxico e sintático antes da semântica.
+supressão de cascata, colunas depois de caracteres acentuados, os erros
+léxico e sintático antes da semântica e os três programas de referência da
+especificação (13.1, 19.1 e 19.2). O objetivo, o código e a saída de cada um
+estão em [testes-semanticos.md](testes-semanticos.md).
+
+Como "passar em todos os testes não significa estar correto" (orientações da
+entrega), o [teste diferencial](../tests/README.md#teste-diferencial-programas-gerados)
+complementa os casos fixos com programas gerados, em três modos:
+
+- **aleatórios**: as duas versões têm de dar a mesma saída;
+- **bem tipados**: têm de ser aceitos (isso pega falso positivo);
+- **com um erro injetado**: têm de reportar exatamente aquele erro (isso pega
+  falso negativo e cascata).
 
 Resultados registrados em [resultados-etapa3.md](resultados-etapa3.md).
