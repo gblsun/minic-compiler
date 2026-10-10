@@ -13,6 +13,64 @@ mesma saída para a mesma entrada.
 
 Detalhes de cada etapa, prazos e comandos exigidos por cada atividade: [docs/etapas.md](docs/etapas.md).
 
+## Como avaliar a AP 2 — analisador semântico
+
+Os comandos são **exatamente os do enunciado da AP 2**, executados na raiz do
+repositório, onde ficam o `minic.py` e o `minic.c`:
+
+```bash
+# Python:
+./testes_semanticos_py.sh minic.py [diretorio]
+
+# C:
+./testes_semanticos_c.sh minic.c [diretorio]
+```
+
+`[diretorio]` é a pasta com os testes da atividade (`minic-testes-semanticos`).
+Passo a passo, a partir de um clone novo:
+
+```bash
+git clone https://github.com/gblsun/minic-compiler.git
+cd minic-compiler
+# coloque aqui os scripts testes_semanticos_py.sh / testes_semanticos_c.sh
+# e a pasta minic-testes-semanticos, como vieram na atividade
+./testes_semanticos_py.sh minic.py minic-testes-semanticos
+./testes_semanticos_c.sh minic.c minic-testes-semanticos
+```
+
+Resultado nas duas versões:
+
+```text
+[OK]     minic-testes-semanticos/01_promocao_numerica.c
+...
+[OK]     minic-testes-semanticos/20_destino_nao_atribuivel.c
+
+Resultado: 20/20 aprovados; 0 reprovados.
+```
+
+- **Nada a instalar nem compilar antes.** O script C compila o `minic.c`
+  sozinho (`gcc -Wall -Wextra`, sem nenhum aviso). O Python só precisa de
+  `python3` 3.10 ou mais novo, sem bibliotecas externas.
+- **Cópia dos arquivos da atividade no repositório.** Os dois scripts e a pasta
+  de testes, idênticos aos distribuídos, estão versionados em `ref/`. Sem
+  copiar nada, o mesmo teste roda assim:
+
+  ```bash
+  ./ref/scripts/testes_semanticos_py.sh minic.py ref/testes-oficiais/testes-semanticos-20
+  ./ref/scripts/testes_semanticos_c.sh minic.c ref/testes-oficiais/testes-semanticos-20
+  ```
+
+- **Um programa isolado:** `python3 minic.py programa.c`, ou
+  `gcc -Wall -Wextra minic.c -o minic && ./minic programa.c`.
+- **Atenção aos fins de linha dos `.gabarito`.** Eles separam as linhas com
+  CRLF, e o script compara com `diff` exato. Se forem abertos e salvos num
+  editor que troque CRLF por LF, os casos de rejeição deixam de bater.
+
+Os critérios de correção e a evidência de cada um (desacoplamento, equivalência
+C × Python, lógica, casos de teste) estão em
+[docs/entrega-ap2.md](docs/entrega-ap2.md), e cada teste com o seu resultado
+está em [docs/testes-semanticos.md](docs/testes-semanticos.md).
+
 - **Disciplina**: Compiladores — 202602 CC 6A Manhã (Ciência da Computação, 6º semestre, 2026)
 - **Professor**: Alex Torquato Souza Carneiro
 
@@ -246,12 +304,16 @@ e a evidência de cada um: [docs/entrega-ap2.md](docs/entrega-ap2.md).
 ### Rodar o analisador (comandos do enunciado)
 
 ```
-python minic.py codigo.c      # versão Python
+./testes_semanticos_py.sh minic.py [diretorio]   # versão Python
+./testes_semanticos_c.sh minic.c [diretorio]     # versão C
 ```
 
+O passo a passo está em [Como avaliar a AP 2](#como-avaliar-a-ap-2--analisador-semântico).
+Para analisar um único arquivo:
+
 ```
-gcc -Wall -Wextra minic.c -o minic
-./minic codigo.c              # versão C
+python3 minic.py codigo.c                            # versão Python
+gcc -Wall -Wextra minic.c -o minic && ./minic codigo.c   # versão C
 ```
 
 ### Testes da etapa 3

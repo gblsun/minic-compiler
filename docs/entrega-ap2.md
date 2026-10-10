@@ -7,21 +7,28 @@ com a evidência correspondente no repositório.
 
 ## Como rodar (comandos do enunciado)
 
-Da raiz do repositório, com os scripts e o pacote de testes da AP 2 (cópias
-versionadas em [`ref/scripts/`](../ref/scripts/) e
-[`ref/testes-oficiais/testes-semanticos-20/`](../ref/testes-oficiais/testes-semanticos-20/)):
+Exatamente como o enunciado pede, na raiz do repositório (onde ficam
+`minic.py` e `minic.c`), com os scripts e a pasta de testes da atividade:
 
 ```bash
-bash ref/scripts/testes_semanticos_py.sh minic.py ref/testes-oficiais/testes-semanticos-20
-bash ref/scripts/testes_semanticos_c.sh  minic.c  ref/testes-oficiais/testes-semanticos-20
+./testes_semanticos_py.sh minic.py [diretorio]
+./testes_semanticos_c.sh minic.c [diretorio]
 ```
 
 ```text
-[OK]     ref/testes-oficiais/testes-semanticos-20/01_promocao_numerica.c
+[OK]     minic-testes-semanticos/01_promocao_numerica.c
 ...
-[OK]     ref/testes-oficiais/testes-semanticos-20/20_destino_nao_atribuivel.c
+[OK]     minic-testes-semanticos/20_destino_nao_atribuivel.c
 
 Resultado: 20/20 aprovados; 0 reprovados.
+```
+
+Os scripts e a pasta de testes, idênticos aos distribuídos, também estão
+versionados no repositório. Sem copiar nada, o mesmo teste roda assim:
+
+```bash
+./ref/scripts/testes_semanticos_py.sh minic.py ref/testes-oficiais/testes-semanticos-20
+./ref/scripts/testes_semanticos_c.sh minic.c ref/testes-oficiais/testes-semanticos-20
 ```
 
 **20/20 nas duas implementações.** Não é preciso compilar nada antes: o script

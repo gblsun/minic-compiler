@@ -84,6 +84,19 @@ jobs:
       - name: Semântico — suíte completa (oficiais + próprios + equivalência C × Python)
         run: python3 tests/run_semantic_tests.py
 
+      # Os comandos exatamente como o enunciado (e o README) mandam: scripts
+      # soltos na raiz, chamados com ./, e a pasta de testes com o nome
+      # original. Também a forma sem copiar nada, com as cópias de ref/.
+      - name: Semântico — comandos do enunciado da AP 2, ao pé da letra
+        run: |
+          cp ref/scripts/testes_semanticos_py.sh ref/scripts/testes_semanticos_c.sh .
+          cp -r ref/testes-oficiais/testes-semanticos-20 minic-testes-semanticos
+          ./testes_semanticos_py.sh minic.py minic-testes-semanticos
+          ./testes_semanticos_c.sh minic.c minic-testes-semanticos
+          ./ref/scripts/testes_semanticos_py.sh minic.py ref/testes-oficiais/testes-semanticos-20
+          ./ref/scripts/testes_semanticos_c.sh minic.c ref/testes-oficiais/testes-semanticos-20
+          rm -r testes_semanticos_py.sh testes_semanticos_c.sh minic-testes-semanticos
+
       - name: Semântico — scripts oficiais da AP 2
         run: |
           bash ref/scripts/testes_semanticos_py.sh ./minic.py ref/testes-oficiais/testes-semanticos-20
