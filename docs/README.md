@@ -11,7 +11,8 @@ existem para não precisar reabrir os PDFs toda hora.
 - Quer entender **como as partes se encaixam**? → [arquitetura.md](arquitetura.md)
 - Vai mexer no **scanner**? → [especificacao.md](especificacao.md) e [tokens.md](tokens.md)
 - Vai mexer no **parser**? → [gramatica.md](gramatica.md), [ast.md](ast.md) e [roteiro-etapa2-parser.md](roteiro-etapa2-parser.md)
-- Vai mexer na **análise semântica**? → [semantica.md](semantica.md)
+- Quer avaliar a **AP 2** (analisador semântico)? → [entrega-ap2.md](entrega-ap2.md)
+- Vai mexer na **análise semântica**? → [semantica.md](semantica.md) e [testes-semanticos.md](testes-semanticos.md)
 - Quer os **resultados dos testes**? → [resultados-etapa2.md](resultados-etapa2.md) e [resultados-etapa3.md](resultados-etapa3.md)
 - Quer saber **o que mudou depois da avaliação da etapa 2**? → [correcoes-etapa2.md](correcoes-etapa2.md)
 - Quer os **exercícios da aula 13** (tradução dirigida por sintaxe)? → [exercicios/aula13/](../exercicios/aula13/)
@@ -42,7 +43,9 @@ existem para não precisar reabrir os PDFs toda hora.
 | [roteiro-etapa2-parser.md](roteiro-etapa2-parser.md) | Plano de execução da **etapa 2** (parser e AST), já executado: decisões tomadas, ordem de implementação, tratamento de erros, pontos de entrada exigidos, testes e checklist de conformidade marcado. |
 | [resultados-etapa2.md](resultados-etapa2.md) | Registro da execução das suítes da etapa 2 (201/201), como ler o resumo dos scripts oficiais do professor e a tabela dos diagnósticos emitidos nos 25 casos de rejeição. |
 | [correcoes-etapa2.md](correcoes-etapa2.md) | Resposta à avaliação da etapa 2: cada apontamento, a causa encontrada, a correção e como conferir. |
-| [resultados-etapa3.md](resultados-etapa3.md) | Registro da execução das suítes da etapa 3 (175/175) e dos scripts oficiais da AP 2 (20/20 em Python e em C). |
+| [entrega-ap2.md](entrega-ap2.md) | **Página de entrega da AP 2**: como rodar, e cada critério de correção (desacoplamento, equivalência C × Python, lógica, casos de teste) com a evidência correspondente. |
+| [testes-semanticos.md](testes-semanticos.md) | Catálogo dos testes da etapa 3: os 20 oficiais e os 19 próprios, com o objetivo, o código e a saída esperada de cada um (gerado por `tests/gerar_catalogo_semantico.py`). |
+| [resultados-etapa3.md](resultados-etapa3.md) | Registro da execução das suítes da etapa 3 (184/184), do teste diferencial (900 programas gerados), dos sanitizers e dos scripts oficiais da AP 2 (20/20 em Python e em C). |
 | [PENDENCIAS.md](../PENDENCIAS.md) | O que precisa ser corrigido, revisado ou decidido antes da entrega: bugs confirmados (com a reprodução anotada), decisões que pedem uma segunda opinião do grupo, riscos de ambiente ainda não testados e o checklist operacional da entrega. |
 | [possiveis_features.md](possiveis_features.md) | Backlog de ideias/diferenciais observados em outros projetos da mesma disciplina. Nada ali é exigência do enunciado — é uma lista para avaliar o que vale incorporar. |
 

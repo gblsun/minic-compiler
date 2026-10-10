@@ -360,8 +360,9 @@ class Parser:
         if self._match("LBRACKET"):
             self._expect("RBRACKET")
             is_array = True
+        # Posição do nome, como em VarDecl: é para ele que a duplicidade aponta.
         return A.Param(
-            tipo_tok.line, tipo_tok.column, tipo_tok.lexeme, nome_tok.lexeme, is_array
+            nome_tok.line, nome_tok.column, tipo_tok.lexeme, nome_tok.lexeme, is_array
         )
 
     # -- comandos ---------------------------------------------------------

@@ -98,6 +98,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Catálogo de testes (docs/testes-semanticos.md) atualizado
+        run: python3 tests/gerar_catalogo_semantico.py --checar
+
       - name: clang sem avisos
         run: |
           clang --version | head -1

@@ -9,7 +9,7 @@ mesma saída para a mesma entrada.
 | ----- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
 | 1     | Analisador léxico (scanner)         | ✅ entregue                                                                                                        |
 | 2     | Analisador sintático e AST (parser) | ✅ **concluída** — 201/201 verificações ([resultados](docs/resultados-etapa2.md))                                   |
-| 3     | Analisador semântico (AP 2)          | ✅ **concluída** — 20/20 oficiais nas duas versões, 175/175 verificações ([resultados](docs/resultados-etapa3.md)) |
+| 3     | Analisador semântico (AP 2)          | ✅ **concluída** — 20/20 oficiais nas duas versões, 184/184 verificações ([entrega](docs/entrega-ap2.md)) |
 
 Detalhes de cada etapa, prazos e comandos exigidos por cada atividade: [docs/etapas.md](docs/etapas.md).
 
@@ -239,7 +239,9 @@ scanner, parser, tabela de símbolos e analisador semântico.
   stderr), `1` erro de uso.
 
 Regras, decisões de projeto e o catálogo completo de mensagens (SEM001 a
-SEM016): [docs/semantica.md](docs/semantica.md).
+SEM016): [docs/semantica.md](docs/semantica.md). Cada teste com o seu resultado:
+[docs/testes-semanticos.md](docs/testes-semanticos.md). Os critérios de correção
+e a evidência de cada um: [docs/entrega-ap2.md](docs/entrega-ap2.md).
 
 ### Rodar o analisador (comandos do enunciado)
 
@@ -255,15 +257,19 @@ gcc -Wall -Wextra minic.c -o minic
 ### Testes da etapa 3
 
 ```
-python tests/run_semantic_tests.py        # 20 oficiais + 16 próprios + equivalência Python/C
+python tests/run_semantic_tests.py        # 20 oficiais + 19 próprios + equivalência Python/C
+python tests/fuzz_semantico.py --c ./minic   # 600 programas gerados: equivalência + oráculos
 python tests/run_semantic_tests.py --update   # regrava os golden dos casos próprios
 bash ref/scripts/testes_semanticos_py.sh ./minic.py ref/testes-oficiais/testes-semanticos-20
 bash ref/scripts/testes_semanticos_c.sh  ./minic.c  ref/testes-oficiais/testes-semanticos-20
 ```
 
-Resultado atual: **175/175 verificações**. São 20/20 casos oficiais e 16/16
-casos próprios em cada implementação, mais 103/103 programas com saída idêntica
-byte a byte entre Python e C. Os scripts oficiais do professor dão
+Resultado atual: **184/184 verificações**. São 20/20 casos oficiais e 19/19
+casos próprios em cada implementação, mais 106/106 programas com saída idêntica
+byte a byte entre Python e C. O teste diferencial gera mais 900 programas no CI:
+aleatórios (saída idêntica entre as versões), bem tipados (têm de ser aceitos)
+e com exatamente um erro injetado (têm de reportar só aquele erro). Todos
+passam, com o C compilado com AddressSanitizer e UBSan. Os scripts oficiais do professor dão
 **20/20 aprovados** nas duas versões. O CI do GitHub roda tudo isso, mais as
 suítes das etapas 1 e 2, a cada push
 ([`.github/workflows/testes.yml`](.github/workflows/testes.yml)).

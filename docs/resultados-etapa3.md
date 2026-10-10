@@ -1,46 +1,77 @@
 # Resultados da etapa 3 — analisador semântico
 
-Registro da execução das suítes da etapa 3 no estado atual do repositório. A
-versão C foi compilada e executada no CI do GitHub (Ubuntu, gcc e Python 3.12,
-[`.github/workflows/testes.yml`](../.github/workflows/testes.yml)); a versão
-Python também foi executada no Windows 11 com Python 3.14.
+Registro da execução das verificações da etapa 3 no estado atual do
+repositório. A versão C é compilada e executada no CI do GitHub
+([`.github/workflows/testes.yml`](../.github/workflows/testes.yml)), em dois
+ambientes: Ubuntu 22.04 (gcc 11.4, Python 3.10) e Ubuntu 24.04 (gcc 13.3,
+Python 3.12, clang 18). A versão Python também foi executada no Windows 11 com
+Python 3.14. O resumo por critério de correção está em
+[entrega-ap2.md](entrega-ap2.md).
 
 ## Scripts oficiais da AP 2
 
 ```
-$ bash ref/scripts/testes_semanticos_py.sh ./minic.py ref/testes-oficiais/testes-semanticos-20
+$ bash ref/scripts/testes_semanticos_py.sh minic.py ref/testes-oficiais/testes-semanticos-20
 [OK]     ref/testes-oficiais/testes-semanticos-20/01_promocao_numerica.c
 ...
 [OK]     ref/testes-oficiais/testes-semanticos-20/20_destino_nao_atribuivel.c
 
 Resultado: 20/20 aprovados; 0 reprovados.
 
-$ bash ref/scripts/testes_semanticos_c.sh ./minic.c ref/testes-oficiais/testes-semanticos-20
+$ bash ref/scripts/testes_semanticos_c.sh minic.c ref/testes-oficiais/testes-semanticos-20
 Compilando o analisador com gcc...
 [OK]     ref/testes-oficiais/testes-semanticos-20/01_promocao_numerica.c
 ...
 Resultado: 20/20 aprovados; 0 reprovados.
 ```
 
-O `minic.c` compila sem nenhum aviso com `gcc -Wall -Wextra` (o comando do
-script), com `-std=c11 -pedantic` e também com os fontes de `src/c/` compilados
-separadamente. O CI usa `-Werror` nas três formas.
+Mesmo resultado nos dois ambientes, e também com o repositório copiado para
+`/tmp/Avaliação Parcial II/minic compiler` (espaço e acento no caminho, como a
+pasta em que o enunciado veio), em locale `C`.
 
 ## Suíte do projeto (`tests/run_semantic_tests.py`)
 
 ```
 Python — oficiais: 20/20
-Python — próprios: 16/16
+Python — próprios: 19/19
 C — oficiais: 20/20
-C — próprios: 16/16
-Equivalência: 103/103 entradas com saída idêntica
-Total: 175/175 verificações conformes.
+C — próprios: 19/19
+Equivalência: 106/106 entradas com saída idêntica
+Total: 184/184 verificações conformes.
 ```
 
 A equivalência roda pelo pipeline completo (`minic`) os 20 casos oficiais da
-AP 2, os 16 casos próprios da etapa 3, os 50 casos oficiais do parser e os 17
+AP 2, os 19 casos próprios da etapa 3, os 50 casos oficiais do parser e os 17
 casos próprios da etapa 2, e compara stdout, stderr e código de saída byte a
-byte.
+byte. O código, o objetivo e a saída de cada caso estão em
+[testes-semanticos.md](testes-semanticos.md).
+
+## Teste diferencial (`tests/fuzz_semantico.py`)
+
+```
+Programas gerados: 900 — 300 aleatórios, 300 bem tipados (devem ser aceitos), 300 com um erro injetado
+Erros injetados: SEM001×20, SEM002×16, SEM003×15, SEM004×14, SEM005×25, SEM006×15, SEM007×14, SEM008×20, SEM009×20, SEM010×17, SEM011×20, SEM012×30, SEM013×22, SEM014×17, SEM015×16, SEM016×19
+Resultado (Python × C): 900/900 programas sem falha
+```
+
+O lado C é o binário compilado com AddressSanitizer e UBSan. "Sem falha"
+significa três coisas:
+
+- nos 300 aleatórios, saída idêntica entre as versões e nenhum crash ou
+  traceback;
+- os 300 bem tipados são aceitos pelas duas;
+- nos 300 com um erro injetado, as duas reportam exatamente o código injetado
+  e mais nenhum.
+
+## Compilação e memória
+
+| Verificação | Resultado |
+|---|---|
+| `gcc -Wall -Wextra -Werror minic.c` (gcc 11 e 13) | sem avisos |
+| `gcc -Wall -Wextra -Werror -std=c11 -pedantic minic.c` | sem avisos |
+| fontes de `src/c/` compilados separadamente, com `-Werror` | sem avisos |
+| `clang -Wall -Wextra -Werror minic.c` (clang 18) | sem avisos |
+| 120 entradas de teste do repositório com `-fsanitize=address,undefined` | nenhum erro de memória, vazamento ou comportamento indefinido |
 
 ## Suítes das etapas anteriores e exercícios
 
@@ -56,8 +87,8 @@ Nada regrediu com a etapa 3:
 ## Correções feitas no lexer C durante a etapa 3
 
 A equivalência C × Python no pipeline semântico revelou duas divergências
-antigas do lexer C, invisíveis até então porque nenhum teste tinha acentos
-antes de um token:
+antigas do lexer C. Nenhum teste anterior tinha acentos antes de um token,
+então elas não apareciam:
 
 1. **Coluna depois de caractere acentuado.** Dentro de cadeias, literais de
    caractere e comentários, o C contava bytes e o Python contava caracteres. Em
@@ -68,6 +99,11 @@ antes de um token:
    "caractere com tamanho inválido" (eram 2 bytes). Agora os dois aceitam.
 
 O caso `tests/semantic_inputs/erro_colunas_apos_utf8.c` cobre as duas.
+
+Na mesma auditoria, o nó `Param` da AST passou a guardar a posição do **nome**
+do parâmetro, e não a do tipo. A duplicidade de parâmetro (SEM002) passa a
+apontar o nome, como o gabarito faz para variáveis (caso oficial 13). A AST
+impressa não mostra posições, então a etapa 2 não muda.
 
 ## Diagnósticos dos 10 casos oficiais de rejeição
 
