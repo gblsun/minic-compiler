@@ -338,18 +338,29 @@ mapa de nomes — sem tocar nas regras léxicas. Tabela das diferenças em
 
 ## 5. Antes de entregar (operacional)
 
+Etapa 2 (AP 1):
+
+- [x] **`git push`** — tudo está no GitHub, e o CI roda a cada push.
+- [x] Repositório público no GitHub (conferido em 10/10/2026).
+- [x] Itens 1.1–1.5 corrigidos antes da entrega.
 - [ ] **Confirmar a data e a forma de entrega no Classroom.** O print que temos
       (17/09/2026) diz "Data de entrega: Amanhã, 23:59", ou seja 18/09/2026 —
       conferir se não mudou, e se a entrega é o link do repositório.
-- [ ] **`git push`** — os commits das etapas estão só na máquina local.
-- [ ] Conferir que o repositório do GitHub é público (ou que o professor tem
-      acesso).
 - [ ] Conferir nomes e RAs do grupo no [README](README.md) e em
       [`etapas.md`](docs/etapas.md).
-- [ ] Cada integrante clonar do zero e rodar os comandos do
-      [README](README.md) — se falhar para alguém, falha para o professor.
-- [ ] Decidir se os itens 1.1–1.4 entram antes da entrega ou ficam para depois
-      (nenhum deles afeta os 50 casos oficiais nem os 15 nossos).
+
+Etapa 3 (AP 2 — analisador semântico):
+
+- [x] Bateria completa verde em 10/10/2026 (registro em
+      [`resultados-etapa3.md`](docs/resultados-etapa3.md#última-execução-completa)):
+      scripts oficiais 20/20 em Python e em C, suíte 184/184, teste diferencial
+      900/900, sanitizers e compiladores sem aviso.
+- [ ] **Entregar no Classroom** o link do repositório, indicando a página de
+      entrega [`docs/entrega-ap2.md`](docs/entrega-ap2.md).
+- [ ] O grupo concordar com as decisões do item [2.5](#25-ap-2-pontos-em-que-o-pacote-oficial-prevaleceu-sobre-a-especificação)
+      (`main` não exigida, `3 = n;` como SEM013, atribuição com valor).
+- [ ] Cada integrante clonar do zero e rodar os dois comandos do enunciado
+      (ver [`entrega-ap2.md`](docs/entrega-ap2.md#como-rodar-comandos-do-enunciado)).
 
 ---
 

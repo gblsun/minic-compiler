@@ -8,6 +8,26 @@ Python 3.12, clang 18). A versão Python também foi executada no Windows 11 com
 Python 3.14. O resumo por critério de correção está em
 [entrega-ap2.md](entrega-ap2.md).
 
+## Última execução completa
+
+**10/10/2026**, na `main` depois do merge da auditoria (PR #2). O CI foi
+disparado manualmente
+([execução 38053562411](https://github.com/gblsun/minic-compiler/actions/runs/38053562411)),
+e a versão Python também rodou localmente. **Tudo passou:**
+
+| Verificação | Python | C |
+|---|---|---|
+| script oficial da AP 2 (Ubuntu 22.04 e 24.04, e pasta com espaço e acento em `LC_ALL=C`) | 20/20 | 20/20 |
+| casos oficiais + próprios (`run_semantic_tests.py`) | 39/39 | 39/39 |
+| equivalência byte a byte, programas fixos | 106/106 | (idem) |
+| teste diferencial, programas gerados (C com sanitizers) | 900/900 | (idem) |
+| AddressSanitizer + UBSan nas entradas de teste | — | 120/120 |
+| compilação `-Wall -Wextra -Werror` (gcc 11, gcc 13, clang 18) | — | sem avisos |
+| catálogo `docs/testes-semanticos.md` em dia | sim | — |
+| etapas 1 e 2 e exercícios da aula 13 | sem regressão | sem regressão |
+
+As seções abaixo detalham cada verificação.
+
 ## Scripts oficiais da AP 2
 
 ```
