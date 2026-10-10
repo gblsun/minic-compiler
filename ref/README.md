@@ -13,10 +13,10 @@ arquivo](#nome-original-de-cada-arquivo) faz o de-para.
 ```text
 ref/
 ├── especificacao-completa-minic.pdf   contrato da linguagem (fonte normativa nº 1)
-├── slides/          slides das aulas 01–11 + roteiro falado da aula 06
-├── apostilas/       apostilas das aulas 02–12 + tutorial tokens→AST
-├── enunciados/      enunciados das atividades (prints do Classroom)
-├── exercicios/      exercícios das aulas 6 a 9 (.docx) e da aula 13 (.pdf)
+├── slides/          slides das aulas 01–11, 14 e 15 + roteiro falado da aula 06
+├── apostilas/       apostilas das aulas 02–12, 14 e 15 + tutorial tokens→AST
+├── enunciados/      enunciados das atividades (Classroom) e orientações de entrega
+├── exercicios/      exercícios das aulas 6 a 9 (.docx), 13 e 13–14 (.pdf)
 ├── scripts/         scripts de teste fornecidos pelo professor
 └── testes-oficiais/ pacotes de teste oficiais (scanner e parser)
 ```
@@ -42,6 +42,8 @@ ref/
 | [aula-09-compiladores.pdf](slides/aula-09-compiladores.pdf) | Análise descendente com FIRST e FOLLOW. |
 | [aula-10-compiladores.pdf](slides/aula-10-compiladores.pdf) | Análise LL(1). |
 | [aula-11-compiladores.pdf](slides/aula-11-compiladores.pdf) | Análise sintática ascendente (LR). |
+| [aula-14-compiladores.pdf](slides/aula-14-compiladores.pdf) | Tabela de símbolos e escopos: modelagem, escopo, resolução de identificadores, implementações. |
+| [aula-15-compiladores.pdf](slides/aula-15-compiladores.pdf) | Conclusão da análise semântica: regras estáticas, equivalência/compatibilidade/conversão de tipos, vetores e funções, condições e laços. |
 | [aula-06-roteiro.txt](slides/aula-06-roteiro.txt) | Roteiro falado da aula 06, slide por slide. É o material mais didático sobre GLC do pacote, e o único em texto puro (dá para pesquisar com `grep`). |
 
 ## apostilas/
@@ -60,6 +62,8 @@ ref/
 | [apostila-aula-11-analise-sintatica-ascendente.pdf](apostilas/apostila-aula-11-analise-sintatica-ascendente.pdf) | Itens LR, estados, famílias LR. |
 | [apostila-aula-12-integracao-scanner-parser-ast.pdf](apostilas/apostila-aula-12-integracao-scanner-parser-ast.pdf) | **Integração scanner–parser–AST.** Contrato dos nós, impressão textual da AST, erros sintáticos, testes de integração. Traz a descrição da atividade prática da **etapa 2** (Partes A, B e C) — resumida em [`docs/roteiro-etapa2-parser.md`](../docs/roteiro-etapa2-parser.md). |
 | [tutorial-conversao-tokens-ast-glc.pdf](apostilas/tutorial-conversao-tokens-ast-glc.pdf) | Tutorial passo a passo de tokens → AST com descida recursiva (regras `Factor`/`Term`/`Expr`, modelo de nó em C, erros comuns, como comparar ASTs). O material mais aplicado para escrever o parser. |
+| [apostila-aula-14-tabela-de-simbolos-e-escopos.pdf](apostilas/apostila-aula-14-tabela-de-simbolos-e-escopos.pdf) | **Tabela de símbolos e escopos.** Campos de uma entrada, escopo × ambiente, busca no escopo atual e nos envolventes, declaração duplicada, identificador não declarado, sombreamento — base da **etapa 3**. |
+| [apostila-aula-15-analise-semantica.pdf](apostilas/apostila-aula-15-analise-semantica.pdf) | **Análise semântica completa** do MINIC: resolução de nomes, tipos, compatibilidade e conversões, expressões, vetores, chamadas, retornos, `break`/`continue`, diagnósticos sem cascata. Fecha o front-end; a representação intermediária começa na aula 16. |
 
 ## enunciados/
 
@@ -70,6 +74,7 @@ pedido e quando.
 |---|---|
 | [ap-analisador-sintatico-enunciado.pdf](enunciados/ap-analisador-sintatico-enunciado.pdf) | Atividade **"AP 1 - analisador sintático"** (10 pontos). Define os comandos obrigatórios de invocação do parser e anexa o pacote `testes-parser-50.tar.gz`. Atenção ao nome: no Classroom a atividade se chama "AP 1", mas corresponde à **etapa 2** do projeto (parser e AST) — a etapa 1 foi o analisador léxico. Prazos em [`docs/etapas.md`](../docs/etapas.md). |
 | [scripts-de-teste-para-o-parser-enunciado.pdf](enunciados/scripts-de-teste-para-o-parser-enunciado.pdf) | Como chamar os scripts de teste do parser e onde eles devem ficar. |
+| [orientacoes-entrega-analisador-semantico.pdf](enunciados/orientacoes-entrega-analisador-semantico.pdf) | Orientações da entrega do **analisador semântico** (etapa 3): repositório no GitHub com scanner, parser e analisador semântico em arquivos separados, mais testes com resultados. Critérios: desacoplamento entre componentes, equivalência C × Python, lógica de implementação e casos de teste ("passar em todos os testes não significa estar correto"). |
 
 > O enunciado da etapa 1 (analisador léxico) não foi salvo em PDF; o texto do
 > requisito está citado em [`docs/roteiro-etapa1-lexer.md`](../docs/roteiro-etapa1-lexer.md).
@@ -87,6 +92,11 @@ Exercícios práticos da aula 13 (tradução dirigida por sintaxe, 10 atividades
 em Python e em C):
 [exercicios-aula-13-enunciados.pdf](exercicios/exercicios-aula-13-enunciados.pdf).
 A resolução está em [`exercicios/aula13/`](../exercicios/aula13/).
+
+Exercícios práticos das aulas 13 e 14 (10 atividades em C e Python:
+atributos sintetizados/herdados, SDDs, construção da AST, tabela de símbolos,
+pilha de escopos, sombreamento e diagnósticos de nomes):
+[exercicios-aulas-13-14-enunciados.pdf](exercicios/exercicios-aulas-13-14-enunciados.pdf).
 
 ## scripts/
 
@@ -121,15 +131,17 @@ Para reencontrar um arquivo no Classroom ou conferir que nada foi trocado:
 | Nome neste repositório | Nome original |
 |---|---|
 | `slides/aula-01-compiladores.pdf` | `Aula01 - Compiladores (1).pdf` |
-| `slides/aula-NN-compiladores.pdf` | `AulaNN - Compiladores.pdf` (aulas 02 a 11) |
+| `slides/aula-NN-compiladores.pdf` | `AulaNN - Compiladores.pdf` (aulas 02 a 11, 14 e 15) |
 | `slides/aula-06-roteiro.txt` | `Aula06_Roteiro - Compiladores.txt` |
 | `apostilas/apostila-aula-0N-*.pdf` | `apostila-aula-N-*.pdf` (aulas 2 a 9, sem o zero à esquerda) |
 | `apostilas/apostila-aula-1N-*.pdf` | idêntico ao original |
 | `apostilas/tutorial-conversao-tokens-ast-glc.pdf` | idêntico ao original |
 | `enunciados/ap-analisador-sintatico-enunciado.pdf` | `AP 1 - analisador sintático - Sala de Aula.pdf` |
 | `enunciados/scripts-de-teste-para-o-parser-enunciado.pdf` | `Scripts de teste para o parser - Sala de Aula.pdf` |
+| `enunciados/orientacoes-entrega-analisador-semantico.pdf` | `Compiladores - CC6 - 2026.2 - orientações para a entrega do analisador semântico.pdf` |
 | `exercicios/*.docx` | idêntico ao original |
 | `exercicios/exercicios-aula-13-enunciados.pdf` | `aula13_exercicios_praticos_python_c.pdf` |
+| `exercicios/exercicios-aulas-13-14-enunciados.pdf` | `exercicios_praticos_minic_aulas_13_14.pdf` |
 | `scripts/*.sh` | idêntico ao original |
 | `testes-oficiais/testes-scanner-minic/` | `Testes para o analisador léxico/testes-scanner-minic_codes/` |
 | `testes-oficiais/testes-parser-50{,.tar.gz}` | `testes-parser-50.tar.gz` |
@@ -138,4 +150,6 @@ Duplicatas descartadas na organização (verificadas por hash MD5 antes de sair)
 duas cópias extras de `test_scanner_c.sh`/`test_scanner_python.sh`, cópias de
 `Aula04`/`Aula05` idênticas às que já estavam em `ref/`, e a variante reduzida
 do pacote de testes do scanner (`testes-scanner-minic`, subconjunto de
-`testes-scanner-minic_codes`, que é o que ficou).
+`testes-scanner-minic_codes`, que é o que ficou) e uma segunda cópia de
+`aula13_exercicios_praticos_python_c.pdf`, idêntica a
+`exercicios/exercicios-aula-13-enunciados.pdf`.
