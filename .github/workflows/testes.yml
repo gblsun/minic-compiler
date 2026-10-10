@@ -59,6 +59,11 @@ jobs:
             grep -q '^Erros de execução: *0$'   "/tmp/oficial-$impl.txt"
           done
 
+      # Os exercícios reaproveitam o lexer C (src/c/lexer.c): qualquer mudança
+      # nele precisa continuar compilando e passando aqui também.
+      - name: Exercícios da aula 13 (Python e C)
+        run: python3 exercicios/aula13/run_tests.py
+
       - name: Semântico — suíte completa (oficiais + próprios + equivalência C × Python)
         run: python3 tests/run_semantic_tests.py
 

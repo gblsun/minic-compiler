@@ -9,6 +9,7 @@ mesma saída para a mesma entrada.
 | ----- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
 | 1     | Analisador léxico (scanner)         | ✅ entregue                                                                                                        |
 | 2     | Analisador sintático e AST (parser) | ✅ **concluída** — 201/201 verificações ([resultados](docs/resultados-etapa2.md))                                   |
+| 3     | Analisador semântico (AP 2)          | ✅ **concluída** — 20/20 oficiais nas duas versões, 175/175 verificações ([resultados](docs/resultados-etapa3.md)) |
 
 Detalhes de cada etapa, prazos e comandos exigidos por cada atividade: [docs/etapas.md](docs/etapas.md).
 
@@ -32,6 +33,8 @@ Cada pasta tem seu próprio README com mais detalhes:
 minic-compiler/
 ├── parser.py  ponto de entrada da etapa 2 em Python (exigido pelo enunciado)
 ├── parser.c   ponto de entrada da etapa 2 em C (compila src/c/ em unidade única)
+├── minic.py   ponto de entrada da etapa 3 em Python: lexer → parser → análise semântica
+├── minic.c    ponto de entrada da etapa 3 em C (compila src/c/ em unidade única)
 ├── docs/      documentação derivada da especificação (o que implementar e por quê)
 ├── src/       código-fonte — src/python/ e src/c/, as duas implementações
 ├── tests/     suítes de regressão do projeto (entradas, saídas gravadas, runners)
@@ -48,8 +51,10 @@ Atalhos úteis:
 | entender o pipeline e os contratos        | [docs/arquitetura.md](docs/arquitetura.md)                                                                        |
 | ver a AST e sua notação                   | [docs/ast.md](docs/ast.md)                                                                                        |
 | ver os resultados dos testes da etapa 2   | [docs/resultados-etapa2.md](docs/resultados-etapa2.md)                                                            |
+| entender a análise semântica e as mensagens | [docs/semantica.md](docs/semantica.md)                                                                          |
+| ver os resultados dos testes da etapa 3   | [docs/resultados-etapa3.md](docs/resultados-etapa3.md)                                                            |
 | saber como a entrega é avaliada           | [ref/testes-oficiais/README.md](ref/testes-oficiais/README.md)                                                    |
-| saber o que vem na etapa 3                | [docs/etapas.md](docs/etapas.md)                                                                                  |
+| saber o que vem depois                    | [docs/etapas.md](docs/etapas.md)                                                                                  |
 | saber o que ainda falta corrigir/revisar  | [PENDENCIAS.md](PENDENCIAS.md)                                                                                    |
 
 ## Etapa 1 — analisador léxico ✅
@@ -215,6 +220,66 @@ As correções feitas depois da avaliação da etapa 2 estão em
 | [src/c/ast.c](src/c/ast.c) / [ast.h](src/c/ast.h)         | a AST em C                                                                                                        |
 | [src/c/parser_main.c](src/c/parser_main.c)                | CLI em C                                                                                                          |
 | [tests/run_parser_tests.py](tests/run_parser_tests.py)    | as três suítes de teste do parser                                                                                 |
+
+## Etapa 3 — analisador semântico ✅
+
+Atividade **"AP 2 - Analisador Semântico"**
+([enunciado](ref/enunciados/ap-analisador-semantico-enunciado.md)). Recebe a
+AST da etapa 2 e verifica nomes, escopos (com sombreamento), tipos e
+conversões, vetores, chamadas, retornos (inclusive retorno em todos os
+caminhos), condições e o contexto de `break`/`continue`. Cada fase tem o seu
+módulo, como pedem as [orientações de entrega](ref/enunciados/orientacoes-entrega-analisador-semantico.pdf):
+scanner, parser, tabela de símbolos e analisador semântico.
+
+- **stdout**: um diagnóstico por linha, no formato do gabarito oficial
+  (`SEM003 — linha 3, coluna 9: Não é possível atribuir float a int sem conversão permitida (destino “n”; expressão “2.5”).`),
+  e o resumo `Análise semântica concluída: N erros; programa aceito|rejeitado.`
+- **código de saída**: `0` aceito, `4` erro semântico, `3` erro sintático,
+  `2` erro léxico (nesses dois, a semântica não roda e as mensagens vão para
+  stderr), `1` erro de uso.
+
+Regras, decisões de projeto e o catálogo completo de mensagens (SEM001 a
+SEM016): [docs/semantica.md](docs/semantica.md).
+
+### Rodar o analisador (comandos do enunciado)
+
+```
+python minic.py codigo.c      # versão Python
+```
+
+```
+gcc -Wall -Wextra minic.c -o minic
+./minic codigo.c              # versão C
+```
+
+### Testes da etapa 3
+
+```
+python tests/run_semantic_tests.py        # 20 oficiais + 16 próprios + equivalência Python/C
+python tests/run_semantic_tests.py --update   # regrava os golden dos casos próprios
+bash ref/scripts/testes_semanticos_py.sh ./minic.py ref/testes-oficiais/testes-semanticos-20
+bash ref/scripts/testes_semanticos_c.sh  ./minic.c  ref/testes-oficiais/testes-semanticos-20
+```
+
+Resultado atual: **175/175 verificações**. São 20/20 casos oficiais e 16/16
+casos próprios em cada implementação, mais 103/103 programas com saída idêntica
+byte a byte entre Python e C. Os scripts oficiais do professor dão
+**20/20 aprovados** nas duas versões. O CI do GitHub roda tudo isso, mais as
+suítes das etapas 1 e 2, a cada push
+([`.github/workflows/testes.yml`](.github/workflows/testes.yml)).
+
+> O gabarito oficial separa as linhas com CRLF e não tem quebra de linha no
+> fim, e o script compara com `diff` exato. A saída reproduz esses bytes, e o
+> pacote está marcado como `-text` no `.gitattributes` para o git não
+> converter nada. Detalhes em [docs/semantica.md](docs/semantica.md#como-rodar).
+
+| Arquivo | Papel |
+|---|---|
+| [minic.py](minic.py) / [minic.c](minic.c) | pontos de entrada exigidos pela AP 2 (cascas para `src/`) |
+| [src/python/tabela_simbolos.py](src/python/tabela_simbolos.py) / [src/c/tabela_simbolos.c](src/c/tabela_simbolos.c) | tabela de símbolos: pilha de escopos |
+| [src/python/semantico.py](src/python/semantico.py) / [src/c/semantico.c](src/c/semantico.c) | o analisador semântico |
+| [src/python/minic.py](src/python/minic.py) / [src/c/minic_main.c](src/c/minic_main.c) | CLI que encadeia lexer → parser → semântica |
+| [tests/run_semantic_tests.py](tests/run_semantic_tests.py) | as três suítes de teste da etapa 3 |
 
 ## Exercícios da aula 13 — tradução dirigida por sintaxe
 

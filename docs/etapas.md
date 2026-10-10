@@ -95,25 +95,42 @@ disciplina abre uma atividade no Classroom para cada uma.
   formato canônico e testar entradas válidas, precedência, `if`-`else`, `while`,
   `return`, chamada e pelo menos três entradas inválidas.
 
-## Etapa 3 — semântica e IR
+## Etapa 3 — analisador semântico ✅
 
-Ainda sem atividade publicada. O que a especificação já fixa:
+Atividade **"AP 2 - Analisador Semântico"**
+([enunciado](../ref/enunciados/ap-analisador-semantico-enunciado.md),
+[orientações de entrega](../ref/enunciados/orientacoes-entrega-analisador-semantico.pdf)).
 
-- tabela de símbolos com nome, categoria (`VARIÁVEL`, `CONSTANTE`, `FUNÇÃO`,
-  `PARÂMETRO`, `VETOR`), tipo, escopo, nível léxico, linha/coluna da
-  declaração, estado de inicialização/uso e deslocamento (Seção 6.1);
-- operações `inserir`, `buscar`, `buscar_no_escopo_atual`, `abrir_escopo`,
-  `fechar_escopo` (Seção 6.2);
-- escopo léxico com sombreamento e proibição de declaração duplicada no mesmo
-  escopo (Seção 6);
-- regras semânticas da Seção 7 (identificador não declarado, lado esquerdo
-  gravável, condição `bool` na versão estrita, aridade e tipos de argumentos,
-  retorno compatível, `break`/`continue` só em laço, índice `int`, divisor
-  constante zero rejeitado);
-- conversões implícitas permitidas: `int` → `float` e `char` → `int`; as demais
-  não (Seção 5);
-- IR em código de três endereços, com as operações mínimas da Seção 9.1
-  (`ADD`…`RETURN`), e exit code 4 para erro semântico.
+Comandos exigidos:
+
+```bash
+./testes_semanticos_py.sh minic.py [diretorio]
+./testes_semanticos_c.sh minic.c [diretorio]
+```
+
+O script Python roda `python3 minic.py <teste>`. O script C compila
+`gcc -Wall -Wextra minic.c` (uma unidade de tradução) e roda o executável.
+Os dois comparam stdout+stderr com o `.gabarito` usando `diff` exato.
+
+Critérios de correção (orientações): desacoplamento entre os componentes,
+equivalência entre as versões C e Python, lógica de implementação e casos de
+teste. A entrega é o repositório no GitHub com scanner, parser e analisador
+semântico em arquivos separados, mais os testes com os resultados.
+
+O que foi entregue:
+
+- [`minic.py`](../minic.py) e [`minic.c`](../minic.c) na raiz, como os scripts
+  chamam;
+- tabela de símbolos e analisador semântico em módulos próprios, nas duas
+  linguagens (`src/python/tabela_simbolos.py`, `src/python/semantico.py`,
+  `src/c/tabela_simbolos.c`, `src/c/semantico.c`);
+- regras, decisões e catálogo de mensagens em [semantica.md](semantica.md);
+- 20/20 casos oficiais nas duas versões; 16 casos próprios; equivalência
+  C × Python em 103 programas ([resultados-etapa3.md](resultados-etapa3.md)).
+
+Ainda pela frente, na especificação: a **representação intermediária** (código
+de três endereços, Seção 9.1), que a apostila da aula 15 coloca a partir da
+aula 16.
 
 ## Etapa 4 — geração de código e otimização
 
