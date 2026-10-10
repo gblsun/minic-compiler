@@ -510,21 +510,27 @@ static void lexer_scan_char(Lexer *lexer, int line, int column) {
         return;
     }
 
-    char ch_value;
+    /* Um caractere pode ocupar até 4 bytes em UTF-8 ('é' são 2): os bytes de
+     * continuação entram no lexema, e 'é' é um caractere só, como no Python. */
+    char seq[5] = {0};
+    size_t n = 0;
     if (lexer_peek(lexer, 0) == '\\') {
         lexer_advance(lexer);
-        ch_value = lexer_read_escape(lexer);
+        seq[n++] = lexer_read_escape(lexer);
     } else {
-        ch_value = lexer_advance(lexer);
+        seq[n++] = lexer_advance(lexer);
+        while (lexer->continuacoes > 0 && n < 4) {
+            seq[n++] = lexer_advance(lexer);
+        }
     }
 
     if (!lexer_at_end(lexer) && lexer_peek(lexer, 0) == '\'') {
         /* Caso feliz: um caractere (ou um escape, que conta como um só),
          * fechado corretamente. */
         lexer_advance(lexer);
-        char *lexeme = malloc(2);
-        lexeme[0] = ch_value;
-        lexeme[1] = '\0';
+        char *lexeme = malloc(n + 1);
+        memcpy(lexeme, seq, n);
+        lexeme[n] = '\0';
         TokenValue value;
         value.str_value = lexeme;
         lexer_add_token(lexer, TOK_CHAR, lexeme, line, column, value);
