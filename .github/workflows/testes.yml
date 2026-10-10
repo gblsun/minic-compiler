@@ -1,6 +1,14 @@
 # Roda as suítes do scanner (etapa 1), do parser (etapa 2) e do analisador
 # semântico (etapa 3) nas duas implementações, num Ubuntu com gcc e python3 —
 # o mesmo tipo de ambiente em que o professor executa os scripts oficiais.
+#
+# Dois jobs:
+# - `testes`, em duas combinações de sistema/compilador/Python (uma mais antiga,
+#   uma atual), porque não sabemos a versão exata da máquina do professor;
+# - `robustez`, que procura o que os testes fixos não pegam: avisos do clang,
+#   erros de memória (AddressSanitizer/UBSan), divergência C × Python em
+#   programas gerados, e os scripts oficiais rodando de uma pasta com espaço e
+#   acento no nome, em locale C.
 name: testes
 
 on:
@@ -10,13 +18,22 @@ on:
 
 jobs:
   testes:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04 # gcc 11
+            python: "3.10"
+          - os: ubuntu-24.04 # gcc 13
+            python: "3.12"
+    runs-on: ${{ matrix.os }}
+    name: testes (${{ matrix.os }}, Python ${{ matrix.python }})
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python }}
 
       - name: Versões
         run: gcc --version | head -1 && python3 --version
@@ -71,3 +88,62 @@ jobs:
         run: |
           bash ref/scripts/testes_semanticos_py.sh ./minic.py ref/testes-oficiais/testes-semanticos-20
           bash ref/scripts/testes_semanticos_c.sh ./minic.c ref/testes-oficiais/testes-semanticos-20
+
+  robustez:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: clang sem avisos
+        run: |
+          clang --version | head -1
+          clang -Wall -Wextra -Werror minic.c -o /tmp/minic-clang
+          clang -Wall -Wextra -Werror -std=c11 parser.c -o /tmp/parser-clang
+
+      - name: Compila com AddressSanitizer e UBSan
+        run: |
+          gcc -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined \
+              -fno-sanitize-recover=all minic.c -o /tmp/minic-asan
+
+      # Todo programa de teste do repositório (scanner, parser, semântico,
+      # oficiais e próprios) passa pelo binário instrumentado. Qualquer acesso
+      # inválido, vazamento ou comportamento indefinido encerra com relatório
+      # do sanitizer em stderr e código de saída fora de {0, 2, 3, 4}.
+      - name: Sem erro de memória nas entradas de teste
+        run: |
+          total=0
+          while IFS= read -r -d '' arquivo; do
+            total=$((total + 1))
+            set +e
+            /tmp/minic-asan "$arquivo" > /dev/null 2> /tmp/asan-stderr.txt
+            codigo=$?
+            set -e
+            if grep -q "Sanitizer\|runtime error" /tmp/asan-stderr.txt || [[ ! "$codigo" =~ ^[0234]$ ]]; then
+              echo "FALHA em $arquivo (exit $codigo)"; cat /tmp/asan-stderr.txt; exit 1
+            fi
+          done < <(find ref/testes-oficiais tests -type f \( -name '*.c' -o -name '*.mc' \) -print0 | sort -z)
+          echo "$total entradas sem erro de memória"
+
+      # 900 programas gerados: aleatórios (equivalência e robustez), bem tipados
+      # (têm de ser aceitos) e com um erro injetado (têm de reportar exatamente
+      # aquele erro). O lado C é o binário com sanitizers.
+      - name: Teste diferencial Python × C (programas gerados, C com sanitizers)
+        run: python3 tests/fuzz_semantico.py --c /tmp/minic-asan -n 900
+
+      # O enunciado veio numa pasta "Avaliação Parcial II", com espaço e acento.
+      # Aqui o repositório inteiro é copiado para um caminho assim e os scripts
+      # oficiais rodam de lá, em locale C (sem UTF-8).
+      - name: Scripts oficiais da AP 2 em pasta com espaço e acento, LC_ALL=C
+        env:
+          LC_ALL: C
+        run: |
+          destino="/tmp/Avaliação Parcial II/minic compiler"
+          mkdir -p "$destino"
+          cp -r . "$destino"
+          cd "$destino"
+          bash ref/scripts/testes_semanticos_py.sh minic.py "ref/testes-oficiais/testes-semanticos-20"
+          bash ref/scripts/testes_semanticos_c.sh minic.c "ref/testes-oficiais/testes-semanticos-20"
