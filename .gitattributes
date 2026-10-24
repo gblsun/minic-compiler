@@ -10,6 +10,8 @@
 *.mc   text eol=lf
 # IR esperada dos testes próprios: comparada byte a byte com a saída (LF).
 *.ir   text eol=lf
+# Saída esperada dos programas executados (--run): também byte a byte.
+tests/exec_expected/** text eol=lf
 
 # Material da disciplina: binário, nunca normalizar.
 *.pdf  binary
