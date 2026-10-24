@@ -1,0 +1,40 @@
+func total(v, n)
+  s = 0
+  i = 0
+L_test:
+  t1 = i < n
+  ifFalse t1 goto L_end
+  t2 = i * 1
+  t3 = load v[t2]
+  t4 = s + t3
+  s = t4
+  t5 = i + 1
+  i = t5
+  goto L_test
+L_end:
+  return s
+endfunc
+func main
+  k = 0
+L_test:
+  t1 = k < 3
+  ifFalse t1 goto L_end
+  t2 = k * 1
+  t3 = k * k
+  store dados[t2], t3
+  t4 = k + 1
+  k = t4
+  goto L_test
+L_end:
+  t5 = 3 * 1
+  read t6
+  store dados[t5], t6
+  param dados
+  param 4
+  t7 = call total, 2
+  print t7
+  t8 = 2 * 1
+  t9 = load dados[t8]
+  print t9
+  return 0
+endfunc

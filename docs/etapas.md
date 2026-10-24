@@ -16,8 +16,8 @@ disciplina abre uma atividade no Classroom para cada uma.
 |---|---|---|---|
 | 1 | Analisador léxico | tokens, expressões regulares, scanner, erros e testes | ✅ entregue |
 | 2 | Parser e AST | gramática, parser, AST, recuperação e testes sintáticos | ✅ concluída |
-| 3 | Semântica e IR | tabela de símbolos, escopos, tipos, 3AC e testes | ✅ analisador semântico concluído (AP 2); IR ainda não |
-| 4 | Código e otimização | backend, duas otimizações, benchmarks, manual e apresentação | não iniciada |
+| 3 | Semântica e IR | tabela de símbolos, escopos, tipos, 3AC e testes | ✅ analisador semântico (AP 2) e IR de três endereços concluídos |
+| 4 | Código e otimização | backend, duas otimizações, benchmarks, manual e apresentação | em andamento: otimizador -O1 pronto; falta o backend |
 
 ## Etapa 1 — analisador léxico ✅
 
@@ -132,16 +132,50 @@ O que foi entregue:
 - a correspondência entre cada critério de correção e a evidência no
   repositório: [entrega-ap2.md](entrega-ap2.md).
 
-Ainda pela frente, na especificação: a **representação intermediária** (código
-de três endereços, Seção 9.1), que a apostila da aula 15 coloca a partir da
-aula 16.
+### Representação intermediária ✅
+
+Atividade **"Testes para o MINIC (IR)"** (Classroom, 17/10), com o pacote
+`minic-ir-test-cases.zip`, em
+[`ref/testes-oficiais/testes-ir-30/`](../ref/testes-oficiais/testes-ir-30/):
+10 programas válidos (IR -O0), 10 inválidos e 10 de otimização (IR -O1).
+O Classroom não mostra prazo; confira lá.
+
+```bash
+python3 minic.py --ir [-O0|-O1] programa.c
+./minic --ir [-O0|-O1] programa.c
+```
+
+O que foi feito, detalhado em [ir.md](ir.md):
+
+- gerador de código de três endereços ([`ir.py`](../src/python/ir.py),
+  [`ir.c`](../src/c/ir.c)) no formato dos gabaritos;
+- otimizador -O1 ([`otimizador.py`](../src/python/otimizador.py),
+  [`otimizador.c`](../src/c/otimizador.c)): dobra de constantes e identidades
+  algébricas, propagação global de constantes e cópias, subexpressões comuns
+  locais, limpeza do fluxo de controle e eliminação de código morto por
+  variáveis vivas;
+- 30/30 casos oficiais nas duas versões. Dos 10 válidos, 8 têm IR idêntica ao
+  gabarito e 2 são equivalentes. A comparação é estrutural + execução, como
+  pede o README do pacote;
+- 11 casos próprios com golden -O0/-O1, equivalência C × Python em 147
+  entradas e em 1000 programas válidos gerados, e -O1 executando igual a -O0
+  em todos eles ([`tests/run_ir_tests.py`](../tests/run_ir_tests.py),
+  [`tests/fuzz_ir.py`](../tests/fuzz_ir.py)).
+
+Os scripts oficiais do pacote (`test_ir_*.sh`) comparam o gabarito inteiro,
+com a prosa, byte a byte, então nenhum compilador passa por eles do jeito que
+vieram. Com o `IGNORE_RE` personalizado, chegam a 17/30. A análise está em
+[ir.md](ir.md#os-scripts-oficiais-test_ir_pythonsh--test_ir_csh).
 
 ## Etapa 4 — geração de código e otimização
 
 - escolha do alvo (assembly de pilha, x86-64, LLVM IR ou VM própria) registrada
-  no relatório e mantida estável (Seção 10);
+  no relatório e mantida estável (Seção 10) — **falta**;
 - ao menos uma otimização local (simplificação algébrica, propagação de
   constantes, eliminação de código morto) e uma global (reaching definitions,
   live variables, eliminação de subexpressões comuns), com corretude
-  demonstrada por testes antes e depois (Seção 10.1);
-- entregáveis extras: benchmarks, manual e apresentação (Seção 15).
+  demonstrada por testes antes e depois (Seção 10.1) — **feito** sobre a IR
+  (`-O1`, ver [ir.md](ir.md#otimizador--o1)). Ainda sem otimizações de laço
+  (código invariante, redução de força; aula 19);
+- entregáveis extras: benchmarks, manual e apresentação (Seção 15) —
+  **faltam**.

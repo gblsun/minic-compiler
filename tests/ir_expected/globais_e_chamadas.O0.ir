@@ -1,0 +1,19 @@
+global contador
+global limite
+func @init
+  contador = 10
+endfunc
+func incrementa
+  t1 = contador + 1
+  contador = t1
+endfunc
+func main
+  limite = 3
+  antes = contador
+  call incrementa, 0
+  print antes
+  print contador
+  t1 = limite + 1
+  print t1
+  return 0
+endfunc

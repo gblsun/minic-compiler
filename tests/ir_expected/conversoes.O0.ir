@@ -1,0 +1,30 @@
+func metade(x)
+  t1 = x / 2.0
+  return t1
+endfunc
+func main
+  n = 7
+  t1 = itof n
+  f = t1
+  c = 'a'
+  t2 = ctoi c
+  codigo = t2
+  t3 = itof n
+  param t3
+  t4 = call metade, 1
+  print t4
+  t5 = f + 1.0
+  print t5
+  t6 = codigo + 1
+  print t6
+  t7 = ctoi c
+  t8 = ctoi 'b'
+  t9 = t7 < t8
+  print t9
+  t10 = ctoi c
+  t11 = neg t10
+  print t11
+  t12 = 7 / 2
+  print t12
+  return 0
+endfunc

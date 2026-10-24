@@ -17,10 +17,10 @@ arquivo .mc / .c
   parser   ──► AST ou diagnóstico sintático                                        [etapa 2 ✅]
       │
       ▼
-  semântica ─► AST anotada + tabela de símbolos                                    [etapa 3]
+  semântica ─► AST anotada + tabela de símbolos                                    [etapa 3 ✅]
       │
       ▼
-  IR (3AC) ──► otimizador ──► gerador de código                                    [etapa 4]
+  IR (3AC) ──► otimizador ──► gerador de código                                    [IR e -O1 ✅; código: etapa 4]
 ```
 
 Cada etapa tem um componente, uma responsabilidade e **uma saída principal**
@@ -101,6 +101,8 @@ invocação, e é por eles que a entrega é avaliada.
 |---|---|---|
 | 1 — scanner | `python scanner.py arquivo.c` / `./scanner arquivo.c` | `python src/python/main.py arquivo.mc` e `src/c/scanner arquivo.mc` |
 | 2 — parser | `python parser.py codigo.c` / `./parser codigo.c` | `parser.py` e `parser.c` na raiz, atendendo aos comandos exatos |
+| 3 — semântica | `python minic.py codigo.c` / `./minic codigo.c` | `minic.py` e `minic.c` na raiz; sem opções, imprimem o relatório da AP 2 |
+| IR / -O1 | (o pacote de testes chama `minic arquivo.c`) | as opções `--ir`, `-O0` e `-O1` da Seção 11 no mesmo `minic`; ver [`ir.md`](ir.md) |
 
 A etapa 2 exige um ponto de entrada chamado literalmente `parser.py` (e um
 executável `parser`), e é por isso que existem [`parser.py`](../parser.py) e

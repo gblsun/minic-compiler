@@ -1,12 +1,16 @@
-/* Compilador MINIC até a análise semântica (etapa 3) — a CLI do pipeline.
+/* Compilador MINIC até a representação intermediária — a CLI do pipeline.
  *
- * Uso: ./minic <arquivo.c>
+ * Uso: ./minic [--ir] [-O0|-O1] <arquivo.c>
  *
  * Mesmo contrato de src/python/minic.py, para as duas implementações serem
- * comparadas byte a byte: lexer -> parser -> analisador semântico, cada fase
- * só rodando se a anterior terminou sem erro.
- *   - stdout: o relatório da análise semântica (diagnósticos + resumo, linhas
- *     separadas por CRLF e sem quebra no fim, formato da AP 2);
+ * comparadas byte a byte: lexer -> parser -> analisador semântico -> IR ->
+ * otimizador (só com -O1), cada fase só rodando se a anterior terminou sem
+ * erro.
+ *   - stdout, com --ir e programa válido: a IR de três endereços (linhas com
+ *     LF);
+ *   - stdout, nos outros casos: o relatório da análise semântica
+ *     (diagnósticos + resumo, linhas separadas por CRLF e sem quebra no fim,
+ *     formato da AP 2);
  *   - stderr: erros léxicos ou sintáticos, quando houver;
  *   - código de saída: 0 = aceito, 1 = uso inválido, 2 = erro léxico,
  *     3 = erro sintático, 4 = erro semântico (Seção 11.1 da especificação).
@@ -22,7 +26,9 @@
 #endif
 
 #include "ast.h"
+#include "ir.h"
 #include "lexer.h"
+#include "otimizador.h"
 #include "parser.h"
 #include "semantico.h"
 
@@ -69,15 +75,29 @@ int main(int argc, char **argv) {
 #endif
 
     if (argc == 2 && (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)) {
-        printf("uso: %s <arquivo.c>\n", argv[0]);
+        printf("uso: %s [--ir] [-O0|-O1] <arquivo.c>\n", argv[0]);
         return 0;
     }
-    if (argc != 2) {
-        fprintf(stderr, "uso: %s <arquivo.c>\n", argv[0]);
+    int modo_ir = 0;
+    int otimizar = 0;
+    const char *arquivo = NULL;
+    int arquivos = 0;
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--ir") == 0) {
+            modo_ir = 1;
+        } else if (strcmp(argv[i], "-O0") == 0 || strcmp(argv[i], "-O1") == 0) {
+            otimizar = strcmp(argv[i], "-O1") == 0;
+        } else {
+            arquivo = argv[i];
+            arquivos++;
+        }
+    }
+    if (arquivos != 1 || arquivo[0] == '-') {
+        fprintf(stderr, "uso: %s [--ir] [-O0|-O1] <arquivo.c>\n", argv[0]);
         return 1;
     }
 
-    char *source = minic_ler_arquivo(argv[1]);
+    char *source = minic_ler_arquivo(arquivo);
 
     Lexer lex;
     lexer_init(&lex, source);
@@ -109,10 +129,24 @@ int main(int argc, char **argv) {
     } else {
         Diagnosticos diagnosticos = {NULL, 0, 0};
         semantico_analisar(programa, &diagnosticos);
-        char *relatorio = semantico_relatorio(&diagnosticos);
-        fputs(relatorio, stdout);
-        free(relatorio);
-        codigo = diagnosticos.len > 0 ? 4 : 0;
+        if (modo_ir && diagnosticos.len == 0) {
+            IrPrograma codigo_ir;
+            memset(&codigo_ir, 0, sizeof codigo_ir);
+            ir_gerar(programa, &codigo_ir);
+            if (otimizar) {
+                otimizador_otimizar(&codigo_ir);
+            }
+            char *texto = ir_formatar(&codigo_ir);
+            fputs(texto, stdout);
+            free(texto);
+            ir_programa_free(&codigo_ir);
+            codigo = 0;
+        } else {
+            char *relatorio = semantico_relatorio(&diagnosticos);
+            fputs(relatorio, stdout);
+            free(relatorio);
+            codigo = diagnosticos.len > 0 ? 4 : 0;
+        }
         diagnosticos_free(&diagnosticos);
     }
 

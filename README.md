@@ -3,8 +3,8 @@
 Compilador da linguagem **MINIC**, desenvolvido de forma incremental na disciplina de Compiladores e implementado **duas vezes**, em **Python** e em **C**. As duas versões produzem exatamente a mesma saída (byte a byte) para a mesma entrada, e isso é verificado por testes automáticos a cada `push`.
 
 ```
-código-fonte ──► scanner ──► tokens ──► parser ──► AST ──► analisador semântico ──► relatório
-                 (etapa 1)              (etapa 2)          (etapa 3)
+código-fonte ──► scanner ──► tokens ──► parser ──► AST ──► analisador semântico ──► IR (3AC) ──► otimizador
+                 (etapa 1)              (etapa 2)          (etapa 3)                 --ir         -O1
 ```
 
 Tudo é escrito à mão, sem `re`, `flex`, `yacc`, `bison` ou ANTLR: o scanner reconhece caractere a caractere e o parser é de descida recursiva.
@@ -16,6 +16,7 @@ Tudo é escrito à mão, sem `re`, `flex`, `yacc`, `bison` ou ANTLR: o scanner r
 |   1   |     —     | Analisador léxico (scanner)         | ✅ entregue                                                                                  |
 |   2   | **AP 1**  | Analisador sintático e AST (parser) | ✅ concluída: 201/201 verificações ([resultados](docs/resultados-etapa2.md))                 |
 |   3   | **AP 2**  | Analisador semântico                | ✅ concluída: 20/20 testes oficiais em Python e em C, 184/184 verificações ([entrega](docs/entrega-ap2.md)) |
+|   3–4 | Testes IR | Representação intermediária e otimizador `-O1` | ✅ 30/30 casos oficiais em Python e em C, 229/229 verificações ([entrega](docs/entrega-ir.md)) |
 
 Prazos e comandos exigidos por cada atividade: [docs/etapas.md](docs/etapas.md).
 
@@ -123,8 +124,8 @@ O CI do GitHub roda tudo em Linux a cada push: Ubuntu 22.04 (gcc 11, Python 3.10
 
 ```
 minic-compiler/
-├── minic.py     ponto de entrada da etapa 3 (Python): lexer → parser → semântica
-├── minic.c      ponto de entrada da etapa 3 (C), compila src/c/ em unidade única
+├── minic.py     ponto de entrada (Python): lexer → parser → semântica → IR → -O1
+├── minic.c      ponto de entrada (C), compila src/c/ em unidade única
 ├── parser.py    ponto de entrada da etapa 2 (Python)
 ├── parser.c     ponto de entrada da etapa 2 (C), compila src/c/ em unidade única
 ├── src/         código-fonte: src/python/ e src/c/, as duas implementações
@@ -143,6 +144,8 @@ Os arquivos `minic.*` e `parser.*` da raiz são só "cascas": existem porque os 
 | Parser               | [`parser.py`](src/python/parser.py)                                            | [`parser.c`](src/c/parser.c) / [`.h`](src/c/parser.h)                               |
 | Tabela de símbolos   | [`tabela_simbolos.py`](src/python/tabela_simbolos.py)                          | [`tabela_simbolos.c`](src/c/tabela_simbolos.c) / [`.h`](src/c/tabela_simbolos.h)    |
 | Analisador semântico | [`semantico.py`](src/python/semantico.py)                                      | [`semantico.c`](src/c/semantico.c) / [`.h`](src/c/semantico.h)                      |
+| IR (três endereços)  | [`ir.py`](src/python/ir.py)                                                    | [`ir.c`](src/c/ir.c) / [`.h`](src/c/ir.h)                                           |
+| Otimizador (`-O1`)   | [`otimizador.py`](src/python/otimizador.py)                                    | [`otimizador.c`](src/c/otimizador.c) / [`.h`](src/c/otimizador.h)                   |
 | CLI do pipeline      | [`minic.py`](src/python/minic.py)                                              | [`minic_main.c`](src/c/minic_main.c)                                                |
 
 ## Mapa da documentação
@@ -154,6 +157,7 @@ Os arquivos `minic.*` e `parser.*` da raiz são só "cascas": existem porque os 
 | ver a AST e sua notação                       | [docs/ast.md](docs/ast.md)                                                                           |
 | entender a análise semântica e as mensagens   | [docs/semantica.md](docs/semantica.md)                                                               |
 | ver cada teste semântico com seu resultado    | [docs/testes-semanticos.md](docs/testes-semanticos.md)                                               |
+| entender a IR e as otimizações                | [docs/ir.md](docs/ir.md)                                                                             |
 | ver os resultados das etapas 2 e 3            | [docs/resultados-etapa2.md](docs/resultados-etapa2.md), [docs/resultados-etapa3.md](docs/resultados-etapa3.md) |
 | saber como a entrega é avaliada               | [ref/testes-oficiais/README.md](ref/testes-oficiais/README.md)                                       |
 | ver as decisões do grupo e o checklist de entrega | [PENDENCIAS.md](PENDENCIAS.md)                                                                   |
@@ -290,6 +294,46 @@ python tests/fuzz_semantico.py --c ./minic    # programas gerados: equivalência
 ```
 
 Resultado: **184/184 verificações**, com 20/20 casos oficiais e 19/19 próprios em cada implementação, e 106/106 programas com saída idêntica entre Python e C. O teste diferencial gera mais 900 programas no CI (aleatórios, bem tipados e com exatamente um erro injetado), com o C compilado com AddressSanitizer e UBSan. Os scripts oficiais do professor dão **20/20** nas duas versões.
+
+## Representação intermediária e otimização ✅
+
+Atividade **"Testes para o MINIC (IR)"** ([pacote de testes](ref/testes-oficiais/testes-ir-30/)). Depois da análise semântica, o programa é traduzido para **código de três endereços** (Seção 9 da especificação) e, com `-O1`, otimizado:
+
+```bash
+python3 minic.py --ir programa.c       # IR sem otimização (-O0)
+python3 minic.py --ir -O1 programa.c   # IR otimizada
+./minic --ir -O1 programa.c            # idem, em C
+```
+
+```text
+int main() {                   func main
+    int n = 9;                   n = 9
+    int r;                       t1 = n < 10
+    if (n < 10) {                ifFalse t1 goto L_else
+        r = 1;                   r = 1
+    } else {                     goto L_end
+        r = 2;                 L_else:
+    }                            r = 2
+    print(r);                  L_end:
+    return 0;                    print r
+}                                return 0
+                               endfunc
+```
+
+(caso oficial P04, IR -O0; com `-O1`, vira só `print 1` e `return 0`)
+
+O otimizador combina dobra de constantes e identidades algébricas, propagação **global** de constantes e cópias (fluxo de dados *forward*), eliminação de subexpressões comuns, remoção de código inalcançável e eliminação de código morto por **variáveis vivas** (*backward*). Nada com efeito observável é removido: `print`, `read`, chamadas, acessos a vetor e divisões por valor desconhecido ficam onde estão. Sem `--ir`, o `minic` continua imprimindo o relatório da AP 2.
+
+**Testes**
+
+```bash
+python tests/run_ir_tests.py                # 30 oficiais + 11 próprios + equivalência, Python e C
+python tests/fuzz_ir.py --c ./src/c/minic   # programas válidos gerados: C × Python e -O0 × -O1
+```
+
+Resultado: **229/229 verificações**. São 30/30 casos oficiais em cada implementação: dos 10 válidos, 8 têm IR idêntica ao gabarito e 2 são equivalentes; os 10 inválidos são rejeitados com a categoria certa; os 10 de otimização executam igual ao gabarito com menos instruções. Somam-se 11/11 casos próprios e 147/147 entradas com IR idêntica entre Python e C, e o fuzz soma 1000/1000 programas gerados. A corretude do `-O1` é verificada **executando** a IR antes e depois da otimização num interpretador ([`tests/ir_interp.py`](tests/ir_interp.py)) e comparando o que cada uma imprime.
+
+> **Os scripts `test_ir_*.sh` do pacote** comparam o gabarito inteiro byte a byte, inclusive as linhas em prosa (`Resultado: …`, `Critério: …`) e, nos casos de otimização, as duas IR (-O0 e -O1) num arquivo só. Nenhum compilador passa por eles do jeito que vieram; com o `IGNORE_RE` personalizado, chegam a 17/30. O README do mesmo pacote pede comparação estrutural e semântica, que é o que `run_ir_tests.py` faz. Detalhes em [docs/ir.md](docs/ir.md#os-scripts-oficiais-test_ir_pythonsh--test_ir_csh).
 
 ## Exercícios da aula 13: tradução dirigida por sintaxe
 

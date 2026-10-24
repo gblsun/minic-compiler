@@ -8,16 +8,20 @@
 *.jsonl text eol=lf
 *.minic text eol=lf
 *.mc   text eol=lf
+# IR esperada dos testes próprios: comparada byte a byte com a saída (LF).
+*.ir   text eol=lf
 
 # Material da disciplina: binário, nunca normalizar.
 *.pdf  binary
 *.docx binary
 *.gz   binary
+*.zip  binary
 
 # Pacotes de teste oficiais e roteiro da aula: material normativo, preservado
 # byte a byte como veio do Classroom (sem conversão de fim de linha nenhuma).
 ref/testes-oficiais/testes-parser-50/** -text
 ref/testes-oficiais/testes-scanner-minic/** -text
+ref/testes-oficiais/testes-ir-30/** -text
 ref/slides/aula-06-roteiro.txt -text
 # Os gabaritos semânticos têm CRLF entre as linhas e nenhuma quebra no fim, e o
 # script oficial compara com `diff` exato: qualquer normalização os quebraria.
