@@ -1,0 +1,16 @@
+func metade(x)
+  t1 = x / 2.0
+  return t1
+endfunc
+func main
+  param 7.0
+  t1 = call metade, 1
+  print t1
+  t2 = 7.0 + 1.0
+  print t2
+  print 98
+  print true
+  print -97
+  print 3
+  return 0
+endfunc

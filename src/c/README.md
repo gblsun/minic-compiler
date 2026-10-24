@@ -20,7 +20,9 @@ mensagens de erro.
 | [parser_main.c](parser_main.c) | CLI do parser: `./parser <arquivo.c>`, com `--tree` e `--tokens`, e os exit codes 0/1/2/3 da Seção 11.1. |
 | [tabela_simbolos.h](tabela_simbolos.h) / [tabela_simbolos.c](tabela_simbolos.c) | Tabela de símbolos (etapa 3), transcrição de [`tabela_simbolos.py`](../python/tabela_simbolos.py): `Simbolo` e a pilha de escopos `TabelaSimbolos` (`tabela_inserir`, `tabela_buscar`, `tabela_buscar_no_escopo_atual`, `tabela_abrir_escopo`, `tabela_fechar_escopo`). Os símbolos apontam para strings da AST em vez de copiá-las. |
 | [semantico.h](semantico.h) / [semantico.c](semantico.c) | O analisador semântico, transcrição de [`semantico.py`](../python/semantico.py): mesmas passagens, mesma ordem de visita e as mesmas mensagens. Tipos são `SemTipo {base, vetor}`, e os diagnósticos são ordenados com `qsort` mais um campo `ordem`, que faz o papel da estabilidade do `sorted()` do Python. |
-| [minic_main.c](minic_main.c) | CLI do pipeline (etapa 3): `./minic <arquivo.c>`, lexer → parser → semântica, códigos 0/1/2/3/4. No Windows põe stdout/stderr em modo binário, para o relatório sair com os mesmos bytes do Linux. |
+| [ir.h](ir.h) / [ir.c](ir.c) | Gerador de IR, transcrição de [`ir.py`](../python/ir.py): mesma ordem de emissão, mesmos nomes de temporários e rótulos. Todas as strings da IR ficam **internadas** num pool do programa (tabela de espalhamento): cada texto existe uma vez, o programa é dono de todos, e comparar operandos é comparar ponteiros. |
+| [otimizador.h](otimizador.h) / [otimizador.c](otimizador.c) | O `-O1`, transcrição de [`otimizador.py`](../python/otimizador.py): os mesmos cinco passes na mesma ordem. Conjuntos de nomes e fatos do fluxo de dados são vetores de ponteiros internados (o `set`/`dict` do Python). |
+| [minic_main.c](minic_main.c) | CLI do pipeline: `./minic [--ir] [-O0\|-O1] <arquivo.c>`, lexer → parser → semântica (→ IR → -O1), códigos 0/1/2/3/4. No Windows põe stdout/stderr em modo binário, para o relatório sair com os mesmos bytes do Linux. |
 | [test_parser_c.sh](test_parser_c.sh) | Roda o script de teste do parser fornecido pela disciplina ([`../../ref/scripts/testar_parser_c.sh`](../../ref/scripts/testar_parser_c.sh)) com os caminhos deste repositório; o cabeçalho explica como ler o resultado. |
 | [test_scanner_c.sh](test_scanner_c.sh) | Script de teste (formato pedido pela disciplina — ver o original em [`../../ref/scripts/test_scanner_c.sh`](../../ref/scripts/test_scanner_c.sh), adaptado aqui para compilar este scanner e comparar com `tests/expected/`; ver [`tests/README.md`](../../tests/README.md) para como os três runners de teste do projeto se encaixam). |
 
@@ -60,6 +62,7 @@ como o script da AP 2 compila:
 ```bash
 gcc -Wall -Wextra minic.c -o minic
 ./minic ref/testes-oficiais/testes-semanticos-20/17_tipos_de_argumentos.c
+./minic --ir -O1 tests/ir_inputs/cse_local.c     # IR otimizada
 ```
 
 ## Rodando os testes

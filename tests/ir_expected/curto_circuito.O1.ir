@@ -1,0 +1,15 @@
+func avisa(x)
+  print x
+  t1 = x > 0
+  return t1
+endfunc
+func main
+  print 20
+  param 3
+  t1 = call avisa, 1
+  ifFalse t1 goto L_end_if3
+  print 30
+L_end_if3:
+  print false
+  return 0
+endfunc

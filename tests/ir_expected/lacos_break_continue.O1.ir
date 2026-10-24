@@ -1,0 +1,41 @@
+func main
+  soma = 0
+  i = 0
+L_test:
+  t1 = i < 6
+  ifFalse t1 goto L_end
+  t2 = i % 2
+  t3 = t2 == 0
+  ifFalse t3 goto L_end_if
+  goto L_step
+L_end_if:
+  j = 0
+L_test2:
+  t4 = j >= i
+  ifFalse t4 goto L_end_if2
+  goto L_end2
+L_end_if2:
+  t5 = soma + j
+  soma = t5
+  t6 = j + 1
+  j = t6
+  goto L_test2
+L_end2:
+L_step:
+  t7 = i + 1
+  i = t7
+  goto L_test
+L_end:
+  print soma
+L_test3:
+  t8 = soma - 1
+  soma = t8
+  t9 = t8 < 5
+  ifFalse t9 goto L_end_if3
+  goto L_end3
+L_end_if3:
+  goto L_test3
+L_end3:
+  print t8
+  return 0
+endfunc

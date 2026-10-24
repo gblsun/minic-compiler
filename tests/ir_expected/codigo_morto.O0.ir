@@ -1,0 +1,20 @@
+func f(x)
+  t1 = x * 100
+  lixo = t1
+  ifFalse false goto L_end_if
+  print 999
+L_end_if:
+  t2 = x + 1
+  return t2
+  print x
+endfunc
+func main
+  param 4
+  t1 = call f, 1
+  r = t1
+  t2 = r * 2
+  nunca = t2
+  nunca = 0
+  print r
+  return 0
+endfunc

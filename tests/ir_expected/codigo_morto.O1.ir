@@ -1,0 +1,10 @@
+func f(x)
+  t1 = x + 1
+  return t1
+endfunc
+func main
+  param 4
+  t1 = call f, 1
+  print t1
+  return 0
+endfunc

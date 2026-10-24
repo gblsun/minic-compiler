@@ -1,0 +1,17 @@
+func main
+  read a
+  read b
+  t1 = a * b
+  t2 = t1 + 1
+  x = t2
+  t3 = a * b
+  t4 = t3 + 2
+  y = t4
+  print x
+  print y
+  t5 = a + 1
+  a = t5
+  t6 = a * b
+  print t6
+  return 0
+endfunc

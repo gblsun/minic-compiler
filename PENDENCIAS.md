@@ -27,6 +27,7 @@ Como ler cada item:
 | [1.5](#15-contagem-de-coluna-o-c-conta-bytes-o-python-conta-caracteres) | Coluna em bytes vs. caracteres | baixa | **resolvido** | Fellipe |
 | [2.1](#21-o-caso-oficial-24-é-comparado-contra-uma-ast-corrigida)–[2.4](#24-caso-41-nossa-mensagem-difere-da-pista-do-pacote) | Decisões que pedem revisão do grupo | — | decisão | Fellipe |
 | [2.5](#25-ap-2-pontos-em-que-o-pacote-oficial-prevaleceu-sobre-a-especificação) | AP 2: pacote oficial × especificação (`main`, `3 = n`, `a = b = 3`) | — | decisão | grupo |
+| [2.6](#26-ir-saída-padrão-do-minic-e-os-scripts-oficiais-da-ir) | IR: `minic arquivo.c` sem opções continua dando o relatório da AP 2 | — | decisão | grupo |
 | [3.1](#31-rodar-a-entrega-inteira-em-linux) | Rodar a entrega inteira em Linux | alta | **verificado no CI** | Fellipe |
 | [3.2](#32-versão-do-python-do-professor) | Versão do Python do professor | média | **verificado (3.10+)** | Fellipe |
 | [3.3](#33-parserpy-da-raiz-e-o-módulo-parser-da-biblioteca-padrão) | `parser.py` vs. módulo `parser` embutido | média | **resolvido** | Fellipe |
@@ -36,8 +37,9 @@ Como ler cada item:
 | [5](#5-antes-de-entregar-operacional) | Checklist da entrega (inclui o `git push`) | alta | em aberto | Fellipe |
 | [6](#6-revisões-de-código-sugeridas) | Revisões de código sugeridas | baixa | em aberto | Fellipe |
 
-Estado do projeto na última revisão (etapa 3, AP 2): etapas 1, 2 e 3
-implementadas, tudo no GitHub e testado no CI a cada push. Resultados em
+Estado do projeto na última revisão (IR): etapas 1, 2 e 3 implementadas, mais
+a IR de três endereços e o otimizador `-O1` ([`docs/ir.md`](docs/ir.md)), tudo
+testado no CI a cada push. Resultados em
 [`resultados-etapa2.md`](docs/resultados-etapa2.md) e
 [`resultados-etapa3.md`](docs/resultados-etapa3.md); resumo da AP 2 em
 [`entrega-ap2.md`](docs/entrega-ap2.md).
@@ -211,6 +213,26 @@ especificação. Estão documentadas e testadas, mas vale o grupo concordar:
   embora a apostila diga que a atribuição "não produz valor no núcleo MINIC".
 
 Detalhes em [`docs/semantica.md`](docs/semantica.md#decisões-de-projeto).
+
+### 2.6 IR: saída padrão do `minic` e os scripts oficiais da IR
+
+Os scripts do pacote de IR (`ref/scripts/test_ir_*.sh`) chamam
+`minic arquivo.c` **sem opções**. O script da AP 2 chama do mesmo jeito e espera
+o relatório da análise semântica. Os dois contratos não cabem na mesma saída
+padrão, e a decisão foi:
+
+- `minic arquivo.c` continua imprimindo o relatório da AP 2 (já entregue e
+  coberto pelo CI);
+- a IR sai com as opções da Seção 11 da especificação: `--ir`, `-O0`, `-O1`.
+
+Na prática, isso não muda o resultado dos scripts da IR. Eles comparam o
+gabarito inteiro byte a byte, com prosa e com as duas IR dos casos de
+otimização, e por isso dão 0/30 para qualquer saída. Com o `IGNORE_RE`
+personalizado e `--ir`, o teto é 17/30
+([`docs/ir.md`](docs/ir.md#os-scripts-oficiais-test_ir_pythonsh--test_ir_csh)).
+Se o professor indicar que a IR deve ser a saída padrão, a troca fica em
+`main()` de `src/python/minic.py` e `src/c/minic_main.c`: as linhas que leem
+`--ir`.
 
 ---
 

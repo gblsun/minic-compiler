@@ -218,6 +218,55 @@ teste com o código e a saída esperada) é gerado por
 um caso ou um golden, rode `python tests/gerar_catalogo_semantico.py`; o CI
 falha se o catálogo estiver desatualizado.
 
+## Suíte da IR e do otimizador
+
+```bash
+python tests/run_ir_tests.py              # tudo, nas duas implementações
+python tests/run_ir_tests.py --python     # só a versão Python
+python tests/run_ir_tests.py --c          # só a versão C
+python tests/run_ir_tests.py --update     # regrava os golden dos casos próprios
+python tests/run_ir_tests.py -v           # detalha caso a caso
+```
+
+```text
+tests/
+├── ir_inputs/       .c próprios (e .in com a entrada de `read`, quando há)
+├── ir_expected/     <nome>.O0.ir e <nome>.O1.ir — a IR esperada, byte a byte
+├── ir_interp.py     interpretador da IR textual (o oráculo semântico)
+├── run_ir_tests.py  runner: oficiais + próprios + equivalência
+└── fuzz_ir.py       teste diferencial em programas válidos gerados
+```
+
+[`run_ir_tests.py`](run_ir_tests.py) roda três suítes:
+
+1. **Casos oficiais** (`ref/testes-oficiais/testes-ir-30/`). O README do
+   pacote diz que os gabaritos não exigem igualdade byte a byte; a suíte
+   compara estrutura e execução:
+   - **P**: a IR, com temporários, rótulos e sufixos renumerados, é
+     comparada com a do gabarito (`idêntica` ou `equivalente`), e as duas são
+     **executadas** no interpretador, que tem de imprimir o mesmo;
+   - **E**: o código de saída é o da categoria do gabarito;
+   - **O**: -O1 executa igual a -O0 e à IR otimizada do gabarito, com menos
+     instruções.
+2. **Casos próprios** (`ir_inputs/`): IR -O0 e -O1 iguais ao golden, e -O1
+   executando igual a -O0.
+3. **Equivalência**: `--ir -O0` e `--ir -O1` dão saída idêntica em Python e em
+   C em todas as entradas do repositório (as da IR, da semântica e do parser),
+   e -O1 executa igual a -O0 em cada programa válido.
+
+[`fuzz_ir.py`](fuzz_ir.py) complementa com volume. Gera programas **válidos**
+e que terminam, usando o que costuma quebrar um otimizador: globais alteradas
+por funções, `&&`/`||` com chamada à direita, `break`/`continue`,
+sombreamento, variáveis chamadas `t1`, conversões e constantes que
+transbordam 32 bits. Para cada um, exige IR idêntica nas duas linguagens e o
+mesmo comportamento em -O0 e -O1:
+
+```bash
+python tests/fuzz_ir.py --c ./src/c/minic -n 1000 --semente 7 --salvar /tmp/falhas
+```
+
+O formato da IR, os passes e os resultados estão em [`docs/ir.md`](../docs/ir.md).
+
 ## Integração contínua
 
 O workflow [`.github/workflows/testes.yml`](../.github/workflows/testes.yml)
@@ -225,11 +274,13 @@ roda a cada push e pull request:
 
 - **job `testes`**, em Ubuntu 22.04 (gcc 11, Python 3.10) e Ubuntu 24.04
   (gcc 13, Python 3.12): compilação de `parser.c` e `minic.c` com `-Werror`,
-  as suítes das etapas 1, 2 e 3, os exercícios da aula 13 e os scripts
-  oficiais do professor (o do parser em locale `C`, como na avaliação);
+  as suítes das etapas 1, 2 e 3 e da IR (com 300 programas do `fuzz_ir.py`),
+  os exercícios da aula 13 e os scripts oficiais do professor (o do parser em
+  locale `C`, como na avaliação);
 - **job `robustez`**: clang com `-Werror`; todas as entradas de teste do
-  repositório pelo binário com AddressSanitizer + UBSan; o teste diferencial
-  com 900 programas; os scripts oficiais da AP 2 rodando de uma cópia do
+  repositório pelo binário com AddressSanitizer + UBSan, nos modos semântico,
+  `--ir -O0` e `--ir -O1`; os testes diferenciais com 900 programas
+  (semântica) e 500 (IR); os scripts oficiais da AP 2 rodando de uma cópia do
   repositório em `/tmp/Avaliação Parcial II/minic compiler` (espaço e acento
   no caminho), em locale `C`; e a conferência de que o catálogo de testes
   está atualizado.

@@ -1,0 +1,25 @@
+func main
+  i = 0
+  passo = 2
+  read lido
+  t1 = lido > 0
+  ifFalse t1 goto L_else
+  k = 5
+  m = 1
+  goto L_end
+L_else:
+  k = 5
+  m = 2
+L_end:
+  t2 = k + m
+  print t2
+L_test:
+  t3 = i < 6
+  ifFalse t3 goto L_end2
+  t4 = i + passo
+  i = t4
+  goto L_test
+L_end2:
+  print i
+  return 0
+endfunc

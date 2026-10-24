@@ -1,0 +1,40 @@
+func avisa(x)
+  print x
+  t1 = x > 0
+  return t1
+endfunc
+func main
+  a = false
+  b = true
+  t1 = a
+  ifFalse t1 goto L_sc
+  param 1
+  t2 = call avisa, 1
+  t1 = t2
+L_sc:
+  ifFalse t1 goto L_end_if
+  print 10
+L_end_if:
+  t3 = b
+  ifTrue t3 goto L_sc2
+  param 2
+  t4 = call avisa, 1
+  t3 = t4
+L_sc2:
+  ifFalse t3 goto L_end_if2
+  print 20
+L_end_if2:
+  t5 = b
+  ifFalse t5 goto L_sc3
+  param 3
+  t6 = call avisa, 1
+  t5 = t6
+L_sc3:
+  ifFalse t5 goto L_end_if3
+  print 30
+L_end_if3:
+  t7 = not b
+  t8 = a or t7
+  print t8
+  return 0
+endfunc
