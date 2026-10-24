@@ -65,17 +65,42 @@ typedef struct {
     int n;
 } IrInstr;
 
+/* Uma declaração, como o gerador a viu (Seção 6.1). Não aparece no texto da
+ * IR: serve ao back-end (geracao.c) e ao --symbols. Strings internadas. */
+typedef struct {
+    const char *nome;      /* como no código */
+    const char *nome_ir;   /* com o sufixo de sombreamento, se houver */
+    const char *categoria; /* variável, parâmetro, parâmetro vetor, vetor, função */
+    const char *tipo;      /* tipo base (função: o de retorno) */
+    const char *tamanho;   /* vetor declarado: o literal do tamanho; senão NULL */
+    int nivel;             /* 0 global, 1 corpo da função, +1 por bloco */
+    int linha;
+    int coluna;
+    int inicializada;
+} IrSimbolo;
+
+/* Par nome na IR -> tipo base (variáveis e destinos de `read`). */
+typedef struct {
+    const char *nome;
+    const char *tipo;
+} IrTipo;
+
 typedef struct {
     const char *nome;
     const char **params;
     size_t nparams, capparams;
     IrInstr *instrs;
     size_t len, cap;
+    IrSimbolo *simbolos; /* parâmetros e locais, em ordem de declaração */
+    size_t nsimbolos, capsimbolos;
+    IrTipo *tipos;
+    size_t ntipos, captipos;
 } IrFuncao;
 
 typedef struct {
     const char *nome;
     const char *tamanho; /* NULL para escalar */
+    const char *tipo;    /* tipo base */
 } IrGlobal;
 
 /* Tabela de espalhamento com endereçamento aberto: texto -> cópia única. */
@@ -90,6 +115,8 @@ typedef struct {
     size_t nglobais, capglobais;
     IrFuncao *funcoes;
     size_t nfuncoes, capfuncoes;
+    IrSimbolo *simbolos; /* globais e funções, em ordem de código */
+    size_t nsimbolos, capsimbolos;
     IrPool pool;
 } IrPrograma;
 
@@ -114,5 +141,12 @@ int ir_eh_temporario(const char *nome);
 
 /* Acrescenta uma instrução no fim da função. */
 void ir_emitir(IrFuncao *funcao, IrInstr instr);
+
+/* Tipo base de `nome` na função (variável local, parâmetro ou destino de
+ * `read`), ou NULL. */
+const char *ir_tipo_local(const IrFuncao *funcao, const char *nome);
+
+/* Tipo base da global `nome`, ou NULL se não for global. */
+const char *ir_tipo_global(const IrPrograma *programa, const char *nome);
 
 #endif /* IR_H */

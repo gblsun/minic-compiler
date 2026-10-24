@@ -2,7 +2,7 @@
 
 Implementação em Python do MINIC: analisador léxico (etapa 1), analisador
 sintático com AST (etapa 2), analisador semântico (etapa 3), representação
-intermediária e otimizador.
+intermediária, otimizador e back-end (etapa 4).
 
 | Arquivo | O que é |
 |---|---|
@@ -14,7 +14,9 @@ intermediária e otimizador.
 | [semantico.py](semantico.py) | O analisador semântico (etapa 3): duas passagens sobre a AST (coleta de assinaturas e globais; verificação), síntese de tipos, compatibilidade, contexto de laço e de função, análise de fluxo para retorno em todos os caminhos, e o relatório no formato do gabarito da AP 2. Regras em [`docs/semantica.md`](../../docs/semantica.md). |
 | [ir.py](ir.py) | Gerador de código de três endereços: `Instr` (uma instrução, com a tabela das formas no docstring), `Funcao`, `ProgramaIR`, o `Gerador` que percorre a AST já verificada (nomes com sufixo para sombreamento, conversões `itof`/`ctoi` explícitas, vetores com `load`/`store`, curto-circuito quando há chamada) e `formatar`. Decisões em [`docs/ir.md`](../../docs/ir.md). |
 | [otimizador.py](otimizador.py) | O `-O1`: blocos básicos, simplificação local, propagação global de constantes e cópias (fluxo de dados forward), subexpressões comuns locais, limpeza do fluxo de controle e código morto por variáveis vivas (backward), repetidos até o ponto fixo. |
-| [minic.py](minic.py) | CLI do pipeline completo: `python minic.py [--ir] [-O0\|-O1] <arquivo.c>` roda lexer → parser → semântica (e, com `--ir`, gera a IR e otimiza com `-O1`), cada fase só se a anterior não teve erro; códigos de saída 0/1/2/3/4. |
+| [geracao.py](geracao.py) | O back-end: traduz a IR para o código da máquina de pilha (MVM), monta o registro de ativação de cada função (parâmetros, locais, temporários) e imprime o `--target=asm` e o `--symbols`. Modelo e instruções em [`docs/backend.md`](../../docs/backend.md). |
+| [vm.py](vm.py) | A máquina virtual que executa o código gerado (`--run`): pilha de operandos, pilha de quadros (iterativa, sem recursão do Python), inteiros de 32 bits, `read`/`print`, e os erros de execução (código 6). |
+| [minic.py](minic.py) | CLI do pipeline completo, com os modos da Seção 11: `--check` (padrão), `--tokens`, `--ast`, `--symbols`, `--ir`, `--target=asm`, `--run`, e `-O0`/`-O1`/`--stats`; cada fase só roda se a anterior não teve erro; códigos de saída 0 a 6. |
 | [test_parser_python.sh](test_parser_python.sh) | Roda o script de teste do parser fornecido pela disciplina ([`../../ref/scripts/testar_parser_python.sh`](../../ref/scripts/testar_parser_python.sh)) com os caminhos deste repositório. O cabeçalho do arquivo explica como ler o resultado (16 aprovados / 25 erros sintáticos é o teto do pacote). |
 | [app_streamlit.py](app_streamlit.py) | Interface web opcional (não faz parte da entrega obrigatória) para testar o lexer interativamente. Reaproveita o mesmo `Lexer` de `lexer.py` — nenhuma regra léxica é duplicada aqui. |
 | [test_scanner_python.sh](test_scanner_python.sh) | Script de teste (formato pedido pela disciplina — ver o original em [`../../ref/scripts/test_scanner_python.sh`](../../ref/scripts/test_scanner_python.sh), adaptado aqui para rodar `main.py` e comparar com `tests/expected/`; ver [`tests/README.md`](../../tests/README.md) para como os três runners de teste do projeto se encaixam). |

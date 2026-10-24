@@ -1,0 +1,35 @@
+func main
+  j = 10
+  k = 1
+  i = 0
+L_test:
+  t1 = i < 6
+  ifFalse t1 goto L_end
+  t2 = i * 1
+  t3 = i * 3
+  store v[t2], t3
+  t4 = j * 8
+  print t4
+  t5 = j - 2
+  j = t5
+  t6 = i % 2
+  t7 = t6 == 0
+  ifFalse t7 goto L_else
+  t8 = k + 1
+  k = t8
+  goto L_end2
+L_else:
+  t9 = k * 2
+  k = t9
+L_end2:
+  t10 = k * 5
+  print t10
+  t11 = i + 1
+  i = t11
+  goto L_test
+L_end:
+  t12 = 5 * 1
+  t13 = load v[t12]
+  print t13
+  return 0
+endfunc

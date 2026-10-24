@@ -267,6 +267,46 @@ python tests/fuzz_ir.py --c ./src/c/minic -n 1000 --semente 7 --salvar /tmp/falh
 
 O formato da IR, os passes e os resultados estão em [`docs/ir.md`](../docs/ir.md).
 
+## Suíte do back-end (geração de código e execução)
+
+```bash
+python tests/run_backend_tests.py              # tudo, nas duas implementações
+python tests/run_backend_tests.py --python     # só a versão Python
+python tests/run_backend_tests.py --update     # regrava os golden de execução
+python tests/run_backend_tests.py -v           # detalha caso a caso
+```
+
+```text
+tests/
+├── exec_inputs/          .c executados com --run (e .in com a entrada de `read`)
+├── exec_expected/        <nome>.out, .err e .exit esperados, byte a byte
+└── run_backend_tests.py  runner: execução + oráculo + equivalência
+```
+
+[`run_backend_tests.py`](run_backend_tests.py) roda três suítes:
+
+1. **Execução** (`exec_inputs/`): cada programa roda com `--run -O0` e
+   `--run -O1`; os dois níveis têm de dar a mesma saída, o mesmo erro e o
+   mesmo código, iguais ao golden. Inclui:
+   - os programas de referência da especificação (13.1, 19.1 e 19.2);
+   - o formato do `print` e o `read` de cada tipo;
+   - vetores e globais;
+   - os erros de execução (código 6) e de geração de código (código 5).
+2. **Oráculo**: todo programa válido do repositório é executado na máquina
+   virtual e tem de imprimir o mesmo que o interpretador da IR
+   ([`ir_interp.py`](ir_interp.py)), que não depende do back-end. Ficam de
+   fora os programas que acessam fora do vetor, porque o interpretador não
+   confere limites e a VM confere; esse erro é coberto pela suíte de execução.
+3. **Equivalência**: C e Python idênticos em `--tokens`, `--ast`, `--symbols`,
+   `--target=asm` e `--run` (com e sem `-O1`), em todas as entradas.
+
+O [`fuzz_ir.py`](fuzz_ir.py) também executa cada programa gerado na VM, nas
+duas linguagens e nos dois níveis. Os benchmarks ([`../benchmarks/rodar.py`](../benchmarks/rodar.py))
+falham se a saída de algum programa mudar com `-O1`.
+
+O modelo de execução, as instruções e as mensagens de erro estão em
+[`docs/backend.md`](../docs/backend.md).
+
 ## Integração contínua
 
 O workflow [`.github/workflows/testes.yml`](../.github/workflows/testes.yml)
@@ -274,13 +314,13 @@ roda a cada push e pull request:
 
 - **job `testes`**, em Ubuntu 22.04 (gcc 11, Python 3.10) e Ubuntu 24.04
   (gcc 13, Python 3.12): compilação de `parser.c` e `minic.c` com `-Werror`,
-  as suítes das etapas 1, 2 e 3 e da IR (com 300 programas do `fuzz_ir.py`),
-  os exercícios da aula 13 e os scripts oficiais do professor (o do parser em
-  locale `C`, como na avaliação);
+  as suítes das etapas 1, 2 e 3, da IR e do back-end (com 300 programas do
+  `fuzz_ir.py`), os benchmarks, os exercícios da aula 13 e os scripts
+  oficiais do professor (o do parser em locale `C`, como na avaliação);
 - **job `robustez`**: clang com `-Werror`; todas as entradas de teste do
-  repositório pelo binário com AddressSanitizer + UBSan, nos modos semântico,
-  `--ir -O0` e `--ir -O1`; os testes diferenciais com 900 programas
-  (semântica) e 500 (IR); os scripts oficiais da AP 2 rodando de uma cópia do
+  repositório pelo binário com AddressSanitizer + UBSan, em todos os modos da
+  CLI (inclusive `--run`); os testes diferenciais com 900 programas
+  (semântica) e 500 (IR e execução); os scripts oficiais da AP 2 rodando de uma cópia do
   repositório em `/tmp/Avaliação Parcial II/minic compiler` (espaço e acento
   no caminho), em locale `C`; e a conferência de que o catálogo de testes
   está atualizado.

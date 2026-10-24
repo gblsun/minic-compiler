@@ -53,11 +53,26 @@ def _int32(valor: int) -> int:
     return (valor + 2**31) % 2**32 - 2**31
 
 
+def _formatar_float(x: float) -> str:
+    """Mesmo formato do `print` da máquina virtual (src/python/vm.py)."""
+    if x != x:
+        return "nan"
+    if x in (float("inf"), float("-inf")):
+        return "inf" if x > 0 else "-inf"
+    for precisao in range(1, 18):
+        texto = "%.*g" % (precisao, x)
+        if float(texto) == x:
+            break
+    if not any(c in texto for c in ".e"):
+        texto += ".0"
+    return texto
+
+
 def _formatar(valor) -> str:
     if isinstance(valor, bool):
         return "true" if valor else "false"
     if isinstance(valor, float):
-        return repr(valor)
+        return _formatar_float(valor)
     if isinstance(valor, dict):
         raise ErroExecucao("print de um vetor inteiro")
     return str(valor)

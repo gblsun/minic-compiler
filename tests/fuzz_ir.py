@@ -19,7 +19,10 @@ Para **cada** programa, exige:
 1. a análise semântica aceita (senão é defeito do gerador, e conta como falha);
 2. Python e C imprimem exatamente a mesma IR, em -O0 e em -O1;
 3. a IR -O1, executada no interpretador (`tests/ir_interp.py`), imprime o
-   mesmo que a IR -O0 — o otimizador preservou o comportamento.
+   mesmo que a IR -O0 — o otimizador preservou o comportamento;
+4. o programa compilado e executado na máquina virtual (`--run`, em -O0 e
+   -O1, em Python e em C) imprime o mesmo que o interpretador — o back-end
+   preservou o comportamento (desligável com `--sem-vm`).
 
 A geração é determinística (semente fixa), então uma falha é reproduzível.
 """
@@ -319,6 +322,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("-n", type=int, default=300, help="quantidade de programas")
     parser.add_argument("--semente", type=int, default=2026)
     parser.add_argument("--salvar", help="pasta onde guardar os programas que falharem")
+    parser.add_argument("--sem-vm", action="store_true", help="não executa na máquina virtual")
     args = parser.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
 
@@ -351,6 +355,17 @@ def main(argv: list[str]) -> int:
                         problemas.append(f"-O1 executa {exec1}, -O0 executa {exec0}")
                     elif ir0 != ir1:
                         otimizados += 1
+                    # O back-end: a máquina virtual imprime o mesmo que o
+                    # interpretador, nos dois níveis e nas duas linguagens.
+                    if exec0[1] is None and not args.sem_vm:
+                        esperado = "".join(linha + "\n" for linha in exec0[0]).encode("utf-8")
+                        for nivel in ("-O0", "-O1"):
+                            vm_py = rodar(comando_py, ["--run", nivel], fonte)
+                            if vm_py != (0, esperado, b""):
+                                problemas.append(f"--run {nivel}: código {vm_py[0]}, "
+                                                 f"{(vm_py[1] + vm_py[2])[:200]!r}")
+                            if comando_c and rodar(comando_c, ["--run", nivel], fonte) != vm_py:
+                                problemas.append(f"--run {nivel}: C e Python diferem")
             if problemas:
                 falhas += 1
                 print(f"FALHA programa {i}: " + "; ".join(problemas))

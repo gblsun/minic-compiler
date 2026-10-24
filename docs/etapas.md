@@ -17,7 +17,7 @@ disciplina abre uma atividade no Classroom para cada uma.
 | 1 | Analisador léxico | tokens, expressões regulares, scanner, erros e testes | ✅ entregue |
 | 2 | Parser e AST | gramática, parser, AST, recuperação e testes sintáticos | ✅ concluída |
 | 3 | Semântica e IR | tabela de símbolos, escopos, tipos, 3AC e testes | ✅ analisador semântico (AP 2) e IR de três endereços concluídos |
-| 4 | Código e otimização | backend, duas otimizações, benchmarks, manual e apresentação | em andamento: otimizador -O1 pronto; falta o backend |
+| 4 | Código e otimização | backend, duas otimizações, benchmarks, manual e apresentação | ✅ implementada: back-end (máquina de pilha + VM), `-O1` com laços, benchmarks, manual e apresentação |
 
 ## Etapa 1 — analisador léxico ✅
 
@@ -167,15 +167,33 @@ com a prosa, byte a byte, então nenhum compilador passa por eles do jeito que
 vieram. Com o `IGNORE_RE` personalizado, chegam a 17/30. A análise está em
 [ir.md](ir.md#os-scripts-oficiais-test_ir_pythonsh--test_ir_csh).
 
-## Etapa 4 — geração de código e otimização
+## Etapa 4 — geração de código e otimização ✅
 
-- escolha do alvo (assembly de pilha, x86-64, LLVM IR ou VM própria) registrada
-  no relatório e mantida estável (Seção 10) — **falta**;
-- ao menos uma otimização local (simplificação algébrica, propagação de
-  constantes, eliminação de código morto) e uma global (reaching definitions,
-  live variables, eliminação de subexpressões comuns), com corretude
-  demonstrada por testes antes e depois (Seção 10.1) — **feito** sobre a IR
-  (`-O1`, ver [ir.md](ir.md#otimizador--o1)). Ainda sem otimizações de laço
-  (código invariante, redução de força; aula 19);
-- entregáveis extras: benchmarks, manual e apresentação (Seção 15) —
-  **faltam**.
+A atividade da etapa 4 ainda não foi aberta no Classroom. O que está aqui
+segue a Seção 15 da especificação ("Backend, duas otimizações, benchmarks,
+manual e apresentação") e a apostila da aula 19 ("gerador de código,
+otimizador, testes, relatório e manual"). Quando o enunciado sair, confira se
+ele pede algo a mais, por exemplo um comando de invocação próprio.
+
+| Entregável | Onde | Situação |
+|---|---|---|
+| **Back-end**: alvo registrado e estável (Seção 10) | máquina virtual de pilha própria (MVM): [`geracao.py`](../src/python/geracao.py)/[`.c`](../src/c/geracao.c) geram o código, [`vm.py`](../src/python/vm.py)/[`.c`](../src/c/vm.c) executam; [backend.md](backend.md) | ✅ |
+| **Otimizações** (Seção 10.1): uma local e uma global, com testes antes e depois | `-O1` com seis passes, quatro deles globais, inclusive as otimizações de laço da aula 19 (código invariante e redução de força); [ir.md](ir.md#otimizador--o1) | ✅ |
+| **Benchmarks** | [`benchmarks/`](../benchmarks/) e o relatório [benchmarks.md](benchmarks.md): 8 programas, de 0% a 42% menos instruções executadas, 7,8% no total | ✅ |
+| **Manual** | [manual.md](manual.md) | ✅ |
+| **Apresentação** | [apresentacao.md](apresentacao.md) (slides em Markdown/Marp) | ✅ |
+| CLI da Seção 11 | `--tokens`, `--ast`, `--symbols`, `--check`, `--ir`, `--target=asm`, `--run`, `-O0`/`-O1`; códigos de saída 5 e 6 | ✅ |
+| Tabela de símbolos com deslocamento (Seção 6.1) | `--symbols` | ✅ |
+
+```bash
+python3 minic.py --run [-O1] programa.c < entrada.txt
+./minic --target=asm -O1 programa.c
+python3 tests/run_backend_tests.py      # execução, VM × interpretador, C × Python
+python3 benchmarks/rodar.py             # -O0 × -O1
+```
+
+Sem opção de modo, `minic programa.c` continua imprimindo o relatório da AP 2,
+porque é assim que o script daquela atividade o chama. A Seção 11 diz que
+`minic programa.mc` "compila o programa"; aqui compilar e executar é
+`--run`, e só gerar o código é `--target=asm`. A decisão está registrada no
+[PENDENCIAS.md](../PENDENCIAS.md).

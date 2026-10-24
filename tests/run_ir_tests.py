@@ -20,8 +20,8 @@ normalizando temporários e rótulos. É o que esta suíte faz:
 - **E01–E10** (inválidos): código de saída igual à categoria do gabarito
   (2 léxico, 3 sintático, 4 semântico) e nenhuma IR em stdout.
 - **O01–O10** (otimização): a IR -O1 imprime o mesmo que a -O0 **e** que a
-  IR otimizada do gabarito, e tem menos instruções que a -O0 (O09, redução de
-  força, é opcional pelo próprio gabarito: lá só se exige equivalência).
+  IR otimizada do gabarito, mudou e não ficou maior que a -O0 (em O09, a
+  redução de força troca a multiplicação por uma soma, sem mudar a contagem).
 
 **2. Casos próprios** — `tests/ir_inputs/*.c` (entrada de `read` opcional em
 `<nome>.in`), golden em `tests/ir_expected/<nome>.O0.ir` e `.O1.ir`, byte a
@@ -204,8 +204,9 @@ def suite_oficial(nome: str, comando: list[str], verboso: bool) -> tuple[int, in
                 falha = f"-O1 executa {exec1}, -O0 executa {exec0}"
             elif exec1 != exec_ref:
                 falha = f"-O1 executa {exec1}, gabarito -O1 executa {exec_ref}"
-            elif n1 >= n0:
-                falha = f"-O1 não reduziu a IR ({n0} → {n1} instruções)"
+            elif n1 > n0 or ir1 == ir0:
+                # A redução de força (O09) troca `*` por `+` sem mudar a contagem.
+                falha = f"-O1 não otimizou a IR ({n0} → {n1} instruções)"
             else:
                 detalhe = f"{n0} → {n1} instruções; imprime {' '.join(exec1[0])}"
 

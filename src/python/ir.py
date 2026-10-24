@@ -117,16 +117,39 @@ class Instr:
 
 
 @dataclass
+class Simbolo:
+    """Uma declaração, como o gerador a viu (Seção 6.1 da especificação).
+
+    Não aparece no texto da IR: serve ao back-end (tipo de cada posição do
+    registro de ativação, tamanho dos vetores) e ao `--symbols`.
+    """
+
+    nome: str  # como no código
+    nome_ir: str  # com o sufixo de sombreamento, se houver
+    categoria: str  # variável, parâmetro, vetor ou função
+    tipo: str  # tipo base (para função, o de retorno)
+    tamanho: str | None  # vetor declarado: o literal do tamanho; senão None
+    nivel: int  # 0 global, 1 corpo da função, +1 por bloco aninhado
+    linha: int
+    coluna: int
+    inicializada: bool
+
+
+@dataclass
 class Funcao:
     nome: str
     params: list = field(default_factory=list)
     instrs: list = field(default_factory=list)
+    simbolos: list = field(default_factory=list)  # parâmetros e locais, em ordem
+    tipos: dict = field(default_factory=dict)  # nome na IR -> tipo base (variáveis e `read`)
 
 
 @dataclass
 class ProgramaIR:
     globais: list = field(default_factory=list)  # (nome, tamanho ou None)
     funcoes: list = field(default_factory=list)
+    simbolos: list = field(default_factory=list)  # globais e funções, em ordem de código
+    tipos: dict = field(default_factory=dict)  # global na IR -> tipo base
 
     def nomes_globais(self) -> set:
         return {nome for nome, _ in self.globais}
@@ -218,14 +241,26 @@ class Gerador:
             if isinstance(item, A.Function):
                 params = [(p.type, p.is_array) for p in item.params]
                 self.assinaturas[item.name] = (item.return_type, params)
+                self.ir.simbolos.append(
+                    Simbolo(item.name, item.name, "função", item.return_type, None, 0,
+                            item.line, item.column, True)
+                )
+            elif isinstance(item, A.VarDecl):
+                self.ir.simbolos.append(
+                    Simbolo(item.name, _nome_global(item.name),
+                            "vetor" if item.size is not None else "variável", item.type,
+                            None if item.size is None else item.size.text, 0,
+                            item.line, item.column, item.init is not None)
+                )
 
         init = Funcao("@init")
         self._entrar(init, "void", [])
         for item in self.programa.decls:
             if isinstance(item, A.VarDecl):
-                nome = item.name + "#g" if TEMPORARIO.fullmatch(item.name) else item.name
+                nome = _nome_global(item.name)
                 tamanho = None if item.size is None else item.size.text
                 self.ir.globais.append((nome, tamanho))
+                self.ir.tipos[nome] = item.type
                 self.globais[item.name] = _Variavel(nome, item.type, item.size is not None)
                 if item.init is not None:
                     self._atribuir_variavel(nome, item.type, item.init)
@@ -261,7 +296,7 @@ class Gerador:
         funcao = Funcao(no.name)
         self._entrar(funcao, no.return_type, declaracoes)
         for p in no.params:
-            funcao.params.append(self._declarar(p.name, p.type, p.is_array))
+            funcao.params.append(self._declarar(p, "parâmetro", p.type, None, True))
         # O corpo divide o escopo com os parâmetros (como na análise semântica).
         for item in no.body.items:
             self._item(item)
@@ -281,14 +316,24 @@ class Gerador:
         self.rotulos[base] = n
         return base if n == 1 else f"{base}{n}"
 
-    def _declarar(self, nome: str, tipo: str, eh_vetor: bool) -> str:
+    def _declarar(self, no, categoria: str, tipo: str, tamanho, inicializada: bool) -> str:
+        """Declara o parâmetro ou a variável local `no` no escopo atual."""
+        nome = no.name
         if nome in self.sufixar:
             n = self.sufixos.get(nome, 0) + 1
             self.sufixos[nome] = n
             nome_ir = f"{nome}#{n}"
         else:
             nome_ir = nome
+        eh_vetor = tamanho is not None or getattr(no, "is_array", False)
+        if eh_vetor and categoria == "parâmetro":
+            categoria = "parâmetro vetor"
         self.escopos[-1][nome] = _Variavel(nome_ir, tipo, eh_vetor)
+        self.funcao.simbolos.append(
+            Simbolo(nome, nome_ir, categoria, tipo, tamanho, len(self.escopos),
+                    no.line, no.column, inicializada)
+        )
+        self.funcao.tipos[nome_ir] = tipo
         return nome_ir
 
     def _buscar(self, nome: str) -> _Variavel:
@@ -327,7 +372,9 @@ class Gerador:
 
     def _item(self, item):
         if isinstance(item, A.VarDecl):
-            nome_ir = self._declarar(item.name, item.type, item.size is not None)
+            categoria = "vetor" if item.size is not None else "variável"
+            tamanho = None if item.size is None else item.size.text
+            nome_ir = self._declarar(item, categoria, item.type, tamanho, item.init is not None)
             if item.init is not None:
                 self._atribuir_variavel(nome_ir, item.type, item.init)
         else:
@@ -377,8 +424,9 @@ class Gerador:
                 endereco = self._endereco(no.target.index)
                 t = self._temp()
                 self._emitir("read", dst=t)
-                vetor = self._buscar(no.target.base.name).nome_ir
-                self._emitir("store", a=vetor, b=endereco, c=t)
+                vetor = self._buscar(no.target.base.name)
+                self.funcao.tipos[t] = vetor.tipo  # o back-end precisa saber o que ler
+                self._emitir("store", a=vetor.nome_ir, b=endereco, c=t)
             else:
                 self._emitir("read", dst=self._buscar(no.target.name).nome_ir)
         else:
@@ -526,6 +574,10 @@ class Gerador:
         var = self._buscar(no.target.name)
         self._atribuir_variavel(var.nome_ir, var.tipo, no.value)
         return var.nome_ir, var.tipo
+
+
+def _nome_global(nome: str) -> str:
+    return nome + "#g" if TEMPORARIO.fullmatch(nome) else nome
 
 
 def _coletar_declaracoes(no, saida: list):

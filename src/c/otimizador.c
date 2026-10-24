@@ -944,6 +944,428 @@ static int ot_mortos(Otimizador *o, IrFuncao *f) {
 }
 
 /* ------------------------------------------------------------------ *
+ * 6. Laços: código invariante e redução de força (aula 19)
+ * ------------------------------------------------------------------ */
+
+/* Matriz n x n de bytes: dom[b*n + d] != 0 se d domina b. */
+typedef struct {
+    char *dom;
+    char *alcancavel;
+    size_t n;
+} OtDominadores;
+
+static OtDominadores ot_dominadores(const OtBlocos *bs) {
+    size_t n = bs->len;
+    OtDominadores d = {calloc(n * n + 1, 1), calloc(n + 1, 1), n};
+    if (!d.dom || !d.alcancavel) {
+        fprintf(stderr, "erro: memória insuficiente\n");
+        exit(1);
+    }
+    if (n == 0) {
+        return d;
+    }
+    size_t *pilha = ot_realloc(NULL, (n * 2 + 1) * sizeof *pilha);
+    size_t topo = 0;
+    d.alcancavel[0] = 1;
+    pilha[topo++] = 0;
+    while (topo > 0) {
+        size_t b = pilha[--topo];
+        for (size_t k = 0; k < bs->itens[b].nsucc; k++) {
+            size_t s = bs->itens[b].succ[k];
+            if (!d.alcancavel[s]) {
+                d.alcancavel[s] = 1;
+                pilha[topo++] = s;
+            }
+        }
+    }
+    free(pilha);
+    for (size_t b = 0; b < n; b++) {
+        if (!d.alcancavel[b]) {
+            continue;
+        }
+        for (size_t x = 0; x < n; x++) {
+            d.dom[b * n + x] = b == 0 ? x == 0 : d.alcancavel[x];
+        }
+    }
+    char *novo = ot_realloc(NULL, n);
+    int mudou = 1;
+    while (mudou) {
+        mudou = 0;
+        for (size_t b = 1; b < n; b++) {
+            if (!d.alcancavel[b]) {
+                continue;
+            }
+            int algum = 0;
+            memset(novo, 0, n);
+            for (size_t k = 0; k < bs->itens[b].npred; k++) {
+                size_t p = bs->itens[b].pred[k];
+                if (!d.alcancavel[p]) {
+                    continue;
+                }
+                for (size_t x = 0; x < n; x++) {
+                    novo[x] = algum ? (novo[x] && d.dom[p * n + x]) : d.dom[p * n + x];
+                }
+                algum = 1;
+            }
+            novo[b] = 1;
+            if (memcmp(novo, &d.dom[b * n], n) != 0) {
+                memcpy(&d.dom[b * n], novo, n);
+                mudou = 1;
+            }
+        }
+    }
+    free(novo);
+    return d;
+}
+
+/* Laços naturais: corpo[h*n + x] != 0 se o bloco x está no laço de cabeçalho h. */
+static char *ot_lacos_naturais(const OtBlocos *bs, const OtDominadores *d, char *eh_cabecalho) {
+    size_t n = bs->len;
+    char *corpo = calloc(n * n + 1, 1);
+    size_t *pilha = ot_realloc(NULL, (n * n + n + 1) * sizeof *pilha);
+    if (!corpo) {
+        fprintf(stderr, "erro: memória insuficiente\n");
+        exit(1);
+    }
+    for (size_t b = 0; b < n; b++) {
+        if (!d->alcancavel[b]) {
+            continue;
+        }
+        for (size_t k = 0; k < bs->itens[b].nsucc; k++) {
+            size_t h = bs->itens[b].succ[k];
+            if (!d->dom[b * n + h]) {
+                continue;
+            }
+            /* aresta de retorno b -> h */
+            eh_cabecalho[h] = 1;
+            corpo[h * n + h] = 1;
+            size_t topo = 0;
+            pilha[topo++] = b;
+            while (topo > 0) {
+                size_t x = pilha[--topo];
+                if (corpo[h * n + x]) {
+                    continue;
+                }
+                corpo[h * n + x] = 1;
+                for (size_t m = 0; m < bs->itens[x].npred; m++) {
+                    pilha[topo++] = bs->itens[x].pred[m];
+                }
+            }
+        }
+    }
+    free(pilha);
+    return corpo;
+}
+
+/* Divisor que nunca causa erro: literal numérico diferente de zero. */
+static int ot_divisor_seguro(const char *operando) {
+    if (!operando || !ir_eh_literal(operando) || operando[0] == '\'' || operando[0] == '"') {
+        return 0;
+    }
+    if (ot_eh(operando, "true") || ot_eh(operando, "false")) {
+        return 0;
+    }
+    return strtod(operando, NULL) != 0.0;
+}
+
+typedef struct {
+    const char *nome;
+    int n;
+} OtContagem;
+
+typedef struct {
+    OtContagem *itens;
+    size_t len, cap;
+} OtContagens;
+
+static int ot_contagem(const OtContagens *c, const char *nome) {
+    for (size_t i = 0; i < c->len; i++) {
+        if (c->itens[i].nome == nome) {
+            return c->itens[i].n;
+        }
+    }
+    return 0;
+}
+
+static void ot_contar(OtContagens *c, const char *nome) {
+    for (size_t i = 0; i < c->len; i++) {
+        if (c->itens[i].nome == nome) {
+            c->itens[i].n++;
+            return;
+        }
+    }
+    OtContagem nova = {nome, 1};
+    OT_PUSH(c->itens, c->len, c->cap, nova);
+}
+
+static const char *ot_novo_temporario(Otimizador *o, const IrFuncao *f) {
+    long maior = 0;
+    for (size_t i = 0; i < f->len; i++) {
+        const IrInstr *ins = &f->instrs[i];
+        const char *campos[4] = {ins->dst, ins->a, ins->b, ins->c};
+        size_t ncampos = ins->kind == IR_CALL ? 1 : 4;
+        for (size_t k = 0; k < ncampos; k++) {
+            if (campos[k] && ir_eh_temporario(campos[k])) {
+                long v = strtol(campos[k] + 1, NULL, 10);
+                if (v > maior) {
+                    maior = v;
+                }
+            }
+        }
+    }
+    char buf[32];
+    snprintf(buf, sizeof buf, "t%ld", maior + 1);
+    return ir_intern(o->p, buf);
+}
+
+/* Insere `ins` na posição `pos` de f->instrs. */
+static void ot_inserir(IrFuncao *f, size_t pos, IrInstr ins) {
+    OT_PUSH(f->instrs, f->len, f->cap, ins); /* garante espaço */
+    memmove(&f->instrs[pos + 1], &f->instrs[pos], (f->len - 1 - pos) * sizeof *f->instrs);
+    f->instrs[pos] = ins;
+}
+
+/* Passo `c` se `d` é `i = i ± c` (direto ou via `u = i ± c; i = u`). */
+static int ot_passo_de_inducao(const IrFuncao *f, const size_t *indices, size_t nind,
+                               const IrInstr *d, const char *i_var, const OtContagens *na_funcao,
+                               long long *passo) {
+    const IrInstr *conta = NULL;
+    if (d->kind == IR_BIN) {
+        conta = d;
+    } else if (d->kind == IR_COPY && ir_eh_temporario(d->a) && ot_contagem(na_funcao, d->a) == 1) {
+        for (size_t j = 0; j < nind; j++) {
+            if (ot_definido(&f->instrs[indices[j]]) == d->a) {
+                conta = &f->instrs[indices[j]];
+                break;
+            }
+        }
+        if (!conta || conta->kind != IR_BIN) {
+            return 0;
+        }
+    } else {
+        return 0;
+    }
+    long long c;
+    if (ot_eh(conta->op, "+")) {
+        if (conta->a == i_var && ot_inteiro(conta->b, &c)) {
+            *passo = c;
+            return 1;
+        }
+        if (conta->b == i_var && ot_inteiro(conta->a, &c)) {
+            *passo = c;
+            return 1;
+        }
+    }
+    if (ot_eh(conta->op, "-") && conta->a == i_var && ot_inteiro(conta->b, &c)) {
+        *passo = -c;
+        return 1;
+    }
+    return 0;
+}
+
+static int ot_transformar_laco(Otimizador *o, IrFuncao *f, const OtBlocos *bs, size_t h,
+                               const char *corpo) {
+    size_t n = bs->len;
+    size_t inicio_h = bs->itens[h].inicio;
+    const char *rotulo_h = f->instrs[inicio_h].kind == IR_LABEL ? f->instrs[inicio_h].label : NULL;
+
+    /* Pré-cabeçalho: a única entrada de fora tem de ser a queda do bloco anterior. */
+    size_t nexternos = 0, externo = 0;
+    for (size_t k = 0; k < bs->itens[h].npred; k++) {
+        size_t p = bs->itens[h].pred[k];
+        if (!corpo[h * n + p]) {
+            nexternos++;
+            externo = p;
+        }
+    }
+    if (h == 0) {
+        if (nexternos > 0) {
+            return 0;
+        }
+    } else {
+        if (nexternos != 1 || externo != h - 1) {
+            return 0;
+        }
+        const IrInstr *anterior = &f->instrs[bs->itens[h - 1].fim - 1];
+        if ((anterior->kind == IR_GOTO || anterior->kind == IR_IFF || anterior->kind == IR_IFT) &&
+            anterior->label == rotulo_h) {
+            return 0;
+        }
+    }
+
+    size_t *indices = ot_realloc(NULL, (f->len + 1) * sizeof *indices);
+    size_t nind = 0;
+    for (size_t i = 0; i < f->len; i++) {
+        for (size_t b = 0; b < n; b++) {
+            if (corpo[h * n + b] && i >= bs->itens[b].inicio && i < bs->itens[b].fim) {
+                indices[nind++] = i;
+                break;
+            }
+        }
+    }
+    OtContagens no_laco = {NULL, 0, 0}, na_funcao = {NULL, 0, 0};
+    int tem_chamada = 0;
+    for (size_t j = 0; j < nind; j++) {
+        const char *d = ot_definido(&f->instrs[indices[j]]);
+        if (d) {
+            ot_contar(&no_laco, d);
+        }
+        tem_chamada |= f->instrs[indices[j]].kind == IR_CALL;
+    }
+    for (size_t i = 0; i < f->len; i++) {
+        const char *d = ot_definido(&f->instrs[i]);
+        if (d) {
+            ot_contar(&na_funcao, d);
+        }
+    }
+
+    int resultado = 0;
+
+    /* (a) Código invariante. */
+    OtConjunto invariantes = {NULL, 0, 0};
+    char *mover = calloc(f->len + 1, 1);
+    size_t nmover = 0;
+    for (size_t j = 0; j < nind; j++) {
+        const IrInstr *ins = &f->instrs[indices[j]];
+        if (ins->kind != IR_BIN && ins->kind != IR_UN) {
+            continue;
+        }
+        if (!ir_eh_temporario(ins->dst) || ot_contagem(&na_funcao, ins->dst) != 1) {
+            continue;
+        }
+        if (ins->kind == IR_BIN && (ot_eh(ins->op, "/") || ot_eh(ins->op, "%")) &&
+            !ot_divisor_seguro(ins->b)) {
+            continue;
+        }
+        const char *operandos[2] = {ins->a, ins->kind == IR_BIN ? ins->b : NULL};
+        int ok = 1;
+        for (size_t k = 0; k < 2 && ok; k++) {
+            const char *x = operandos[k];
+            if (!x || ir_eh_literal(x) || ot_tem(&invariantes, x)) {
+                continue;
+            }
+            ok = ot_contagem(&no_laco, x) == 0 && !(tem_chamada && ot_global(o, x));
+        }
+        if (ok) {
+            mover[indices[j]] = 1;
+            nmover++;
+            ot_por(&invariantes, ins->dst);
+        }
+    }
+    if (nmover > 0) {
+        IrInstr *novas = ot_realloc(NULL, (f->len + 1) * sizeof *novas);
+        size_t antes = 0;
+        for (size_t i = 0; i < inicio_h; i++) {
+            antes += mover[i] != 0;
+        }
+        size_t posicao = inicio_h - antes;
+        /* resto[:posicao] + movidas + resto[posicao:] */
+        size_t j = 0, r = 0;
+        for (size_t i = 0; i < f->len && r < posicao; i++) {
+            if (!mover[i]) {
+                novas[j++] = f->instrs[i];
+                r++;
+            }
+        }
+        for (size_t i = 0; i < f->len; i++) {
+            if (mover[i]) {
+                novas[j++] = f->instrs[i];
+            }
+        }
+        r = 0;
+        for (size_t i = 0; i < f->len; i++) {
+            if (!mover[i]) {
+                if (r >= posicao) {
+                    novas[j++] = f->instrs[i];
+                }
+                r++;
+            }
+        }
+        memcpy(f->instrs, novas, j * sizeof *novas);
+        f->len = j;
+        free(novas);
+        resultado = 1;
+    }
+    free(mover);
+    free(invariantes.itens);
+
+    /* (b) Redução de força. */
+    for (size_t jd = 0; jd < nind && !resultado; jd++) {
+        size_t di = indices[jd];
+        const IrInstr *d = &f->instrs[di];
+        const char *i_var = ot_definido(d);
+        if (!i_var || ir_eh_temporario(i_var) || ot_global(o, i_var) ||
+            ot_contagem(&no_laco, i_var) != 1) {
+            continue;
+        }
+        long long passo;
+        if (!ot_passo_de_inducao(f, indices, nind, d, i_var, &na_funcao, &passo)) {
+            continue;
+        }
+        for (size_t jm = 0; jm < nind; jm++) {
+            size_t mi = indices[jm];
+            const IrInstr *m = &f->instrs[mi];
+            if (m->kind != IR_BIN || !ot_eh(m->op, "*") || mi == di) {
+                continue;
+            }
+            if (!ir_eh_temporario(m->dst) || ot_contagem(&na_funcao, m->dst) != 1) {
+                continue;
+            }
+            long long k;
+            if (m->a == i_var && ot_inteiro(m->b, &k)) {
+            } else if (m->b == i_var && ot_inteiro(m->a, &k)) {
+            } else {
+                continue;
+            }
+            const char *s = ot_novo_temporario(o, f);
+            f->instrs[mi] = ot_copia(m->dst, s);
+            IrInstr atualizacao = {IR_BIN, s, s, ot_numero(o, ot_int32(k * passo)), NULL,
+                                   ir_intern(o->p, "+"), NULL, 0};
+            IrInstr inicial = {IR_BIN, s, i_var, ot_numero(o, k), NULL, ir_intern(o->p, "*"),
+                               NULL, 0};
+            ot_inserir(f, di + 1, atualizacao);
+            ot_inserir(f, inicio_h + (di < inicio_h ? 1 : 0), inicial);
+            resultado = 1;
+            break;
+        }
+    }
+
+    free(indices);
+    free(no_laco.itens);
+    free(na_funcao.itens);
+    return resultado;
+}
+
+/* Teto de transformações de laço por chamada (cada uma recalcula os blocos). */
+#define OT_MAX_LACOS 100
+
+static int ot_lacos(Otimizador *o, IrFuncao *f) {
+    int mudou = 0;
+    for (int volta = 0; volta < OT_MAX_LACOS; volta++) {
+        OtBlocos bs = ot_blocos(f);
+        OtDominadores d = ot_dominadores(&bs);
+        char *eh_cabecalho = calloc(bs.len + 1, 1);
+        char *corpo = ot_lacos_naturais(&bs, &d, eh_cabecalho);
+        int transformou = 0;
+        for (size_t h = 0; h < bs.len && !transformou; h++) {
+            if (eh_cabecalho[h]) {
+                transformou = ot_transformar_laco(o, f, &bs, h, corpo);
+            }
+        }
+        free(corpo);
+        free(eh_cabecalho);
+        free(d.dom);
+        free(d.alcancavel);
+        ot_blocos_free(&bs);
+        if (!transformou) {
+            break;
+        }
+        mudou = 1;
+    }
+    return mudou;
+}
+
+/* ------------------------------------------------------------------ *
  * Pipeline
  * ------------------------------------------------------------------ */
 
@@ -977,6 +1399,26 @@ static void ot_renumerar(Otimizador *o, IrFuncao *f) {
             *campos[k] = novo;
         }
     }
+    /* O tipo guardado para o destino de um `read` acompanha o novo nome; o de
+     * um temporário que sumiu é descartado (o nome pode ter passado a outro). */
+    size_t j = 0;
+    for (size_t i = 0; i < f->ntipos; i++) {
+        IrTipo par = f->tipos[i];
+        if (ir_eh_temporario(par.nome)) {
+            const char *novo = NULL;
+            for (size_t m = 0; m < nnovos; m++) {
+                if (novos[m].x == par.nome) {
+                    novo = novos[m].c;
+                }
+            }
+            if (!novo) {
+                continue;
+            }
+            par.nome = novo;
+        }
+        f->tipos[j++] = par;
+    }
+    f->ntipos = j;
     free(novos);
 }
 
@@ -994,6 +1436,7 @@ void otimizador_otimizar(IrPrograma *programa) {
             mudou |= ot_cse(&o, f);
             mudou |= ot_limpar(f);
             mudou |= ot_mortos(&o, f);
+            mudou |= ot_lacos(&o, f);
             if (!mudou) {
                 break;
             }

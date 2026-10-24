@@ -136,11 +136,58 @@ rodadas). No fim, os temporários são renumerados em ordem de aparição.
 | 3 | Subexpressões comuns                           | local (bloco básico)               | `t3 = a * b` depois de `t1 = a * b`, sem redefinir `a`, `b` ou `t1` no meio, vira `t3 = t1`. |
 | 4 | Limpeza do fluxo de controle                   | global                             | Remove blocos inalcançáveis (código depois de `return`, ramo de `if` constante), `goto` para o rótulo seguinte e rótulos sem uso. |
 | 5 | Código morto                                   | **global**, *live variables* (backward) | Remove a atribuição a uma variável local ou temporário que não é lida em nenhum caminho adiante. |
+| 6 | Laços (aula 19)                                | **global**, dominadores e laços naturais | **Código invariante**: um temporário cujos operandos não mudam no laço vai para antes dele (pré-cabeçalho). **Redução de força**: `t = i * k`, com `i` variável de indução (`i = i ± c`), vira uma soma incremental `s = s + k*c`. |
 
 A especificação pede pelo menos uma otimização local e uma global, com
 corretude demonstrada por testes antes e depois (Seção 10.1). Aqui há duas
-locais (1, 3) e três globais (2, 4, 5). A corretude é verificada executando a
-IR -O0 e a -O1 e comparando o que cada uma imprime (ver [Testes](#testes)).
+locais (1, 3) e quatro globais (2, 4, 5, 6). A corretude é verificada
+executando a IR -O0 e a -O1 e comparando o que cada uma imprime (ver
+[Testes](#testes)). O efeito em programas maiores está nos
+[benchmarks](benchmarks.md).
+
+### Otimizações de laço
+
+O passe 6 calcula os **dominadores** de cada bloco básico (fluxo de dados até
+o ponto fixo) e acha as **arestas de retorno**: uma aresta b → h em que h
+domina b. Cada uma define um **laço natural**, formado por h mais todo bloco
+que chega a b sem passar por h. Para cada laço, o passe:
+
+1. **Confere o pré-cabeçalho.** O código novo vai logo antes do cabeçalho, e
+   isso só é seguro se a única entrada no laço vinda de fora for a queda do
+   bloco anterior. Se houver outro desvio para o cabeçalho vindo de fora, o
+   laço fica como está.
+2. **Move o código invariante.** Sai do laço um temporário definido uma única
+   vez na função, sem efeito colateral, cujos operandos são literais,
+   invariantes já movidos ou nomes que não são escritos no laço. Uma global
+   só conta como invariante se o laço não tiver chamadas. **Divisão e resto
+   por valor desconhecido nunca saem:** num laço que roda zero vezes, a
+   divisão movida aconteceria mesmo assim e poderia falhar. É o exemplo da
+   apostila da aula 19, testado em
+   [`laco_invariante.c`](../tests/ir_inputs/laco_invariante.c).
+3. **Reduz a força.** Uma variável de indução básica é um nome local com uma
+   única definição no laço, da forma `i = i ± c` (direta ou via temporário).
+   Cada `t = i * k`, com `k` constante, vira `t = s`. Antes do laço entra
+   `s = i * k`, e logo depois do passo de `i` entra `s = s + k*c`. O
+   transbordamento em 32 bits mantém `s == i * k` em toda volta
+   ([`reducao_forca.c`](../tests/ir_inputs/reducao_forca.c)).
+
+O09 sai exatamente na forma que o gabarito descreve como possível:
+
+```text
+-O0                                  -O1
+  i = 0                                i = 0
+L_test:                                t1 = 0
+  t1 = i < 5                         L_test:
+  ifFalse t1 goto L_end                t2 = i < 5
+  t2 = i * 2                           ifFalse t2 goto L_end
+  dobro = t2                           print t1
+  print dobro                          t3 = i + 1
+  t3 = i + 1                           i = t3
+  i = t3                               t1 = t1 + 2
+  goto L_test                          goto L_test
+L_end:                               L_end:
+  return 0                             return 0
+```
 
 ### Cuidados de corretude (aula 18, seção 1.1)
 
@@ -222,12 +269,12 @@ infinito tratados como erro de execução.
 | ------------------------------------- | --------------------------------------------------------------- | :----: | :-: |
 | Oficiais P01–P10 (válidos, -O0)       | código 0; a IR executa igual à IR do gabarito; -O1 executa igual | 10/10 | 10/10 |
 | Oficiais E01–E10 (inválidos)          | código 2, 3 ou 4, conforme a categoria do gabarito; nenhuma IR  | 10/10 | 10/10 |
-| Oficiais O01–O10 (otimização)         | -O1 executa igual a -O0 e à IR otimizada do gabarito, com menos instruções | 10/10 | 10/10 |
-| Próprios (11 programas)               | IR -O0 e -O1 iguais ao golden, byte a byte; -O1 executa igual a -O0 | 11/11 | 11/11 |
-| Equivalência (147 entradas)           | C e Python idênticos em `--ir -O0` e `--ir -O1`; nos 76 válidos, -O1 executa igual a -O0 | 147/147 | |
-| Fuzz (programas válidos gerados)      | idem, em programas bem tipados gerados aleatoriamente           | 1000/1000 (semente 7) | |
+| Oficiais O01–O10 (otimização)         | -O1 executa igual a -O0 e à IR otimizada do gabarito; a IR mudou e não cresceu | 10/10 | 10/10 |
+| Próprios (13 programas)               | IR -O0 e -O1 iguais ao golden, byte a byte; -O1 executa igual a -O0 | 13/13 | 13/13 |
+| Equivalência (149 entradas)           | C e Python idênticos em `--ir -O0` e `--ir -O1`; nos 78 válidos, -O1 executa igual a -O0 | 149/149 | |
+| Fuzz (programas válidos gerados)      | idem, em programas bem tipados gerados aleatoriamente, e também executando na VM | 1000/1000 (sementes 2026 e 7) | |
 
-**Total do `run_ir_tests.py`: 229/229.** O CI roda tudo isso a cada push e
+**Total do `run_ir_tests.py`: 235/235.** O CI roda tudo isso a cada push e
 repete o fuzz com o C compilado com AddressSanitizer e UBSan
 ([`testes.yml`](../.github/workflows/testes.yml)).
 
@@ -244,8 +291,10 @@ foge da tradução direta:
   `if` sem `else` com um rótulo só, e é o que a IR gerada faz nos dois casos.
 
 As IR otimizadas vão além do alvo de alguns gabaritos, e o próprio pacote diz
-que elas só precisam ser "equivalentes". Em O02–O05, O08 e O09, as variáveis
-recebem constantes, então a propagação dobra tudo. Por exemplo, O05 espera só
+que elas só precisam ser "equivalentes". Em O02–O05 e O08, as variáveis
+recebem constantes, então a propagação dobra tudo; em O08, `x * y` vira `42`
+antes mesmo de o passe de laços procurar código invariante (com valores lidos,
+ele sai do laço: [`laco_invariante.c`](../tests/ir_inputs/laco_invariante.c)). Por exemplo, O05 espera só
 a eliminação de `a * b` repetido e recebe `print 22` / `print 23`. A
 eliminação de subexpressão comum com valores desconhecidos aparece em
 `cse_local.c`.
@@ -282,19 +331,21 @@ diverge: P06 e P10 pelos motivos acima, e P09 pelos nomes. Por isso a suíte do
 repositório faz a comparação que o README do pacote descreve (estrutura
 normalizada + execução) em vez de usar o `cmp` dos scripts.
 
-## Limitações e o que falta da etapa 4
+## Limitações
 
-- **Sem movimentação de código invariante (LICM) nem redução de força.** São
-  os alvos de O08 e O09, temas da aula 19. Nos dois casos oficiais, a
-  propagação de constantes já elimina a expressão invariante (`x * y` vira
-  `42`). Em O09, o próprio gabarito diz que a redução de força é opcional.
-- **CSE só dentro do bloco básico.** As expressões disponíveis entre blocos
-  (*available expressions* global) não foram implementadas.
-- **Sem back-end.** A Seção 10 pede um alvo (assembly de pilha, x86-64, LLVM IR
-  ou VM própria). O interpretador de `tests/` executa a IR, mas é ferramenta de
-  teste, não o alvo do compilador. Também faltam os benchmarks `-O0` × `-O1`,
-  o manual e a apresentação (Seção 15).
-- **O interpretador não confere limites de vetor**, e lê como 0 uma variável
-  nunca escrita. Isso não afeta a comparação -O0 × -O1, porque o otimizador
-  não remove nem move acessos a vetor nem supõe nada sobre variáveis não
-  inicializadas.
+- **Subexpressões comuns só dentro do bloco básico.** As expressões
+  disponíveis entre blocos (*available expressions* global) não foram
+  implementadas.
+- **Sem reassociação.** `a + 20 + 28 - 28` continua com três operações:
+  reassociar exige provar que não há transbordamento intermediário diferente
+  ([benchmarks](benchmarks.md#leitura)).
+- **Código invariante só para temporários.** Uma atribuição a variável do
+  usuário (`x = a * b` dentro do laço) não é movida, porque `x` pode ser lida
+  depois do laço com o valor da última volta, inclusive quando o laço não roda.
+- **O interpretador de testes não confere limites de vetor** e lê como 0 uma
+  variável nunca escrita. Isso não afeta a comparação -O0 × -O1, porque o
+  otimizador não remove nem move acessos a vetor nem supõe nada sobre
+  variáveis não inicializadas. A máquina virtual do back-end confere limites
+  ([backend.md](backend.md#erros)).
+
+A geração de código, que vem depois da IR, está em [backend.md](backend.md).
