@@ -158,6 +158,13 @@ Prazos e comandos exigidos por cada atividade: [docs/etapas.md](docs/etapas.md).
 
 Cada atividade define os próprios comandos, e os pacotes de teste oficiais estão versionados em [`ref/testes-oficiais/`](ref/testes-oficiais/), sem edição. Os comandos abaixo rodam na raiz do repositório, a partir de um clone novo.
 
+| Atividade | Comando principal | Resultado esperado |
+| --------- | ----------------- | ------------------ |
+| **AP 1** — parser | `python3 parser.py codigo.c` | 50/50 pela suíte do repositório; os scripts do pacote marcam 16 aprovados (é o teto, veja abaixo) |
+| **AP 2** — semântica | `./testes_semanticos_py.sh minic.py [diretorio]` e `./testes_semanticos_c.sh minic.c [diretorio]` | **20/20** nas duas versões |
+| **Testes para o MINIC (IR)** | `python3 minic.py --ir [-O1] arquivo.c` | **30/30** pela suíte do repositório; os scripts do pacote dão 0/30 para qualquer compilador (veja abaixo) |
+| **Etapa 4** — código e otimização | `python3 minic.py --run [-O1] arquivo.c` | programa executado na máquina virtual; 250/250 no back-end |
+
 <details>
 <summary><strong>AP 1 — analisador sintático</strong> (<code>parser.py</code> / <code>parser.c</code>)</summary>
 
@@ -229,9 +236,15 @@ Cada critério de correção (desacoplamento, equivalência C × Python, lógica
 
 <br>
 
+Os comandos são os que o README do pacote sugere (`minic --ir arquivo.c` e `minic -O1 --ir arquivo.c`):
+
 ```bash
 python3 minic.py --ir programa.c          # IR sem otimização (-O0)
 python3 minic.py --ir -O1 programa.c      # IR otimizada
+
+gcc -Wall -Wextra minic.c -o minic        # a mesma coisa em C
+./minic --ir -O1 programa.c
+
 python3 tests/run_ir_tests.py             # os 30 casos do pacote, em Python e em C
 ```
 
@@ -241,11 +254,38 @@ python3 tests/run_ir_tests.py             # os 30 casos do pacote, em Python e e
 | E01–E10, inválidos | rejeição com a categoria certa (código 2, 3 ou 4) | 10/10 | 10/10 |
 | O01–O10, otimização | IR `-O1` equivalente, com menos instruções | 10/10 | 10/10 |
 
-**Sobre os scripts `test_ir_*.sh` do pacote.** Eles comparam o gabarito inteiro byte a byte, inclusive linhas em prosa como `Resultado: REJEITAR` e `Critério: …`. Nos casos de otimização, comparam também as duas IR (`-O0` e `-O1`) com uma única execução. Por isso dão **0/30 para qualquer compilador**; com o filtro `IGNORE_RE` personalizado que o próprio script sugere, o teto é 17/30.
+Em P06 e P10 a IR difere do gabarito só em pontos em que o próprio gabarito foge da tradução direta, e as duas imprimem o mesmo resultado ([detalhes](docs/entrega-ir.md)).
+
+**Sobre os scripts `test_ir_*.sh` do pacote.** Eles chamam `minic arquivo.c` **sem `--ir`** e comparam o gabarito inteiro byte a byte, inclusive linhas em prosa como `Resultado: REJEITAR` e `Critério: …`. Nos casos de otimização, comparam também as duas IR (`-O0` e `-O1`) com uma única execução. Por isso dão **0/30 para qualquer compilador**, e é fácil conferir:
+
+```bash
+bash ref/scripts/test_ir_python.sh minic.py ref/testes-oficiais/testes-ir-30/testes
+bash ref/scripts/test_ir_c.sh      minic.c  ref/testes-oficiais/testes-ir-30/testes
+```
+
+Com o filtro `IGNORE_RE` personalizado que o próprio script sugere, o teto é 17/30. O `minic` sem opções não pode imprimir a IR, porque os scripts da AP 2 também o chamam sem opções e esperam o relatório semântico.
 
 O README do mesmo pacote diz que os gabaritos "não são uma exigência de igualdade byte a byte" e pede comparação de estrutura e semântica. É o que `run_ir_tests.py` faz: renumera temporários e rótulos e **executa** as duas IR num interpretador para comparar o que imprimem.
 
 Página de entrega: [docs/entrega-ir.md](docs/entrega-ir.md). Análise completa: [docs/ir.md](docs/ir.md).
+
+</details>
+
+<details>
+<summary><strong>Etapa 4 — geração de código e otimização</strong> (<code>--run</code>, <code>--target=asm</code>, <code>-O1</code>)</summary>
+
+<br>
+
+```bash
+python3 minic.py --target=asm programa.c       # código para a máquina de pilha
+python3 minic.py --run programa.c              # compila e executa
+python3 minic.py --run -O1 --stats programa.c  # com otimização e contagem de instruções
+
+python3 tests/run_backend_tests.py             # 14 programas executados + VM × interpretador + C × Python
+python3 benchmarks/rodar.py                    # -O0 × -O1 em 8 programas
+```
+
+Resultado: **250/250 verificações** no back-end. Nos benchmarks, o `-O1` executa de 0% a 42% menos instruções (7,8% no total), com a mesma saída em todos os programas. Descrição em [docs/backend.md](docs/backend.md), [docs/benchmarks.md](docs/benchmarks.md), [docs/manual.md](docs/manual.md) e [docs/apresentacao.md](docs/apresentacao.md).
 
 </details>
 
@@ -368,12 +408,16 @@ Onde o pacote oficial da AP 2 e a especificação divergem, prevaleceu o pacote:
 
 A AST verificada é traduzida para **código de três endereços** (Seção 9), no formato dos gabaritos do pacote de IR:
 
-| Instrução | | Instrução | |
-| --------- | - | --------- | - |
-| `x = a op b` | aritmética, relacional, `and`/`or` | `x = load v[i]` · `store v[i], a` | acesso a vetor |
-| `x = neg a` · `x = not a` | unárias | `param a` · `x = call f, n` | chamada |
-| `x = itof a` · `x = ctoi a` | conversões implícitas, explícitas na IR | `goto L` · `ifFalse a goto L` | desvios |
-| `print a` · `read x` · `return a` | E/S e retorno | `func f(a, b)` … `endfunc` | função |
+| Instrução | Para que serve |
+| --------- | -------------- |
+| `x = a op b` | aritmética, relacional, `and`/`or` |
+| `x = neg a` · `x = not a` | operadores unários |
+| `x = itof a` · `x = ctoi a` | conversões implícitas, explícitas na IR |
+| `x = load v[i]` · `store v[i], a` | acesso a vetor |
+| `param a` · `x = call f, n` | chamada de função |
+| `goto L` · `ifFalse a goto L` | desvios |
+| `print a` · `read x` · `return a` | entrada, saída e retorno |
+| `func f(a, b)` … `endfunc` | delimitam uma função |
 
 Algumas decisões de tradução:
 
@@ -511,7 +555,7 @@ Todas as etapas da especificação estão implementadas. O que daria para melhor
 - **Código gerado mais enxuto.** A IR é traduzida instrução a instrução para a pilha, e cada temporário vira um `STORE` seguido de um `LOAD`. Um otimizador de janela (*peephole*) ou uma alocação de registradores removeria isso.
 - **Mais otimizações.** Subexpressões comuns entre blocos (*available expressions* global), reassociação, *inlining* e eliminação de recursão de cauda.
 - **Alvo nativo.** A máquina virtual é interpretada; gerar x86-64 ou LLVM IR seria o passo seguinte.
-- **Saída padrão do `minic`.** Sem opção, ele imprime o relatório da AP 2 em vez de compilar, por compatibilidade com o script daquela atividade. Compilar e executar é `--run`.
+- **Saída padrão do `minic`.** Sem opção, ele imprime o relatório da AP 2 em vez de compilar, porque os scripts daquela atividade o chamam assim e esperam esse relatório. Gerar a IR é `--ir`, e compilar e executar é `--run`.
 
 Decisões que o grupo ainda precisa revisar e o checklist de entrega: [PENDENCIAS.md](PENDENCIAS.md).
 
