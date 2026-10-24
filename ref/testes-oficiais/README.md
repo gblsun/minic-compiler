@@ -10,12 +10,49 @@ ref/testes-oficiais/
 ├── testes-scanner-minic/    etapa 1 — tokens em JSONL (6 casos inválidos + 5 programas C)
 ├── testes-parser-50/        etapa 2 — 50 programas (25 aceitos + 25 rejeitados) com AST esperada
 ├── testes-semanticos-20/    etapa 3 — 20 programas (10 aceitos + 10 rejeitados) com gabarito
-└── testes-parser-50.tar.gz  o pacote original, como veio do Classroom
+├── testes-ir-30/            etapa 4 — 30 programas (10 válidos -O0, 10 erros, 10 otimização -O1)
+├── testes-parser-50.tar.gz  o pacote original, como veio do Classroom
+└── testes-ir-30.zip         idem, para o pacote de IR
 ```
 
-O `.tar.gz` fica versionado junto do conteúdo extraído de propósito: o
+O `.tar.gz` e o `.zip` ficam versionados junto do conteúdo extraído de propósito: o
 extraído é o que se lê e se usa no dia a dia, e o compactado é a prova de que
 nada foi alterado (`tar -tzf testes-parser-50.tar.gz` lista o original).
+
+---
+
+## testes-ir-30/ — etapa 4 (IR e otimização)
+
+Pacote `minic-ir-test-cases.zip`. Cada caso fica em `testes/<grupo>/<ID>/`, com
+`<ID>.c` e `<ID>.txt`; o [`indice.tsv`](testes-ir-30/indice.tsv) dá o tema de
+cada um e o [`README.md`](testes-ir-30/README.md) explica o critério.
+
+- **P01–P10** (`01-validos-sem-otimizacao/`): IR canônica esperada em `-O0`;
+- **E01–E10** (`02-erros/`): rejeição e categoria do erro (léxico, sintático
+  ou semântico);
+- **O01–O10** (`03-otimizacoes/`): IR de referência e transformação esperada
+  em `-O1` (dobra de constantes, cópias, código morto, CSE, código invariante
+  em laço, redução de força…).
+
+Diferente dos outros pacotes, o gabarito **não** é byte a byte: a
+especificação não fixa a serialização da IR, então compara-se estrutura,
+fluxo de controle e semântica, normalizando nomes de temporários e rótulos. A
+redução de força do O09 é opcional. Os scripts
+[`test_ir_python.sh`](../scripts/test_ir_python.sh) e
+[`test_ir_c.sh`](../scripts/test_ir_c.sh) recebem `<compilador> <diretorio>`.
+
+Esses scripts, porém, chamam o compilador sem opções e comparam **com `cmp`**
+o gabarito inteiro, inclusive as linhas em prosa (`Resultado: …`, `Critério:
+…`) e, nos casos O, as duas IR (-O0 e -O1) num arquivo só. Do jeito que vieram,
+dão 0/30 para qualquer compilador. Com o `IGNORE_RE` personalizado e
+`minic --ir`, o nosso chega a 17/30, que é o teto. A suíte do repositório,
+[`tests/run_ir_tests.py`](../../tests/run_ir_tests.py), faz a comparação que
+este README descreve: estrutura normalizada mais execução da IR num
+interpretador.
+
+Resultado: 30/30 nas duas implementações. Dos 10 válidos, 8 têm IR idêntica ao
+gabarito e 2 (P06, P10) são equivalentes; os dois gabaritos fogem da tradução
+direta do código. Análise completa em [`docs/ir.md`](../../docs/ir.md).
 
 ---
 

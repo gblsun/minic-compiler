@@ -13,12 +13,12 @@ arquivo](#nome-original-de-cada-arquivo) faz o de-para.
 ```text
 ref/
 ├── especificacao-completa-minic.pdf   contrato da linguagem (fonte normativa nº 1)
-├── slides/          slides das aulas 01–11, 14 e 15 + roteiro falado da aula 06
-├── apostilas/       apostilas das aulas 02–12, 14 e 15 + tutorial tokens→AST
+├── slides/          slides das aulas 01–11 e 14–19 + roteiro falado da aula 06
+├── apostilas/       apostilas das aulas 02–12 e 14–19 + tutorial tokens→AST
 ├── enunciados/      enunciados das atividades (Classroom) e orientações de entrega
 ├── exercicios/      exercícios das aulas 6 a 9 (.docx), 13 e 13–14 (.pdf)
 ├── scripts/         scripts de teste fornecidos pelo professor
-└── testes-oficiais/ pacotes de teste oficiais (scanner, parser e semântico)
+└── testes-oficiais/ pacotes de teste oficiais (scanner, parser, semântico e IR)
 ```
 
 ## Especificação
@@ -44,6 +44,10 @@ ref/
 | [aula-11-compiladores.pdf](slides/aula-11-compiladores.pdf) | Análise sintática ascendente (LR). |
 | [aula-14-compiladores.pdf](slides/aula-14-compiladores.pdf) | Tabela de símbolos e escopos: modelagem, escopo, resolução de identificadores, implementações. |
 | [aula-15-compiladores.pdf](slides/aula-15-compiladores.pdf) | Conclusão da análise semântica: regras estáticas, equivalência/compatibilidade/conversão de tipos, vetores e funções, condições e laços. |
+| [aula-16-compiladores.pdf](slides/aula-16-compiladores.pdf) | Da sintaxe ao significado: atributos, dependências, avaliação de expressões. |
+| [aula-17-compiladores.pdf](slides/aula-17-compiladores.pdf) | Ambientes de execução e geração de código: endereçamentos, código de destino, `CALL`/`RET`. |
+| [aula-18-compiladores.pdf](slides/aula-18-compiladores.pdf) | Otimização local e análise de fluxo de dados: blocos básicos, transformações locais, análises forward e backward. |
+| [aula-19-compiladores.pdf](slides/aula-19-compiladores.pdf) | Otimização de laços e integração do compilador: dominância, invariantes, indução, integração do MINIC. |
 | [aula-06-roteiro.txt](slides/aula-06-roteiro.txt) | Roteiro falado da aula 06, slide por slide. É o material mais didático sobre GLC do pacote, e o único em texto puro (dá para pesquisar com `grep`). |
 
 ## apostilas/
@@ -64,6 +68,10 @@ ref/
 | [tutorial-conversao-tokens-ast-glc.pdf](apostilas/tutorial-conversao-tokens-ast-glc.pdf) | Tutorial passo a passo de tokens → AST com descida recursiva (regras `Factor`/`Term`/`Expr`, modelo de nó em C, erros comuns, como comparar ASTs). O material mais aplicado para escrever o parser. |
 | [apostila-aula-14-tabela-de-simbolos-e-escopos.pdf](apostilas/apostila-aula-14-tabela-de-simbolos-e-escopos.pdf) | **Tabela de símbolos e escopos.** Campos de uma entrada, escopo × ambiente, busca no escopo atual e nos envolventes, declaração duplicada, identificador não declarado, sombreamento — base da **etapa 3**. |
 | [apostila-aula-15-analise-semantica.pdf](apostilas/apostila-aula-15-analise-semantica.pdf) | **Análise semântica completa** do MINIC: resolução de nomes, tipos, compatibilidade e conversões, expressões, vetores, chamadas, retornos, `break`/`continue`, diagnósticos sem cascata. Fecha o front-end; a representação intermediária começa na aula 16. |
+| [apostila-aula-16-sintaxe-semantica-avaliacao-expressoes.pdf](apostilas/apostila-aula-16-sintaxe-semantica-avaliacao-expressoes.pdf) | Atributos sintetizados e herdados, grafos de dependência, SDD × SDT, definições S- e L-atribuídas, avaliação de expressões no MINIC. Ponte entre a AST anotada e a IR (só uma prévia; código de três endereços fica para a aula 17). |
+| [apostila-aula-17-ambientes-execucao-geracao-codigo.pdf](apostilas/apostila-aula-17-ambientes-execucao-geracao-codigo.pdf) | Alocação estática, pilha e heap; registros de ativação e recursão; escopo × tempo de vida; seleção de instruções; tradução de expressões, decisões, laços e chamadas para IR e para uma máquina de pilha didática — base da **etapa 4**. |
+| [apostila-aula-18-otimizacao-local-fluxo-dados.pdf](apostilas/apostila-aula-18-otimizacao-local-fluxo-dados.pdf) | Blocos básicos e grafo de fluxo; simplificação algébrica, propagação de constantes, eliminação de cópias e de código morto; IN/OUT, gen/kill; reaching definitions, available expressions, live variables; cuidados semânticos do MINIC ao otimizar. |
+| [apostila-aula-19-otimizacao-de-lacos-integracao.pdf](apostilas/apostila-aula-19-otimizacao-de-lacos-integracao.pdf) | Dominadores, arestas de retorno e laços naturais; invariantes e movimentação de código; variáveis de indução e redução de força; fusão, desenrolamento e vetorização; integração das quatro etapas e comparação `-O0` × `-O1`. |
 
 ## enunciados/
 
@@ -115,6 +123,8 @@ como os runners se encaixam.
 | [testes_semanticos_py.sh](scripts/testes_semanticos_py.sh) | `bash testes_semanticos_py.sh minic.py <diretorio>` — roda `python3 minic.py` em cada `.c` e compara stdout+stderr com o `.gabarito` usando `diff` exato (AP 2). | não precisa: chama-se direto, com `./minic.py` e `ref/testes-oficiais/testes-semanticos-20` |
 | [testes_semanticos_c.sh](scripts/testes_semanticos_c.sh) | `bash testes_semanticos_c.sh minic.c <diretorio>` — compila `gcc -Wall -Wextra minic.c` (unidade única) num diretório temporário e faz a mesma comparação. | idem, com `./minic.c` |
 | [testar_parser_c.sh](scripts/testar_parser_c.sh) | `bash testar_parser_c.sh ./testes-parser-50 ./parser.c` — compila o parser como **unidade única** (`gcc … $PARSER -o parser`) e faz a mesma comparação. | [`src/c/test_parser_c.sh`](../src/c/test_parser_c.sh) (wrapper, idem) |
+| [test_ir_python.sh](scripts/test_ir_python.sh) | `bash test_ir_python.sh ./minic.py <diretorio>` — roda o compilador sobre cada `.c` de `testes-ir-30` e compara com o `.txt` do caso, ignorando linhas de mensagem/diagnóstico (`IGNORE_RE`, configurável). Conta à parte válidos, erros e otimização. | não há: a comparação é byte a byte e nenhum compilador passa como veio (ver [`docs/ir.md`](../docs/ir.md#os-scripts-oficiais-test_ir_pythonsh--test_ir_csh)); a suíte do repositório é [`tests/run_ir_tests.py`](../tests/run_ir_tests.py) |
+| [test_ir_c.sh](scripts/test_ir_c.sh) | `bash test_ir_c.sh ./minic.c <diretorio>` — compila o fonte com `gcc` e faz a mesma comparação. | idem |
 
 As armadilhas conhecidas desses quatro scripts (comparação byte a byte,
 exigência de bit de execução, compilação em arquivo único) estão detalhadas em
@@ -122,7 +132,7 @@ exigência de bit de execução, compilação em arquivo único) estão detalhad
 
 ## testes-oficiais/
 
-Pacotes de teste oficiais do scanner, do parser e do analisador semântico. Têm
+Pacotes de teste oficiais do scanner, do parser, do analisador semântico e da IR/otimização. Têm
 [README próprio](testes-oficiais/README.md), porque exigem explicação: o que
 cada pacote cobre, o que está faltando neles e como interpretar o resultado
 dos scripts.
@@ -134,10 +144,11 @@ Para reencontrar um arquivo no Classroom ou conferir que nada foi trocado:
 | Nome neste repositório | Nome original |
 |---|---|
 | `slides/aula-01-compiladores.pdf` | `Aula01 - Compiladores (1).pdf` |
-| `slides/aula-NN-compiladores.pdf` | `AulaNN - Compiladores.pdf` (aulas 02 a 11, 14 e 15) |
+| `slides/aula-NN-compiladores.pdf` | `AulaNN - Compiladores.pdf` (aulas 02 a 11 e 14 a 19) |
 | `slides/aula-06-roteiro.txt` | `Aula06_Roteiro - Compiladores.txt` |
 | `apostilas/apostila-aula-0N-*.pdf` | `apostila-aula-N-*.pdf` (aulas 2 a 9, sem o zero à esquerda) |
-| `apostilas/apostila-aula-1N-*.pdf` | idêntico ao original |
+| `apostilas/apostila-aula-18-otimizacao-local-fluxo-dados.pdf` | `apostila-aula-18-minic.pdf` (o nome original não dizia o tema) |
+| `apostilas/apostila-aula-1N-*.pdf` (demais) | idêntico ao original |
 | `apostilas/tutorial-conversao-tokens-ast-glc.pdf` | idêntico ao original |
 | `enunciados/ap-analisador-sintatico-enunciado.pdf` | `AP 1 - analisador sintático - Sala de Aula.pdf` |
 | `enunciados/scripts-de-teste-para-o-parser-enunciado.pdf` | `Scripts de teste para o parser - Sala de Aula.pdf` |
@@ -151,6 +162,8 @@ Para reencontrar um arquivo no Classroom ou conferir que nada foi trocado:
 | `scripts/testes_semanticos_{py,c}.sh` | `Avaliação Parcial II/testes_semanticos_{py,c}.sh` |
 | `testes-oficiais/testes-scanner-minic/` | `Testes para o analisador léxico/testes-scanner-minic_codes/` |
 | `testes-oficiais/testes-parser-50{,.tar.gz}` | `testes-parser-50.tar.gz` |
+| `testes-oficiais/testes-ir-30{,.zip}` | `minic-ir-test-cases.zip` (a pasta raiz `minic-ir-test-cases/` virou `testes-ir-30/`) |
+| `scripts/test_ir_{python,c}.sh` | `minic-ir-test-cases/test_ir_{python,c}.sh` (saíram do pacote para `scripts/`, como os demais) |
 
 Duplicatas descartadas na organização (verificadas por hash MD5 antes de sair):
 duas cópias extras de `test_scanner_c.sh`/`test_scanner_python.sh`, cópias de
@@ -158,4 +171,6 @@ duas cópias extras de `test_scanner_c.sh`/`test_scanner_python.sh`, cópias de
 do pacote de testes do scanner (`testes-scanner-minic`, subconjunto de
 `testes-scanner-minic_codes`, que é o que ficou) e uma segunda cópia de
 `aula13_exercicios_praticos_python_c.pdf`, idêntica a
-`exercicios/exercicios-aula-13-enunciados.pdf`.
+`exercicios/exercicios-aula-13-enunciados.pdf`. Uma nova cópia de
+`Compiladores - CC6 - 2026.2 - orientações para a entrega do analisador semântico.pdf`
+também foi descartada: mesmo MD5 de `enunciados/orientacoes-entrega-analisador-semantico.pdf`.
