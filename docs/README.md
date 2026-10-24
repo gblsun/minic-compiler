@@ -15,6 +15,9 @@ existem para não precisar reabrir os PDFs toda hora.
 - Vai mexer na **análise semântica**? → [semantica.md](semantica.md) e [testes-semanticos.md](testes-semanticos.md)
 - Vai mexer na **IR ou no otimizador** (`--ir`, `-O1`)? → [ir.md](ir.md)
 - Quer avaliar os **testes da IR** (atividade "Testes para o MINIC (IR)")? → [entrega-ir.md](entrega-ir.md)
+- Vai **usar o compilador**? → [manual.md](manual.md)
+- Vai mexer no **back-end** (`--target=asm`, `--run`)? → [backend.md](backend.md)
+- Quer os **benchmarks** `-O0` × `-O1` ou a **apresentação**? → [benchmarks.md](benchmarks.md) e [apresentacao.md](apresentacao.md)
 - Quer os **resultados dos testes**? → [resultados-etapa2.md](resultados-etapa2.md) e [resultados-etapa3.md](resultados-etapa3.md)
 - Quer saber **o que mudou depois da avaliação da etapa 2**? → [correcoes-etapa2.md](correcoes-etapa2.md)
 - Quer os **exercícios da aula 13** (tradução dirigida por sintaxe)? → [exercicios/aula13/](../exercicios/aula13/)
@@ -47,6 +50,10 @@ existem para não precisar reabrir os PDFs toda hora.
 | [resultados-etapa2.md](resultados-etapa2.md) | Registro da execução das suítes da etapa 2 (201/201), como ler o resumo dos scripts oficiais do professor e a tabela dos diagnósticos emitidos nos 25 casos de rejeição. |
 | [correcoes-etapa2.md](correcoes-etapa2.md) | Resposta à avaliação da etapa 2: cada apontamento, a causa encontrada, a correção e como conferir. |
 | [entrega-ap2.md](entrega-ap2.md) | **Página de entrega da AP 2**: como rodar, e cada critério de correção (desacoplamento, equivalência C × Python, lógica, casos de teste) com a evidência correspondente. |
+| [manual.md](manual.md) | **Manual do usuário**: instalação, a linguagem, todos os modos da CLI, mensagens de erro com exemplos, execução e otimização. |
+| [backend.md](backend.md) | **Back-end** (etapa 4): alvo escolhido (máquina virtual de pilha), registro de ativação, convenção de chamada, conjunto de instruções, tradução da IR, semântica de execução, erros e testes. |
+| [benchmarks.md](benchmarks.md) | **Benchmarks** `-O0` × `-O1`: 8 programas, instruções executadas, tamanho do código e tempo, com a leitura de cada resultado (gerado por `benchmarks/rodar.py`). |
+| [apresentacao.md](apresentacao.md) | **Apresentação** do projeto em slides (Markdown/Marp). |
 | [entrega-ir.md](entrega-ir.md) | **Página de entrega dos testes da IR**: como rodar, resultado por grupo do pacote (30/30 em Python e em C), por que os scripts do pacote não servem de critério, e o que foi entregue. |
 | [testes-semanticos.md](testes-semanticos.md) | Catálogo dos testes da etapa 3: os 20 oficiais e os 19 próprios, com o objetivo, o código e a saída esperada de cada um (gerado por `tests/gerar_catalogo_semantico.py`). |
 | [resultados-etapa3.md](resultados-etapa3.md) | Registro da execução das suítes da etapa 3 (184/184), do teste diferencial (900 programas gerados), dos sanitizers e dos scripts oficiais da AP 2 (20/20 em Python e em C). |

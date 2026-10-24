@@ -102,12 +102,12 @@ filtro usado estão em
 As duas implementações imprimem a mesma IR byte a byte, em `-O0` e em `-O1`.
 Isso foi conferido em 147 entradas do repositório e em 1000 programas gerados.
 
-## O que ainda não está aqui
+## Depois desta entrega
 
-Itens da etapa 4, fora do escopo deste pacote de testes:
+A etapa 4 foi implementada sobre esta IR, fora do escopo do pacote de testes:
 
-- o back-end, com o alvo da Seção 10 (assembly, LLVM IR ou VM);
-- as otimizações de laço da aula 19 (código invariante, redução de força);
-- os benchmarks, o manual e a apresentação.
+- o back-end: código para uma máquina virtual de pilha e sua execução (`--target=asm`, `--run`), descrito em [backend.md](backend.md);
+- as otimizações de laço da aula 19 (código invariante e redução de força). Com elas, O09 sai na forma que o gabarito descreve;
+- os [benchmarks](benchmarks.md), o [manual](manual.md) e a [apresentação](apresentacao.md).
 
-Ver [etapas.md](etapas.md#etapa-4--geração-de-código-e-otimização).
+Os números desta página continuam valendo. A suíte da IR passou de 229 para 235 verificações, com dois casos próprios de laço. Ver [etapas.md](etapas.md#etapa-4--geração-de-código-e-otimização-).

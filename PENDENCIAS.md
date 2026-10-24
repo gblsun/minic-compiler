@@ -1,336 +1,172 @@
-# Pendências — o que precisa ser corrigido, revisado e decidido
+# Pendências — o que falta fazer, decidir e revisar
 
-Lista de trabalho do grupo. Não é backlog de ideias (isso é
-[`possiveis_features.md`](docs/possiveis_features.md)): aqui só entra o que está
-**errado**, **em aberto** ou **precisa de uma segunda opinião** antes da
-entrega.
+Lista de trabalho do grupo. Aqui só entra o que está **em aberto**, **precisa
+de uma segunda opinião** ou é **limitação conhecida**. Ideias novas vão para
+[`possiveis_features.md`](docs/possiveis_features.md); o que já foi resolvido
+fica no [histórico](#6-histórico-o-que-já-foi-resolvido), no fim.
 
-**Responsável pela lista: Fellipe Augusto Silva Pereira (RA 2401525)** — revisar,
-priorizar e repartir os itens no grupo. A coluna *Responsável* do índice abaixo
-começa toda com ele; é só editar a linha para passar um item adiante.
+**Responsável pela lista: Fellipe Augusto Silva Pereira (RA 2401525).** Ele
+revisa, prioriza e reparte os itens no grupo. Para passar um item adiante, é
+só editar a coluna *Responsável*.
 
-Como ler cada item:
+## Situação em 24/10/2026
 
-- **Confirmado** — reproduzido nesta máquina, com o comando anotado.
-- **Não verificado** — risco identificado por leitura do código, ainda sem
-  teste que prove (ou descarte) o problema.
-- **Decisão** — já resolvido de um jeito; falta o grupo concordar.
+**Todas as etapas da especificação estão implementadas**, em Python e em C,
+com saída idêntica byte a byte e tudo testado no CI a cada push:
+
+| Etapa | Situação | Onde conferir |
+|---|---|---|
+| 1 — léxico | entregue | [`etapas.md`](docs/etapas.md#etapa-1--analisador-léxico-) |
+| 2 — parser e AST (AP 1) | entregue; 50/50 casos oficiais | [`resultados-etapa2.md`](docs/resultados-etapa2.md) |
+| 3 — semântica (AP 2) | entregue; 20/20 nos scripts oficiais | [`entrega-ap2.md`](docs/entrega-ap2.md) |
+| IR (Testes para o MINIC) | entregue; 30/30 casos oficiais | [`entrega-ir.md`](docs/entrega-ir.md) |
+| 4 — código e otimização | **implementada, falta entregar**: back-end, otimizações de laço, benchmarks, manual, apresentação | [`etapas.md`](docs/etapas.md#etapa-4--geração-de-código-e-otimização-) |
+
+O que sobra é, sobretudo, **operacional** (seção 1) e **decisões para o grupo
+confirmar** (seção 2).
 
 ## Índice
 
 | Item | Assunto | Prioridade | Status | Responsável |
 |---|---|---|---|---|
-| [1.1](#11-o-lexer-python-aceita-identificador-fora-do-ascii-o-c-não) | Python aceita identificador não-ASCII; C não | alta | **resolvido** | Fellipe |
-| [1.2](#12-o-lexer-python-aceita-dígito-fora-do-ascii) | Python aceita dígito não-ASCII | alta | **resolvido** | Fellipe |
-| [1.3](#13-mensagem-de-erro-do-c-corrompe-a-saída-em-byte-não-ascii) | Mensagem do C corrompe a saída | média | **resolvido** | Fellipe |
-| [1.4](#14-expressão-muito-aninhada-traceback-no-python-crash-no-c) | Aninhamento profundo derruba os dois | média | **resolvido** | Fellipe |
-| [1.5](#15-contagem-de-coluna-o-c-conta-bytes-o-python-conta-caracteres) | Coluna em bytes vs. caracteres | baixa | **resolvido** | Fellipe |
-| [2.1](#21-o-caso-oficial-24-é-comparado-contra-uma-ast-corrigida)–[2.4](#24-caso-41-nossa-mensagem-difere-da-pista-do-pacote) | Decisões que pedem revisão do grupo | — | decisão | Fellipe |
-| [2.5](#25-ap-2-pontos-em-que-o-pacote-oficial-prevaleceu-sobre-a-especificação) | AP 2: pacote oficial × especificação (`main`, `3 = n`, `a = b = 3`) | — | decisão | grupo |
-| [2.6](#26-ir-saída-padrão-do-minic-e-os-scripts-oficiais-da-ir) | IR: `minic arquivo.c` sem opções continua dando o relatório da AP 2 | — | decisão | grupo |
-| [3.1](#31-rodar-a-entrega-inteira-em-linux) | Rodar a entrega inteira em Linux | alta | **verificado no CI** | Fellipe |
-| [3.2](#32-versão-do-python-do-professor) | Versão do Python do professor | média | **verificado (3.10+)** | Fellipe |
-| [3.3](#33-parserpy-da-raiz-e-o-módulo-parser-da-biblioteca-padrão) | `parser.py` vs. módulo `parser` embutido | média | **resolvido** | Fellipe |
-| [3.4](#34-locale-no-script-oficial) | Locale no script oficial | baixa | contornado | Fellipe |
-| [3.5](#35-ap-2-fins-de-linha-dos-gabaritos) | AP 2: fins de linha (CRLF) dos gabaritos | média | mitigado | grupo |
-| [4.1](#41-pacote-de-fixtures-do-scanner-está-incompleto)–[4.2](#42-nosso-scanner-não-produz-o-jsonl-das-fixtures-oficiais) | Material da disciplina em falta | baixa | em aberto | Fellipe |
-| [5](#5-antes-de-entregar-operacional) | Checklist da entrega (inclui o `git push`) | alta | em aberto | Fellipe |
-| [6](#6-revisões-de-código-sugeridas) | Revisões de código sugeridas | baixa | em aberto | Fellipe |
-
-Estado do projeto na última revisão (IR): etapas 1, 2 e 3 implementadas, mais
-a IR de três endereços e o otimizador `-O1` ([`docs/ir.md`](docs/ir.md)), tudo
-testado no CI a cada push. Resultados em
-[`resultados-etapa2.md`](docs/resultados-etapa2.md) e
-[`resultados-etapa3.md`](docs/resultados-etapa3.md); resumo da AP 2 em
-[`entrega-ap2.md`](docs/entrega-ap2.md).
+| [1](#1-antes-de-entregar-a-etapa-4) | Checklist da entrega da etapa 4 | **alta** | em aberto | grupo |
+| [2.1](#21-saída-padrão-do-minic) | `minic programa.c` sem opções dá o relatório da AP 2, e não compila | alta | decisão | grupo |
+| [2.2](#22-alvo-do-back-end-máquina-virtual-de-pilha-própria) | Alvo do back-end: VM de pilha própria | média | decisão | grupo |
+| [2.3](#23-regras-de-execução-que-a-especificação-não-fixa) | Regras de execução que a especificação não fixa | média | decisão | grupo |
+| [2.4](#24-ap-2-pacote-oficial--especificação) | AP 2: pacote oficial × especificação (`main`, `3 = n`, `a = b = 3`) | baixa | decisão | grupo |
+| [2.5](#25-etapa-2-divergências-do-pacote-oficial) | Etapa 2: divergências do pacote oficial (casos 24 e 41, espaços) | baixa | decisão | Fellipe |
+| [3](#3-limitações-conhecidas) | Limitações conhecidas (não são defeitos) | — | registradas | — |
+| [4](#4-material-da-disciplina-em-falta) | Material da disciplina em falta | baixa | em aberto | Fellipe |
+| [5](#5-revisões-de-código-sugeridas) | Revisões de código sugeridas | baixa | em aberto | Fellipe |
+| [6](#6-histórico-o-que-já-foi-resolvido) | Histórico: o que já foi resolvido | — | resolvido | — |
 
 ---
 
-## 1. Bugs confirmados
+## 1. Antes de entregar a etapa 4
 
-### 1.1 O lexer Python aceita identificador fora do ASCII; o C não
-
-> **Resolvido:** `lexer.py` usa `_eh_letra`/`_eh_digito` (ASCII explícito).
-> Caso de regressão: `tests/parser_inputs/erro_identificador_nao_ascii.c`.
-
-**Prioridade: alta** (quebra a equivalência entre as duas implementações, que é
-requisito do projeto) · **Confirmado**
-
-```bash
-printf 'int a\xc3\xa7ao = 1;\n' > /tmp/acento.c
-python parser.py /tmp/acento.c    # Program(VarDecl(int açao=Lit(int,1)))  exit 0
-./parser /tmp/acento.c            # 2 erros léxicos                        exit 2
-```
-
-Causa: [`src/python/lexer.py`](src/python/lexer.py) usa `ch.isalpha()`, que
-em Python é **Unicode** — `"ç".isalpha()` é `True`. O C usa `isalpha()` da
-libc, que em locale C só aceita `[A-Za-z]`. A Seção 3.5 da especificação define
-identificador como `[A-Za-z_][A-Za-z0-9_]*`, então **quem está errado é o
-Python**.
-
-O que fazer: trocar `isalpha()`/`isalnum()` por checagem ASCII explícita em
-`_scan_token` e `_scan_identifier_or_keyword`. Nenhum golden muda (todas as
-entradas de teste são ASCII — conferido).
-
-### 1.2 O lexer Python aceita dígito fora do ASCII
-
-> **Resolvido** junto com o 1.1.
-
-**Prioridade: alta** · **Confirmado** · mesma causa e mesma correção do 1.1
-
-```bash
-printf 'int x = \xd9\xa3;\n' > /tmp/digito.c
-python parser.py /tmp/digito.c    # Program(VarDecl(int x=Lit(int,٣)))  exit 0
-./parser /tmp/digito.c            # 2 erros léxicos                     exit 2
-```
-
-`"٣".isdigit()` é `True` em Python, e `int("٣")` devolve 3 — ou seja, o número
-entra na AST como literal válido. A especificação define inteiro como `[0-9]+`.
-
-### 1.3 Mensagem de erro do C corrompe a saída em byte não-ASCII
-
-> **Resolvido:** o C consome a sequência UTF-8 inteira e a reporta como um
-> erro só (igual ao Python); byte inválido sai como `\xNN` nas duas
-> implementações. O Python lê o arquivo com `errors="surrogateescape"`,
-> então arquivo com UTF-8 inválido também deixou de gerar traceback.
-
-**Prioridade: média** (só ocorre em entrada inválida, mas produz saída
-inválida) · **Confirmado**
-
-No exemplo do 1.1, o C imprime `símbolo "<byte 0xC3>" não reconhecido` com o
-byte cru. Como um byte solto de uma sequência UTF-8 não é UTF-8 válido, quem
-lê a saída em UTF-8 quebra (a nossa própria auditoria quebrou com
-`UnicodeDecodeError` ao ler o stderr do C).
-
-O que fazer: em [`src/c/lexer.c`](src/c/lexer.c), imprimir bytes não
-imprimíveis/não-ASCII na forma `\xNN` em vez do caractere cru.
-
-### 1.4 Expressão muito aninhada: traceback no Python, crash no C
-
-> **Resolvido:** limite de 200 níveis (`LIMITE_ANINHAMENTO`) nos dois parsers,
-> contando atribuições, unários e comandos. Passou do limite, a análise é
-> abortada com um único `Erro de sintaxe ...: aninhamento acima do limite de
-> 200 níveis; encontrado X.` e exit 3. Caso de regressão:
-> `tests/parser_inputs/erro_aninhamento_profundo.c`.
-
-**Prioridade: média** (nenhuma entrada real chega perto disso, mas a falha é
-feia nos dois lados) · **Confirmado**
-
-| Parênteses aninhados | Python | C |
-|---|---|---|
-| 50 | ok (exit 0) | ok (exit 0) |
-| 100 | **traceback + exit 1** | ok |
-| 1000 | traceback + exit 1 | ok |
-| 5000 | traceback + exit 1 | **exit 127 (estouro de pilha)** |
-
-```bash
-python -c "open('/tmp/p.c','w').write('int x = ' + '('*100 + '1' + ')'*100 + ';')"
-python parser.py /tmp/p.c   # RecursionError
-```
-
-Descida recursiva gasta uma moldura de pilha por nível de precedência, então o
-limite do Python (~100 parênteses) é bem mais baixo que o do C (~milhares).
-
-O que fazer: contar profundidade no parser e, ao passar de um limite (o mesmo
-nas duas implementações), emitir um diagnóstico normal —
-`Erro de sintaxe na linha L, coluna C: expressão aninhada demais` — com exit 3,
-em vez de traceback/crash. Assim as duas voltam a concordar.
-
-### 1.5 Contagem de coluna: o C conta bytes, o Python conta caracteres
-
-**Resolvido na etapa 3.** O lexer C passou a contar colunas por caractere
-UTF-8, como o Python, e um literal `'é'` passou a ser um caractere só nas duas
-versões. Com a análise semântica, a diferença aparecia nos diagnósticos
-(`print("ação"); n = 2.5;` apontava a coluna errada no C). O caso
-`tests/semantic_inputs/erro_colunas_apos_utf8.c` cobre isso. Texto original
-abaixo, como registro.
-
-**Prioridade: baixa** · **Confirmado** (consequência dos itens acima)
-
-Em fonte 100% ASCII — todos os testes, todos os casos oficiais — não há
-diferença. Com caractere não-ASCII (que só aparece dentro de literais, ou em
-entrada inválida), as colunas dos tokens seguintes divergem.
-
-O que fazer: decidir e **documentar** qual é a definição oficial do projeto
-("coluna em caracteres" ou "coluna em bytes") e alinhar as duas. Mexer nisso
-sem necessidade é arriscado; talvez só documentar já resolva para a entrega.
+- [ ] **Ler o enunciado da etapa 4 assim que for publicado no Classroom.**
+      Até agora a implementação segue a Seção 15 da especificação e a apostila
+      da aula 19. Se o enunciado pedir um comando de invocação, um formato de
+      saída ou um pacote de testes próprios, ajustar e registrar em
+      [`etapas.md`](docs/etapas.md).
+- [ ] **Confirmar o prazo e a forma de entrega** (link do repositório, PDF,
+      apresentação ao vivo?).
+- [ ] **Juntar o branch da etapa 4 na `main`**, depois do CI verde no PR.
+- [ ] **Revisar o manual e a apresentação**: [`docs/manual.md`](docs/manual.md)
+      e [`docs/apresentacao.md`](docs/apresentacao.md). Os slides estão em
+      Markdown no formato Marp; para exportar em PDF, use a extensão "Marp for
+      VS Code" (*Export Slide Deck*).
+- [ ] **Ensaiar a demonstração** do último slide, com a versão em C compilada
+      na máquina da apresentação.
+- [ ] Opcional: **regravar os benchmarks numa máquina Linux**
+      (`python3 benchmarks/rodar.py --escrever`). As instruções executadas não
+      mudam; só a coluna de tempo e a linha de ambiente.
+- [ ] **Cada integrante clonar do zero e rodar**:
+      ```bash
+      gcc -Wall -Wextra minic.c -o minic
+      ./minic --run -O1 tests/exec_inputs/spec_19_1_fatorial.c     # 120
+      python3 tests/run_backend_tests.py --python
+      ```
+- [ ] **Avisar o professor sobre os scripts do pacote de IR**, se ele os usar:
+      do jeito que vieram, dão 0/30 para qualquer compilador
+      ([`entrega-ir.md`](docs/entrega-ir.md#por-que-não-pelos-scripts-do-pacote)).
+      Uma linha no comentário da entrega basta.
 
 ---
 
-## 2. Decisões tomadas que o grupo precisa revisar
+## 2. Decisões que o grupo precisa confirmar
 
-Nenhuma é erro; todas estão implementadas e documentadas. O que falta é alguém
-do grupo ler e concordar (ou discordar antes de entregar).
+Nenhuma é defeito: todas estão implementadas, documentadas e testadas. Falta
+alguém do grupo ler e concordar, ou discordar antes de entregar.
 
-### 2.1 O caso oficial 24 é comparado contra uma AST corrigida
+### 2.1 Saída padrão do `minic`
 
-O arquivo `ast.esperada.txt` do caso 24 tem um `)` faltando, o que joga o
-`Return` para fora do corpo da função. Nosso runner compara contra a árvore
-corrigida e **diz isso no relatório**. Detalhes em
-[`ref/testes-oficiais/README.md`](ref/testes-oficiais/README.md#defeitos-conhecidos-do-pacote).
+A Seção 11 diz que `minic programa.mc` "compila o programa". Aqui, **sem
+opção, o `minic` imprime o relatório da análise semântica** (o mesmo que
+`--check`), porque é assim que o script da AP 2 o chama e compara a saída com
+o gabarito. Compilar e executar é `--run`, e só gerar o código é
+`--target=asm`.
 
-Revisar: vale avisar o professor do defeito na entrega? (Sugestão: sim, uma
-linha no comentário da atividade.)
+Os scripts do pacote de IR também chamam `minic arquivo.c` sem opções, mas
+mudar a saída padrão não os faria passar: eles comparam o gabarito inteiro,
+com prosa, byte a byte ([`ir.md`](docs/ir.md#os-scripts-oficiais-test_ir_pythonsh--test_ir_csh)).
 
-### 2.2 A comparação de AST normaliza espaços
+Se o enunciado da etapa 4 pedir outra saída padrão, a troca fica no `main()` de
+[`src/python/minic.py`](src/python/minic.py) e de
+[`src/c/minic_main.c`](src/c/minic_main.c): é o valor inicial de `modo`. Os
+testes da AP 2 em `tests/run_semantic_tests.py` e no CI precisariam então
+passar `--check`.
 
-Os arquivos oficiais formatam o mesmo construto de dois jeitos diferentes, então
-nenhum impressor determinístico casa com todos. Escolhemos a regra que casa
-exatamente com 16 dos 25 e comparamos o resto ignorando espaço em branco fora
-de lexemas. Ver [`ast.md`](docs/ast.md#por-que-não-dá-para-comparar-byte-a-byte).
+### 2.2 Alvo do back-end: máquina virtual de pilha própria
 
-Revisar: o script oficial vai mostrar **16 aprovados / 34 reprovados**, e isso
-precisa estar claro para quem corrigir — está explicado em
-[`resultados-etapa2.md`](docs/resultados-etapa2.md#scripts-oficiais-da-disciplina),
-mas talvez valha repetir no comentário da entrega.
+A Seção 10 aceita assembly de pilha, x86-64, LLVM IR ou "código para uma
+máquina virtual própria", desde que a escolha seja registrada e mantida
+estável. A escolha foi a **VM de pilha própria** (MVM). Os motivos estão em
+[`backend.md`](docs/backend.md#escolha-do-alvo):
 
-### 2.3 Três pontos em que seguimos os casos oficiais, não a gramática do PDF
+- é o modelo da aula 17;
+- roda igual nas duas linguagens e em qualquer sistema;
+- os testes conferem a saída do programa compilado, e não só o texto gerado.
 
-Comandos soltos no topo do arquivo, vetor em declaração global e `main` não
-exigida pelo parser. Registrados em
-[`gramatica.md`](docs/gramatica.md#divergências-entre-a-especificação-e-os-casos-oficiais).
+Revisar: o grupo concorda em registrar essa escolha como definitiva? Trocar
+de alvo depois exigiria refazer `geracao.*` e `vm.*`, mas não o resto.
 
-### 2.4 Caso 41: nossa mensagem difere da pista do pacote
+### 2.3 Regras de execução que a especificação não fixa
 
-Em `a[1 = 2;` apontamos o `=` ("lado esquerdo da atribuição não é atribuível");
-a pista do pacote esperava `FECHA_COLCHETE`. A gramática permite atribuição
-dentro do índice, então o primeiro problema real é mesmo o alvo inválido. O
-caso é rejeitado nas duas implementações, com posição exata.
+A especificação não diz o que acontece em vários pontos da execução. O
+back-end decidiu assim, e as duas implementações seguem as mesmas regras
+([`backend.md`](docs/backend.md#semântica-de-execução)):
 
-### 2.5 AP 2: pontos em que o pacote oficial prevaleceu sobre a especificação
+| Ponto | Decisão |
+|---|---|
+| tamanho do `int` | 32 bits, com transbordamento em complemento de dois (como o C na prática) |
+| `INT_MIN / -1` | dá `INT_MIN` (em C é comportamento indefinido) |
+| variável não inicializada | vale zero (`0`, `0.0`, `false`, caractere nulo) |
+| `print` de float | menor número de dígitos que representa o valor, com `.0` se for inteiro |
+| `read` | itens separados por espaço; `int` precisa caber em 32 bits |
+| profundidade de recursão | até 10 000 chamadas aninhadas; passou disso, erro de execução (código 6) |
+| programa sem `main` | aceito pela semântica (como na AP 2), mas não pode ser executado: código 5 |
+
+### 2.4 AP 2: pacote oficial × especificação
 
 Três decisões da etapa 3 seguem os testes oficiais da AP 2 e não o texto da
-especificação. Estão documentadas e testadas, mas vale o grupo concordar:
+especificação ([`semantica.md`](docs/semantica.md#decisões-de-projeto)):
 
-- **`main` não é exigida.** A Seção 2 da especificação diz que todo programa
-  tem exatamente uma `main`, mas os 10 programas válidos da AP 2 usam
-  `principal` e o gabarito os aceita. Se uma etapa futura exigir `main`, a
-  regra cabe na passagem A do analisador (`_coletar_globais`).
-- **`3 = n;` é erro semântico (SEM013), não sintático.** Só no pipeline
-  semântico (`minic`): o parser da etapa 2 (`parser.py`/`parser.c`) continua
-  rejeitando como antes.
-- **`a = b = 3` tem valor** (o tipo do destino), por causa do caso oficial 09,
-  embora a apostila diga que a atribuição "não produz valor no núcleo MINIC".
+- **`main` não é exigida pela semântica**: os 10 programas válidos da AP 2 usam
+  `principal`. Para executar, `main` é exigida (item 2.3).
+- **`3 = n;` é erro semântico (SEM013)**, e não sintático, no `minic`; o parser
+  da etapa 2 continua rejeitando como antes.
+- **`a = b = 3` tem valor** (o tipo do destino), por causa do caso oficial 09.
 
-Detalhes em [`docs/semantica.md`](docs/semantica.md#decisões-de-projeto).
+### 2.5 Etapa 2: divergências do pacote oficial
 
-### 2.6 IR: saída padrão do `minic` e os scripts oficiais da IR
-
-Os scripts do pacote de IR (`ref/scripts/test_ir_*.sh`) chamam
-`minic arquivo.c` **sem opções**. O script da AP 2 chama do mesmo jeito e espera
-o relatório da análise semântica. Os dois contratos não cabem na mesma saída
-padrão, e a decisão foi:
-
-- `minic arquivo.c` continua imprimindo o relatório da AP 2 (já entregue e
-  coberto pelo CI);
-- a IR sai com as opções da Seção 11 da especificação: `--ir`, `-O0`, `-O1`.
-
-Na prática, isso não muda o resultado dos scripts da IR. Eles comparam o
-gabarito inteiro byte a byte, com prosa e com as duas IR dos casos de
-otimização, e por isso dão 0/30 para qualquer saída. Com o `IGNORE_RE`
-personalizado e `--ir`, o teto é 17/30
-([`docs/ir.md`](docs/ir.md#os-scripts-oficiais-test_ir_pythonsh--test_ir_csh)).
-Se o professor indicar que a IR deve ser a saída padrão, a troca fica em
-`main()` de `src/python/minic.py` e `src/c/minic_main.c`: as linhas que leem
-`--ir`.
+- O caso oficial 24 é comparado contra uma AST corrigida: o gabarito tem um `)`
+  faltando ([`ref/testes-oficiais/README.md`](ref/testes-oficiais/README.md#defeitos-conhecidos-do-pacote)).
+- A comparação de AST normaliza espaços, porque o pacote formata o mesmo
+  construto de dois jeitos ([`ast.md`](docs/ast.md#por-que-não-dá-para-comparar-byte-a-byte)).
+- Três pontos seguem os casos oficiais e não a gramática do PDF: comandos
+  soltos no topo, vetor em declaração global e `main` não exigida
+  ([`gramatica.md`](docs/gramatica.md#divergências-entre-a-especificação-e-os-casos-oficiais)).
+- No caso 41 (`a[1 = 2;`), nossa mensagem aponta o `=`, e não o
+  `FECHA_COLCHETE` da pista do pacote. A gramática permite atribuição dentro
+  do índice, então o primeiro problema real é o alvo inválido.
 
 ---
 
-## 3. Riscos de ambiente
+## 3. Limitações conhecidas
 
-O desenvolvimento é em **Windows 11, Python 3.14**. Desde a etapa 3, o CI do
-GitHub ([`.github/workflows/testes.yml`](.github/workflows/testes.yml)) roda
-tudo em Linux a cada push: Ubuntu 22.04 com gcc 11 e Python 3.10, e Ubuntu
-24.04 com gcc 13, clang 18 e Python 3.12.
+Não são defeitos: são escolhas de escopo, documentadas, que uma versão futura
+poderia melhorar.
 
-### 3.1 Rodar a entrega inteira em Linux
-
-> **Verificado no CI:** o workflow faz exatamente isso a cada push (checkout
-> limpo, compilação e todos os scripts oficiais), nos dois ambientes acima. O
-> bit de execução, os fins de linha LF e a compilação sem aviso estão
-> conferidos ali. Texto original abaixo, como registro.
-
-**Prioridade: alta** · **Não verificado**
-
-Antes de entregar, alguém do grupo com Linux (ou WSL) deveria clonar do zero e
-rodar:
-
-```bash
-python3 parser.py ref/testes-oficiais/testes-parser-50/casos/09_if_com_else/codigo.c
-gcc -Wall -Wextra -std=c11 parser.c -o parser && ./parser <mesmo arquivo>
-python3 tests/run_parser_tests.py
-bash ref/scripts/testar_parser_python.sh ref/testes-oficiais/testes-parser-50 ./parser.py
-bash ref/scripts/testar_parser_c.sh      ref/testes-oficiais/testes-parser-50 ./parser.c
-```
-
-Pontos específicos para conferir nesse teste:
-
-- o bit de execução de `parser.py` sobreviveu ao clone (está gravado no git
-  como `100755`; o script oficial exige `-x`);
-- os finais de linha dos `.sh` vieram como LF (o `.gitattributes` força, mas
-  vale confirmar);
-- o `gcc` do Linux compila `parser.c` sem aviso (aqui compila limpo com
-  `-Wall -Wextra`).
-
-### 3.2 Versão do Python do professor
-
-> **Verificado:** o CI roda tudo em Python 3.10 e 3.12. E a avaliação da etapa
-> 2 mostra que o parser Python executou na máquina do professor (41/50), o que
-> só é possível em 3.10 ou mais novo, pela sintaxe `str | None`.
-
-**Prioridade: média** · **Não verificado**
-
-O código usa sintaxe de anotação `str | None`, que **exige Python 3.10+**. Em
-3.9 ou anterior, o parser Python nem carrega. O README já declara "Python
-3.10+", mas se houver risco de o professor usar 3.8/3.9, a correção é barata:
-acrescentar `from __future__ import annotations` no topo de
-`src/python/parser.py`, `minic_ast.py` e `tests/run_parser_tests.py`.
-
-### 3.3 `parser.py` da raiz e o módulo `parser` da biblioteca padrão
-
-> **Resolvido:** o `parser.py` da raiz carrega `src/python/parser.py` com
-> `importlib.util.spec_from_file_location`, e `src/python/parser.py` põe o
-> próprio diretório no `sys.path` antes de importar `lexer`/`minic_ast`.
-
-**Prioridade: média** · **Não verificado**
-
-O atalho da raiz faz `from parser import main` depois de pôr `src/python/` na
-frente do `sys.path`. Em Python ≤ 3.9 existia um módulo embutido chamado
-`parser`, e módulos embutidos têm prioridade sobre o `sys.path` — o import
-poderia pegar o módulo errado. Em 3.10+ (o nosso caso) esse módulo não existe
-mais, então hoje funciona.
-
-Correção defensiva: carregar o arquivo por caminho com
-`importlib.util.spec_from_file_location`, que não depende de nome de módulo.
-
-### 3.4 Locale no script oficial
-
-**Prioridade: baixa** · **Confirmado e contornado**
-
-O `grep` do script do professor procura por "sintático"; em locale `C` o "á"
-não casa e o contador "Erros sintáticos" aparece como **0** mesmo com os 25
-casos sendo detectados. Os wrappers em `src/` já exportam `LC_ALL=C.UTF-8`, e o
-README mostra a chamada direta com o locale.
-
-Se o professor rodar sem isso e vier 0, é este efeito — vale mencionar na
-entrega.
-
-### 3.5 AP 2: fins de linha dos gabaritos
-
-**Prioridade: média** · **Mitigado**
-
-Os `.gabarito` da AP 2 separam as linhas com **CRLF** e não terminam com quebra
-de linha, e o script oficial compara com `diff` exato. A nossa saída reproduz
-esses bytes, e o pacote está marcado como `-text` no `.gitattributes` para o
-git não convertê-lo.
-
-O risco que sobra está fora do repositório: se a cópia do pacote usada na
-correção tiver passado por uma conversão de fim de linha (por exemplo, editada
-num editor que salva LF), os 10 casos de rejeição deixariam de casar, nas duas
-implementações e em qualquer entrega. Os 10 de aceitação têm uma linha só e
-não são afetados. Não há como atender aos dois formatos com `diff` exato;
-seguimos o arquivo distribuído. Se acontecer, a explicação está em
-[`ref/testes-oficiais/README.md`](ref/testes-oficiais/README.md#testes-semanticos-20--etapa-3-análise-semântica).
+| Limitação | Efeito | Onde está documentada |
+|---|---|---|
+| Tradução direta da IR para a pilha, sem *peephole* | cada temporário vira `STORE` + `LOAD` | [`backend.md`](docs/backend.md#limitações) |
+| Subexpressões comuns só dentro do bloco básico | repetições entre blocos não são aproveitadas | [`ir.md`](docs/ir.md#limitações) |
+| Sem reassociação (`a + 20 + 28 - 28`) | contas com constantes no meio de variáveis ficam | [`benchmarks.md`](docs/benchmarks.md#leitura) |
+| Código invariante só move temporários | `x = a * b` dentro do laço, com `x` do usuário, fica | [`ir.md`](docs/ir.md#limitações) |
+| Sem *inlining* nem recursão de cauda | chamadas custam o mesmo em `-O0` e `-O1` | [`benchmarks.md`](docs/benchmarks.md#o-que-ainda-limitaria-o-ganho) |
+| VM interpretada, sem código nativo | é o que a Seção 10 permite com "VM própria" | [`backend.md`](docs/backend.md#limitações) |
+| Interpretador de testes (`tests/ir_interp.py`) sem limites de vetor | o oráculo ignora programas com acesso fora do vetor; esse erro é testado à parte | [`tests/README.md`](tests/README.md#suíte-do-back-end-geração-de-código-e-execução) |
 
 ---
 
@@ -338,66 +174,66 @@ seguimos o arquivo distribuído. Se acontecer, a explicação está em
 
 ### 4.1 Pacote de fixtures do scanner está incompleto
 
-**Prioridade: baixa** (não afeta a entrega da etapa 2)
-
 O `MANIFESTO.md` de
 [`ref/testes-oficiais/testes-scanner-minic/`](ref/testes-oficiais/testes-scanner-minic/)
 lista sete casos válidos (`v01`–`v07`) e um oitavo inválido (`i07`) que **não
-vieram no download**; o `i06` veio sem o `.minic`. Para completar, é preciso
-rebaixar o pacote no Classroom ou pedir ao professor.
+vieram no download**, e o `i06` veio sem o `.minic`. Para completar, é
+preciso baixar o pacote de novo no Classroom ou pedir ao professor. Não afeta
+nenhuma entrega.
 
 ### 4.2 Nosso scanner não produz o JSONL das fixtures oficiais
 
-**Prioridade: baixa**
-
-A etapa 1 foi entregue com a notação do material de aula (`<TOKEN, lexema>`), e
-as fixtures oficiais usam JSONL com outros nomes de token. Se um dia for
-preciso rodá-las, o caminho é um modo `--jsonl` no `main.py`/`main.c` com um
-mapa de nomes — sem tocar nas regras léxicas. Tabela das diferenças em
-[`ref/testes-oficiais/README.md`](ref/testes-oficiais/README.md#divergências-entre-estas-fixtures-e-o-nosso-scanner).
+A etapa 1 foi entregue com a notação do material de aula (`<TOKEN, lexema>`),
+e as fixtures oficiais usam JSONL com outros nomes de token. Se um dia for
+preciso rodá-las, o caminho é um modo `--jsonl` com um mapa de nomes, sem
+tocar nas regras léxicas
+([diferenças](ref/testes-oficiais/README.md#divergências-entre-estas-fixtures-e-o-nosso-scanner)).
 
 ---
 
-## 5. Antes de entregar (operacional)
-
-Etapa 2 (AP 1):
-
-- [x] **`git push`** — tudo está no GitHub, e o CI roda a cada push.
-- [x] Repositório público no GitHub (conferido em 10/10/2026).
-- [x] Itens 1.1–1.5 corrigidos antes da entrega.
-- [ ] **Confirmar a data e a forma de entrega no Classroom.** O print que temos
-      (17/09/2026) diz "Data de entrega: Amanhã, 23:59", ou seja 18/09/2026 —
-      conferir se não mudou, e se a entrega é o link do repositório.
-- [ ] Conferir nomes e RAs do grupo no [README](README.md) e em
-      [`etapas.md`](docs/etapas.md).
-
-Etapa 3 (AP 2 — analisador semântico):
-
-- [x] Bateria completa verde em 10/10/2026 (registro em
-      [`resultados-etapa3.md`](docs/resultados-etapa3.md#última-execução-completa)):
-      scripts oficiais 20/20 em Python e em C, suíte 184/184, teste diferencial
-      900/900, sanitizers e compiladores sem aviso.
-- [ ] **Entregar no Classroom** o link do repositório, indicando a página de
-      entrega [`docs/entrega-ap2.md`](docs/entrega-ap2.md).
-- [ ] O grupo concordar com as decisões do item [2.5](#25-ap-2-pontos-em-que-o-pacote-oficial-prevaleceu-sobre-a-especificação)
-      (`main` não exigida, `3 = n;` como SEM013, atribuição com valor).
-- [ ] Cada integrante clonar do zero e rodar os dois comandos do enunciado
-      (ver [`entrega-ap2.md`](docs/entrega-ap2.md#como-rodar-comandos-do-enunciado)).
-
----
-
-## 6. Revisões de código sugeridas
+## 5. Revisões de código sugeridas
 
 Nada quebrado, mas vale um olhar:
 
+- **Formato do float duplicado.** `formatar_float` existe em
+  [`src/python/vm.py`](src/python/vm.py) e em
+  [`tests/ir_interp.py`](tests/ir_interp.py), de propósito: o interpretador de
+  testes não importa o compilador, para continuar sendo um oráculo
+  independente. Se o formato mudar, os dois têm de mudar juntos, e o
+  `run_backend_tests.py` acusa a diferença.
 - **`ast_free()` em [`src/c/ast.c`](src/c/ast.c) não é usada por ninguém.** O
-  parser é dono dos nós e libera com `ast_free_node()` (raso). Manter a função
-  recursiva como API pública ou remover? Se ficar, vale um teste que a exercite.
-- **Cobertura de `Print`/`Read`/`For` na versão C**: os casos próprios cobrem,
-  mas só com um exemplo de cada. Vale mais um caso com `for` aninhado e `read`
-  em vetor multidimensional (que deve ser erro semântico, não sintático).
-- **Nenhum teste roda o parser sobre os programas de referência da Seção 19 da
-  especificação** (fatorial recursivo e entrada/vetor/repetição). São dois
-  programas prontos no PDF — bons candidatos a casos próprios da etapa 3.
-- **`tests/run_parser_tests.py` não tem um modo "só um caso"** (`--caso 24`),
-  o que ajudaria a depurar sem rolar 50 linhas de saída.
+  parser libera os nós com `ast_free_node()` (raso). Manter como API pública ou
+  remover?
+- **O passe de laços recalcula tudo a cada transformação** (blocos,
+  dominadores, laços). É quadrático no tamanho da função, o que é irrelevante
+  nos programas da disciplina, mas seria o primeiro ponto a otimizar para
+  entradas grandes.
+- **Os runners não têm um modo "só um caso"** (`--caso 24`), o que ajudaria a
+  depurar sem rolar a saída inteira.
+
+---
+
+## 6. Histórico: o que já foi resolvido
+
+Registro curto. Os detalhes de cada item estão no histórico do git deste
+arquivo.
+
+| Item | Problema | Resolução |
+|---|---|---|
+| Léxico 1 | Python aceitava letra e dígito fora do ASCII; o C não | checagem ASCII explícita no `lexer.py`; casos de regressão em `tests/parser_inputs/` |
+| Léxico 2 | mensagem do C com byte cru quebrava a saída UTF-8 | byte inválido sai como `\xNN` nas duas versões |
+| Léxico 3 | coluna em bytes no C, em caracteres no Python | o C passou a contar caracteres UTF-8 (etapa 3) |
+| Parser | expressão muito aninhada: traceback no Python, *crash* no C | limite de 200 níveis, com diagnóstico normal e código 3 |
+| Ambiente 1 | rodar a entrega em Linux | o CI faz isso a cada push (Ubuntu 22.04 e 24.04) |
+| Ambiente 2 | versão do Python do professor | o CI testa 3.10 e 3.12; o código exige 3.10+ |
+| Ambiente 3 | `parser.py` da raiz × módulo `parser` embutido | carregamento por caminho (`importlib`) |
+| Ambiente 4 | `grep` do script oficial em locale C | mensagem "Erro de sintaxe" em ASCII |
+| Ambiente 5 | CRLF nos gabaritos da AP 2 | pacote marcado como `-text`; saída reproduz os bytes |
+| IR | tipo do `read` em vetor se perdia na renumeração do `-O1` | a renumeração leva junto o tipo de cada temporário |
+
+Checklists das entregas anteriores:
+
+- **AP 1 (etapa 2):** repositório público, `git push` e correções feitas.
+- **AP 2 (etapa 3):** bateria completa verde em 10/10/2026
+  ([`resultados-etapa3.md`](docs/resultados-etapa3.md#última-execução-completa)).
+- **Testes da IR:** PR #3 juntado na `main` em 24/10/2026, com o CI verde.

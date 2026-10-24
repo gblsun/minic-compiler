@@ -20,7 +20,16 @@ arquivo .mc / .c
   semântica ─► AST anotada + tabela de símbolos                                    [etapa 3 ✅]
       │
       ▼
-  IR (3AC) ──► otimizador ──► gerador de código                                    [IR e -O1 ✅; código: etapa 4]
+  IR (3AC) ──► IR de três endereços                                               [etapa 3 ✅]
+      │
+      ▼
+  otimizador ─► IR otimizada (-O1)                                                  [etapa 4 ✅]
+      │
+      ▼
+  gerador ───► código da máquina de pilha (MVM)                                     [etapa 4 ✅]
+      │
+      ▼
+  máquina virtual ─► execução do programa                                           [etapa 4 ✅]
 ```
 
 Cada etapa tem um componente, uma responsabilidade e **uma saída principal**
@@ -33,7 +42,7 @@ Cada etapa tem um componente, uma responsabilidade e **uma saída principal**
 | Analisador semântico | verificar nomes, escopos, tipos e regras contextuais | AST anotada ou diagnósticos |
 | Gerador de IR | traduzir a AST para código de três endereços | IR estruturada |
 | Otimizador | aplicar transformações corretas à IR | IR otimizada |
-| Gerador de código | produzir código de destino executável | assembly, LLVM IR ou VM |
+| Gerador de código | produzir código de destino executável | código da máquina virtual de pilha (MVM), executado pela VM do próprio compilador ([backend.md](backend.md)) |
 
 Ver [`etapas.md`](etapas.md) para o status e os prazos de cada etapa.
 
@@ -93,16 +102,27 @@ A especificação (Seção 11) descreve uma CLI única para o compilador complet
 | `minic --target=asm programa.mc` | gera assembly |
 | `minic -O0` / `-O1 programa.mc` | desativa/ativa otimizações |
 
-**Este repositório não implementa essa CLI unificada**, e por um motivo
-concreto: cada atividade da disciplina define seus próprios comandos de
-invocação, e é por eles que a entrega é avaliada.
+O `minic` (`minic.py` e `minic.c` na raiz) **implementa todos esses modos**,
+mais `--run`, que gera o código e o executa na máquina virtual, e `--stats`,
+que informa quantas instruções ela executou. Referência de uso:
+[manual.md](manual.md#4-a-linha-de-comando).
+
+Uma diferença em relação à tabela: **sem opção, `minic programa.c` imprime o
+relatório da análise semântica** (o mesmo que `--check`), e não compila. É o
+contrato da AP 2, cujo script chama o `minic` sem opções e compara a saída
+com o gabarito. Compilar e executar é `--run`, e só gerar o código é
+`--target=asm`.
+
+Cada atividade da disciplina define também seus próprios comandos, e é por
+eles que cada entrega foi avaliada:
 
 | Etapa | Comando exigido pela atividade | O que existe aqui |
 |---|---|---|
-| 1 — scanner | `python scanner.py arquivo.c` / `./scanner arquivo.c` | `python src/python/main.py arquivo.mc` e `src/c/scanner arquivo.mc` |
-| 2 — parser | `python parser.py codigo.c` / `./parser codigo.c` | `parser.py` e `parser.c` na raiz, atendendo aos comandos exatos |
+| 1 — scanner | `python scanner.py arquivo.c` / `./scanner arquivo.c` | `python src/python/main.py arquivo.mc` e `src/c/scanner arquivo.mc` (e `minic --tokens`) |
+| 2 — parser | `python parser.py codigo.c` / `./parser codigo.c` | `parser.py` e `parser.c` na raiz, atendendo aos comandos exatos (e `minic --ast`) |
 | 3 — semântica | `python minic.py codigo.c` / `./minic codigo.c` | `minic.py` e `minic.c` na raiz; sem opções, imprimem o relatório da AP 2 |
-| IR / -O1 | (o pacote de testes chama `minic arquivo.c`) | as opções `--ir`, `-O0` e `-O1` da Seção 11 no mesmo `minic`; ver [`ir.md`](ir.md) |
+| IR / -O1 | (o pacote de testes chama `minic arquivo.c`) | `minic --ir [-O0\|-O1]`; ver [`ir.md`](ir.md) |
+| 4 — código | (atividade ainda não aberta) | `minic --target=asm` e `minic --run`; ver [`backend.md`](backend.md) |
 
 A etapa 2 exige um ponto de entrada chamado literalmente `parser.py` (e um
 executável `parser`), e é por isso que existem [`parser.py`](../parser.py) e
@@ -117,11 +137,11 @@ professor compila. Nenhum dos dois duplica lógica.
 |---|---|---|
 | 0 | sucesso | todas as etapas |
 | 1 | uso inválido da ferramenta | argumento faltando, arquivo ilegível |
-| 2 | erro léxico | etapa 1 ✅ |
+| 2 | erro léxico | etapa 1 |
 | 3 | erro sintático | etapa 2 |
 | 4 | erro semântico | etapa 3 |
-| 5 | erro na geração de código | etapa 4 |
-| 6 | erro durante execução | etapa 4 |
+| 5 | erro na geração de código (programa sem `main`) | etapa 4 (`--target=asm`, `--run`) |
+| 6 | erro durante a execução (divisão por zero, índice fora do vetor, recursão sem fim, entrada inválida) | etapa 4 (`--run`) |
 
 O runner de testes compara o código de saída junto com stdout e stderr — ver
 [`tests/README.md`](../tests/README.md).
