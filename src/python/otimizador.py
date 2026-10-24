@@ -26,6 +26,13 @@ deles ainda mudar alguma coisa:
 5. **Eliminação de código morto global** (`_mortos`): análise *backward* de
    variáveis vivas (*live variables*); uma atribuição a uma variável local ou
    temporário que não é lida em nenhum caminho adiante é removida.
+6. **Laços** (`_lacos`, aula 19): dominadores, arestas de retorno e laços
+   naturais. Em cada laço com pré-cabeçalho possível, primeiro move para fora
+   o **código invariante** (temporário cujos operandos não mudam no laço e
+   cuja operação não pode falhar — nada de divisão por valor desconhecido,
+   que, movida, poderia falhar num laço que roda zero vezes); depois faz
+   **redução de força**: `t = i * k`, com `i` variável de indução básica
+   (`i = i ± c`), vira uma soma incremental `s = s + k*c`.
 
 No fim, os temporários são renumerados em ordem de aparição (`t1`, `t2`, ...).
 
@@ -490,6 +497,223 @@ def _mortos(funcao, globais: set) -> bool:
     return removeu
 
 
+# -- 6. laços: código invariante e redução de força (aula 19) -----------------------------------------
+
+
+def _dominadores(blocos, predecessores):
+    """dom[b]: blocos que dominam b (None se b não é alcançável da entrada)."""
+    n = len(blocos)
+    alcancaveis = {0} if n else set()
+    pilha = [0] if n else []
+    sucessores = [[] for _ in range(n)]
+    for b in range(n):
+        for p in predecessores[b]:
+            sucessores[p].append(b)
+    while pilha:
+        for s in sucessores[pilha.pop()]:
+            if s not in alcancaveis:
+                alcancaveis.add(s)
+                pilha.append(s)
+    dom = [None] * n
+    for b in alcancaveis:
+        dom[b] = {0} if b == 0 else set(alcancaveis)
+    mudou = True
+    while mudou:
+        mudou = False
+        for b in range(1, n):
+            if dom[b] is None:
+                continue
+            novo = None
+            for p in predecessores[b]:
+                if dom[p] is not None:
+                    novo = set(dom[p]) if novo is None else novo & dom[p]
+            novo = (novo or set()) | {b}
+            if novo != dom[b]:
+                dom[b] = novo
+                mudou = True
+    return dom
+
+
+def _lacos_naturais(blocos, sucessores, predecessores, dom):
+    """[(cabeçalho, corpo)] — um laço natural por cabeçalho, em ordem de bloco.
+
+    Aresta de retorno é b → h com h dominando b; o corpo é h mais todo bloco
+    que chega a b sem passar por h. Arestas de retorno para o mesmo cabeçalho
+    formam um laço só.
+    """
+    corpos = {}
+    for b in range(len(blocos)):
+        if dom[b] is None:
+            continue
+        for h in sucessores[b]:
+            if h in dom[b]:
+                corpo = corpos.setdefault(h, {h})
+                pilha = [b]
+                while pilha:
+                    x = pilha.pop()
+                    if x not in corpo:
+                        corpo.add(x)
+                        pilha.extend(predecessores[x])
+    return sorted(corpos.items())
+
+
+def _divisor_seguro(operando) -> bool:
+    """Divisor que nunca causa erro: literal numérico diferente de zero."""
+    if operando is None or not eh_literal(operando) or operando[0] in "'\"":
+        return False
+    if operando in ("true", "false"):
+        return False
+    return float(operando) != 0
+
+
+def _definicoes(instrs, indices) -> dict:
+    contagem = {}
+    for i in indices:
+        destino = _definido(instrs[i])
+        if destino is not None:
+            contagem[destino] = contagem.get(destino, 0) + 1
+    return contagem
+
+
+def _novo_temporario(instrs) -> str:
+    """Um temporário que ainda não existe na função (o maior + 1)."""
+    maior = 0
+    for ins in instrs:
+        campos = ("dst",) if ins.kind == "call" else ("dst", "a", "b", "c")
+        for campo in campos:
+            valor = getattr(ins, campo)
+            if valor is not None and TEMPORARIO.fullmatch(valor):
+                maior = max(maior, int(valor[1:]))
+    return f"t{maior + 1}"
+
+
+def _transformar_laco(funcao, blocos, predecessores, h, corpo, globais) -> bool:
+    instrs = funcao.instrs
+    inicio_h = blocos[h][0]
+    rotulo_h = instrs[inicio_h].label if instrs[inicio_h].kind == "label" else None
+
+    # Pré-cabeçalho: o código novo vai logo antes do cabeçalho, e só é seguro
+    # se a única entrada no laço vinda de fora for a queda do bloco anterior.
+    externos = [p for p in predecessores[h] if p not in corpo]
+    if h == 0:
+        if externos:
+            return False
+    else:
+        if externos != [h - 1]:
+            return False
+        anterior = instrs[blocos[h - 1][1] - 1]
+        if anterior.kind in ("goto", "iff", "ift") and anterior.label == rotulo_h:
+            return False
+
+    indices = sorted(i for b in corpo for i in range(*blocos[b]))
+    no_laco = _definicoes(instrs, indices)
+    na_funcao = _definicoes(instrs, range(len(instrs)))
+    tem_chamada = any(instrs[i].kind == "call" for i in indices)
+
+    def fora_do_laco(nome) -> bool:
+        return no_laco.get(nome, 0) == 0 and not (tem_chamada and nome in globais)
+
+    # (a) Código invariante: temporário definido uma vez só, sem efeito e sem
+    # erro possível, cujos operandos não mudam dentro do laço.
+    invariantes, mover = set(), []
+    for i in indices:
+        ins = instrs[i]
+        if ins.kind not in ("bin", "un"):
+            continue
+        if not TEMPORARIO.fullmatch(ins.dst) or na_funcao.get(ins.dst) != 1:
+            continue
+        if ins.kind == "bin" and ins.op in ("/", "%") and not _divisor_seguro(ins.b):
+            continue
+        operandos = [ins.a] if ins.kind == "un" else [ins.a, ins.b]
+        if all(eh_literal(x) or x in invariantes or fora_do_laco(x) for x in operandos):
+            mover.append(i)
+            invariantes.add(ins.dst)
+    if mover:
+        movidas = [instrs[i] for i in mover]
+        resto = [ins for j, ins in enumerate(instrs) if j not in set(mover)]
+        posicao = inicio_h - sum(1 for i in mover if i < inicio_h)
+        funcao.instrs = resto[:posicao] + movidas + resto[posicao:]
+        return True
+
+    # (b) Redução de força: `t = i * k`, com `i` variável de indução básica
+    # (uma única definição no laço, `i = i ± c`), vira `t = s`, com
+    # `s = i * k` no pré-cabeçalho e `s = s + k*c` logo depois de cada passo.
+    for di in indices:
+        d = instrs[di]
+        i_var = _definido(d)
+        if (
+            i_var is None
+            or TEMPORARIO.fullmatch(i_var)
+            or i_var in globais
+            or no_laco.get(i_var) != 1
+        ):
+            continue
+        passo = _passo_de_inducao(instrs, indices, d, i_var, na_funcao)
+        if passo is None:
+            continue
+        for mi in indices:
+            m = instrs[mi]
+            if m.kind != "bin" or m.op != "*" or m is d:
+                continue
+            if not TEMPORARIO.fullmatch(m.dst) or na_funcao.get(m.dst) != 1:
+                continue
+            if m.a == i_var and _inteiro(m.b) is not None:
+                k = _inteiro(m.b)
+            elif m.b == i_var and _inteiro(m.a) is not None:
+                k = _inteiro(m.a)
+            else:
+                continue
+            s = _novo_temporario(instrs)
+            instrs[mi] = Instr("copy", dst=m.dst, a=s)
+            atualizacao = Instr("bin", dst=s, a=s, op="+", b=str(_int32(k * passo)))
+            inicial = Instr("bin", dst=s, a=i_var, op="*", b=str(k))
+            novas = instrs[: di + 1] + [atualizacao] + instrs[di + 1 :]
+            posicao = inicio_h + (1 if di < inicio_h else 0)
+            funcao.instrs = novas[:posicao] + [inicial] + novas[posicao:]
+            return True
+    return False
+
+
+def _passo_de_inducao(instrs, indices, d, i_var, na_funcao):
+    """Passo `c` se `d` é `i = i ± c` (direto ou via `u = i ± c; i = u`), senão None."""
+    if d.kind == "bin":
+        conta = d
+    elif d.kind == "copy" and TEMPORARIO.fullmatch(d.a) and na_funcao.get(d.a) == 1:
+        conta = next((instrs[j] for j in indices if _definido(instrs[j]) == d.a), None)
+        if conta is None or conta.kind != "bin":
+            return None
+    else:
+        return None
+    if conta.op == "+":
+        if conta.a == i_var and _inteiro(conta.b) is not None:
+            return _inteiro(conta.b)
+        if conta.b == i_var and _inteiro(conta.a) is not None:
+            return _inteiro(conta.a)
+    if conta.op == "-" and conta.a == i_var and _inteiro(conta.b) is not None:
+        return -_inteiro(conta.b)
+    return None
+
+
+# Teto de transformações de laço por chamada (cada uma recalcula os blocos).
+MAX_LACOS = 100
+
+
+def _lacos(funcao, globais: set) -> bool:
+    mudou = False
+    for _ in range(MAX_LACOS):
+        blocos, sucessores, predecessores = _blocos(funcao.instrs)
+        dom = _dominadores(blocos, predecessores)
+        transformou = False
+        for h, corpo in _lacos_naturais(blocos, sucessores, predecessores, dom):
+            if _transformar_laco(funcao, blocos, predecessores, h, corpo, globais):
+                transformou = True
+                break
+        if not transformou:
+            break
+        mudou = True
+    return mudou
+
+
 # -- pipeline --------------------------------------------------------------------------------------
 
 
@@ -505,6 +729,13 @@ def _renumerar(funcao):
                 if valor not in novos:
                     novos[valor] = f"t{len(novos) + 1}"
                 setattr(ins, campo, novos[valor])
+    # O tipo guardado para o destino de um `read` acompanha o novo nome; o de
+    # um temporário que sumiu é descartado (o nome pode ter passado a outro).
+    funcao.tipos = {
+        novos.get(nome, nome): tipo
+        for nome, tipo in funcao.tipos.items()
+        if not TEMPORARIO.fullmatch(nome) or nome in novos
+    }
 
 
 # Teto de rodadas: cada rodada só encolhe ou simplifica a IR, então o ponto fixo
@@ -522,6 +753,7 @@ def otimizar(programa):
             mudou |= _cse(funcao, globais)
             mudou |= _limpar(funcao)
             mudou |= _mortos(funcao, globais)
+            mudou |= _lacos(funcao, globais)
             if not mudou:
                 break
         _renumerar(funcao)

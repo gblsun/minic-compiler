@@ -103,9 +103,12 @@ void ir_programa_free(IrPrograma *programa) {
     for (size_t i = 0; i < programa->nfuncoes; i++) {
         free(programa->funcoes[i].params);
         free(programa->funcoes[i].instrs);
+        free(programa->funcoes[i].simbolos);
+        free(programa->funcoes[i].tipos);
     }
     free(programa->funcoes);
     free(programa->globais);
+    free(programa->simbolos);
     for (size_t i = 0; i < programa->pool.cap; i++) {
         free(programa->pool.slots[i]);
     }
@@ -142,6 +145,24 @@ int ir_eh_temporario(const char *nome) {
 
 void ir_emitir(IrFuncao *funcao, IrInstr instr) {
     IRG_PUSH(funcao->instrs, funcao->len, funcao->cap, instr);
+}
+
+const char *ir_tipo_local(const IrFuncao *funcao, const char *nome) {
+    for (size_t i = funcao->ntipos; i-- > 0;) {
+        if (strcmp(funcao->tipos[i].nome, nome) == 0) {
+            return funcao->tipos[i].tipo;
+        }
+    }
+    return NULL;
+}
+
+const char *ir_tipo_global(const IrPrograma *programa, const char *nome) {
+    for (size_t i = 0; i < programa->nglobais; i++) {
+        if (strcmp(programa->globais[i].nome, nome) == 0) {
+            return programa->globais[i].tipo;
+        }
+    }
+    return NULL;
 }
 
 /* ------------------------------------------------------------------ *
@@ -430,7 +451,16 @@ static const char *irg_rotulo(IrGerador *g, const char *base) {
     return ir_intern(g->p, base);
 }
 
-static const char *irg_declarar(IrGerador *g, const char *nome, const char *tipo, int eh_vetor) {
+static void irg_registrar_tipo(IrGerador *g, const char *nome_ir, const char *tipo) {
+    IrTipo par = {nome_ir, ir_intern(g->p, tipo)};
+    IRG_PUSH(g->funcao.tipos, g->funcao.ntipos, g->funcao.captipos, par);
+}
+
+/* Declara o parâmetro ou a variável local `no` no escopo atual. */
+static const char *irg_declarar(IrGerador *g, const Ast *no, const char *categoria,
+                                const char *tamanho, int inicializada) {
+    const char *nome = no->text;
+    const char *tipo = no->type_name;
     const char *nome_ir = NULL;
     for (size_t i = 0; i < g->nsufixar; i++) {
         if (strcmp(g->sufixar[i], nome) == 0) {
@@ -452,9 +482,18 @@ static const char *irg_declarar(IrGerador *g, const char *nome, const char *tipo
     if (!nome_ir) {
         nome_ir = ir_intern(g->p, nome);
     }
+    int eh_vetor = tamanho != NULL || (no->kind == AST_PARAM && no->is_array);
+    if (eh_vetor && strcmp(categoria, "parâmetro") == 0) {
+        categoria = "parâmetro vetor";
+    }
     IrgEscopo *escopo = &g->escopos[g->nescopos - 1];
     IrgVariavel var = {nome, nome_ir, tipo, eh_vetor};
     IRG_PUSH(escopo->itens, escopo->len, escopo->cap, var);
+    IrSimbolo simbolo = {ir_intern(g->p, nome), nome_ir, ir_intern(g->p, categoria),
+                         ir_intern(g->p, tipo), tamanho ? ir_intern(g->p, tamanho) : NULL,
+                         (int)g->nescopos, no->line, no->column, inicializada};
+    IRG_PUSH(g->funcao.simbolos, g->funcao.nsimbolos, g->funcao.capsimbolos, simbolo);
+    irg_registrar_tipo(g, nome_ir, tipo);
     return nome_ir;
 }
 
@@ -510,7 +549,9 @@ static const char *irg_endereco(IrGerador *g, const Ast *indice) {
 
 static void irg_item(IrGerador *g, const Ast *item) {
     if (item->kind == AST_VAR_DECL) {
-        const char *nome_ir = irg_declarar(g, item->text, item->type_name, item->b != NULL);
+        const char *categoria = item->b ? "vetor" : "variável";
+        const char *tamanho = item->b ? item->b->text : NULL;
+        const char *nome_ir = irg_declarar(g, item, categoria, tamanho, item->a != NULL);
         if (item->a) {
             irg_atribuir_variavel(g, nome_ir, item->type_name, item->a);
         }
@@ -643,7 +684,9 @@ static void irg_comando(IrGerador *g, const Ast *no) {
             const char *endereco = irg_endereco(g, no->a->b);
             const char *t = irg_temp(g);
             irg_emitir(g, IR_READ, t, NULL, NULL, NULL, NULL, NULL, 0);
-            const char *vetor = irg_buscar(g, no->a->a->text)->nome_ir;
+            const IrgVariavel *var = irg_buscar(g, no->a->a->text);
+            const char *vetor = var->nome_ir;
+            irg_registrar_tipo(g, t, var->tipo); /* o back-end precisa saber o que ler */
             irg_emitir(g, IR_STORE, NULL, vetor, NULL, endereco, t, NULL, 0);
         } else {
             const char *nome = irg_buscar(g, no->a->text)->nome_ir;
@@ -836,7 +879,7 @@ static void irg_funcao(IrGerador *g, const Ast *no) {
 
     for (size_t i = 0; i < no->items_len; i++) {
         const Ast *p = no->items[i];
-        const char *nome_ir = irg_declarar(g, p->text, p->type_name, p->is_array);
+        const char *nome_ir = irg_declarar(g, p, "parâmetro", NULL, 1);
         IRG_PUSH(g->funcao.params, g->funcao.nparams, g->funcao.capparams, nome_ir);
     }
     /* O corpo divide o escopo com os parâmetros (como na análise semântica). */
@@ -846,21 +889,41 @@ static void irg_funcao(IrGerador *g, const Ast *no) {
     irg_terminar_funcao(g);
 }
 
+static const char *irg_nome_global(IrPrograma *p, const char *nome) {
+    return ir_eh_temporario(nome) ? irg_intern_livre(p, irg_format("%s#g", nome))
+                                  : ir_intern(p, nome);
+}
+
 void ir_gerar(const Ast *programa, IrPrograma *saida) {
     IrGerador g;
     memset(&g, 0, sizeof g);
     g.p = saida;
     g.programa = programa;
 
+    for (size_t i = 0; i < programa->items_len; i++) {
+        const Ast *item = programa->items[i];
+        if (item->kind == AST_FUNCTION) {
+            IrSimbolo s = {ir_intern(saida, item->text), ir_intern(saida, item->text),
+                           ir_intern(saida, "função"), ir_intern(saida, item->type_name),
+                           NULL, 0, item->line, item->column, 1};
+            IRG_PUSH(saida->simbolos, saida->nsimbolos, saida->capsimbolos, s);
+        } else if (item->kind == AST_VAR_DECL) {
+            IrSimbolo s = {ir_intern(saida, item->text), irg_nome_global(saida, item->text),
+                           ir_intern(saida, item->b ? "vetor" : "variável"),
+                           ir_intern(saida, item->type_name),
+                           item->b ? ir_intern(saida, item->b->text) : NULL, 0, item->line,
+                           item->column, item->a != NULL};
+            IRG_PUSH(saida->simbolos, saida->nsimbolos, saida->capsimbolos, s);
+        }
+    }
+
     irg_entrar(&g, "@init", "void", NULL, 0);
     for (size_t i = 0; i < programa->items_len; i++) {
         const Ast *item = programa->items[i];
         if (item->kind == AST_VAR_DECL) {
-            const char *nome =
-                ir_eh_temporario(item->text)
-                    ? irg_intern_livre(saida, irg_format("%s#g", item->text))
-                    : ir_intern(saida, item->text);
-            IrGlobal global = {nome, item->b ? ir_intern(saida, item->b->text) : NULL};
+            const char *nome = irg_nome_global(saida, item->text);
+            IrGlobal global = {nome, item->b ? ir_intern(saida, item->b->text) : NULL,
+                               ir_intern(saida, item->type_name)};
             IRG_PUSH(saida->globais, saida->nglobais, saida->capglobais, global);
             IrgVariavel var = {item->text, nome, item->type_name, item->b != NULL};
             IRG_PUSH(g.globais, g.nglobais, g.capglobais, var);
@@ -875,6 +938,8 @@ void ir_gerar(const Ast *programa, IrPrograma *saida) {
         irg_terminar_funcao(&g);
     } else {
         free(g.funcao.instrs);
+        free(g.funcao.simbolos);
+        free(g.funcao.tipos);
     }
 
     for (size_t i = 0; i < programa->items_len; i++) {

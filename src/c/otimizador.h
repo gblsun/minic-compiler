@@ -12,6 +12,8 @@
  *   4. limpeza do fluxo de controle (blocos inalcançáveis, desvios e rótulos
  *      inúteis);
  *   5. eliminação de código morto global (variáveis vivas, backward);
+ *   6. laços (aula 19): dominadores e laços naturais; código invariante movido
+ *      para o pré-cabeçalho e redução de força em variáveis de indução;
  *
  * repetidos até nada mudar; no fim, os temporários são renumerados.
  */

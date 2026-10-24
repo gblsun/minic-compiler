@@ -47,7 +47,7 @@ jobs:
           gcc -Wall -Wextra -Werror -std=c11 -pedantic minic.c -o /tmp/minic
           gcc -Wall -Wextra -Werror -std=c11 src/c/lexer.c src/c/ast.c src/c/parser.c \
               src/c/tabela_simbolos.c src/c/semantico.c src/c/ir.c src/c/otimizador.c \
-              src/c/minic_main.c -o /tmp/minic-separado
+              src/c/geracao.c src/c/vm.c src/c/minic_main.c -o /tmp/minic-separado
 
       - name: Scanner — Python
         run: python3 tests/run_tests.py
@@ -109,10 +109,22 @@ jobs:
       - name: IR — suíte completa (oficiais + próprios + equivalência)
         run: python3 tests/run_ir_tests.py
 
-      - name: IR — teste diferencial em programas válidos gerados
+      # Programas gerados: IR idêntica nas duas linguagens, -O1 executando igual
+      # a -O0 no interpretador e o programa compilado rodando igual na VM.
+      - name: IR e back-end — teste diferencial em programas válidos gerados
         run: |
           gcc -Wall -Wextra minic.c -o /tmp/minic
           python3 tests/fuzz_ir.py --c /tmp/minic -n 300
+
+      # Execução com golden (-O0 e -O1), VM × interpretador da IR, e C × Python
+      # em --tokens, --ast, --symbols, --target=asm e --run. Ver docs/backend.md.
+      - name: Back-end — suíte completa (execução + oráculo + equivalência)
+        run: python3 tests/run_backend_tests.py
+
+      # Benchmarks -O0 × -O1: além de medir, falham se a saída de algum
+      # programa mudar com a otimização.
+      - name: Benchmarks -O0 × -O1
+        run: python3 benchmarks/rodar.py
 
   robustez:
     runs-on: ubuntu-24.04
@@ -137,22 +149,25 @@ jobs:
           gcc -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined \
               -fno-sanitize-recover=all minic.c -o /tmp/minic-asan
 
-      # Todo programa de teste do repositório (scanner, parser, semântico,
-      # oficiais e próprios) passa pelo binário instrumentado. Qualquer acesso
-      # inválido, vazamento ou comportamento indefinido encerra com relatório
-      # do sanitizer em stderr e código de saída fora de {0, 2, 3, 4}.
+      # Todo programa de teste do repositório (scanner, parser, semântico, IR,
+      # execução, oficiais e próprios) passa pelo binário instrumentado, em
+      # todos os modos da CLI. Qualquer acesso inválido, vazamento ou
+      # comportamento indefinido encerra com relatório do sanitizer em stderr
+      # e código de saída fora de {0, 2, 3, 4, 5, 6}.
       - name: Sem erro de memória nas entradas de teste
         run: |
           total=0
           while IFS= read -r -d '' arquivo; do
-            # Os três modos: análise semântica, IR -O0 e IR -O1.
-            for opcoes in "" "--ir -O0" "--ir -O1"; do
+            entrada=/dev/null
+            [ -f "${arquivo%.c}.in" ] && entrada="${arquivo%.c}.in"
+            for opcoes in "" "--tokens" "--ast" "--symbols" "--ir -O0" "--ir -O1" \
+                          "--target=asm" "--target=asm -O1" "--run" "--run -O1"; do
               total=$((total + 1))
               set +e
-              /tmp/minic-asan $opcoes "$arquivo" > /dev/null 2> /tmp/asan-stderr.txt
+              /tmp/minic-asan $opcoes "$arquivo" < "$entrada" > /dev/null 2> /tmp/asan-stderr.txt
               codigo=$?
               set -e
-              if grep -q "Sanitizer\|runtime error" /tmp/asan-stderr.txt || [[ ! "$codigo" =~ ^[0234]$ ]]; then
+              if grep -q "Sanitizer\|runtime error" /tmp/asan-stderr.txt || [[ ! "$codigo" =~ ^[023456]$ ]]; then
                 echo "FALHA em $arquivo $opcoes (exit $codigo)"; cat /tmp/asan-stderr.txt; exit 1
               fi
             done
@@ -165,9 +180,10 @@ jobs:
       - name: Teste diferencial Python × C (programas gerados, C com sanitizers)
         run: python3 tests/fuzz_semantico.py --c /tmp/minic-asan -n 900
 
-      # Programas válidos: IR idêntica nas duas linguagens e -O1 executando
-      # igual a -O0, com o gerador e o otimizador em C instrumentados.
-      - name: IR — teste diferencial com sanitizers
+      # Programas válidos: IR idêntica nas duas linguagens, -O1 executando
+      # igual a -O0 e a VM igual ao interpretador, com o gerador, o otimizador,
+      # o back-end e a VM em C instrumentados.
+      - name: IR e back-end — teste diferencial com sanitizers
         run: python3 tests/fuzz_ir.py --c /tmp/minic-asan -n 500 --semente 11
 
       # O enunciado veio numa pasta "Avaliação Parcial II", com espaço e acento.

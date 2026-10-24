@@ -1,0 +1,26 @@
+func main
+  i = 0
+  soma = 0
+  read a
+  read b
+  read x
+  read y
+L_test:
+  t1 = i < 5
+  ifFalse t1 goto L_end
+  t2 = a * b
+  t3 = soma + t2
+  soma = t3
+  t4 = y != 0
+  ifFalse t4 goto L_end_if
+  t5 = x / y
+  t6 = soma + t5
+  soma = t6
+L_end_if:
+  t7 = i + 1
+  i = t7
+  goto L_test
+L_end:
+  print soma
+  return 0
+endfunc
